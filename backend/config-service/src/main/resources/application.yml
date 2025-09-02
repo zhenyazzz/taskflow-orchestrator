@@ -1,0 +1,28 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/zhenyazzz/taskflow-orchestrator-config-repo.git
+          default-label: main
+          clone-on-start: true
+        vault:
+          host: localhost
+          port: 8200
+          scheme: http
+          token: root
+          authentication: token
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: "*"
