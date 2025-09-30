@@ -1,0 +1,48 @@
+spring:
+  # Database - подключение к контейнеру PostgreSQL
+  datasource:
+    url: jdbc:postgresql://postgres:5432/analytics_db
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  
+  # JPA - настройки для продакшена
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  
+  # Kafka - подключение к контейнеру Kafka
+  kafka:
+    bootstrap-servers: kafka:9092
+
+# Eureka - подключение к контейнеру Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-service:8761/eureka/
+  instance:
+    prefer-ip-address: false
+    hostname: analytics-service
+    instance-id: ${spring.application.name}:${server.port}
+
+# Logging - минимальное для продакшена
+logging:
+  level:
+    org.example.analyticsservice: INFO
+    org.springframework.kafka: WARN
+    org.hibernate: WARN
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+  pattern:
+    console: "%d{ISO8601} [%thread] %-5level [%logger{36}] - %msg%n"
+
+# Actuator - ограниченная информация для продакшена
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

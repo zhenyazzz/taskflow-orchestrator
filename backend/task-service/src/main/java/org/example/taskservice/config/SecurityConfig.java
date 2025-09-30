@@ -1,4 +1,4 @@
- package org.example.userservice.config;
+ package org.example.taskservice.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

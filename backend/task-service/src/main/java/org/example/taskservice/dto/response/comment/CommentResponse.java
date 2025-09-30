@@ -1,4 +1,15 @@
-package org.example.taskservice.dto.response;
+package org.example.taskservice.dto.response.comment;
 
-public record CommentResponse() {
+import lombok.Builder;
+
+import java.time.Instant;
+
+@Builder
+public record CommentResponse(
+        String id,
+        String content,
+        String authorId,
+        Instant createdAt,
+        Instant updatedAt
+) {
 }

@@ -1,10 +1,9 @@
-package org.example.taskservice.dto.response;
+package org.example.taskservice.dto.response.task;
 
 import org.example.events.enums.Department;
 import org.example.events.enums.TaskPriority;
 import org.example.events.enums.TaskStatus;
 import org.example.taskservice.dto.response.comment.CommentResponse;
-import org.example.taskservice.model.Comment;
 
 import java.time.Instant;
 import java.util.List;

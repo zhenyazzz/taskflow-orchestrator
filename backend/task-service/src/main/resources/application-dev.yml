@@ -1,0 +1,26 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:password@localhost:27017/taskdb?authSource=admin&socketTimeoutMS=30000&connectTimeoutMS=30000&serverSelectionTimeoutMS=30000&maxIdleTimeMS=120000&maxLifeTimeMS=300000
+      database: taskdb
+      auto-index-creation: true
+      repositories:
+        enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minio
+  secret-key: minio123
+  bucket-name: taskflow-attachments
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    hostname: task-service
+    preferIpAddress: false

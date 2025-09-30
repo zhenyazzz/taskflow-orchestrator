@@ -1,4 +1,17 @@
 package org.example.events.task;
 
-public record TaskDeletedEvent() {
+import org.example.events.enums.Department;
+
+import java.time.Instant;
+import java.util.Set;
+
+public record TaskDeletedEvent(
+        String id,
+        String userId,
+        String creatorId,
+        String title,
+        Set<String> assigneeIds,
+        Department department,
+        Instant timestamp
+) {
 }

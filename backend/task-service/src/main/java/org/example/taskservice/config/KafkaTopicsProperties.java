@@ -1,4 +1,4 @@
-package org.example.userservice.config;
+package org.example.taskservice.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,10 +11,14 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app.kafka.topics")
 public class KafkaTopicsProperties {
 
-    private String userRegistration;
-    private String userLogin;
-    private String userRoleUpdate;
-    private String userCreated;
-    private String userProfileUpdate;
-    private String userDelete;
+    private String taskCreated;
+    private String taskUpdated;
+    private String taskSubscribed;
+    private String taskUnsubscribed;
+    private String taskCompleted;
+    private String taskDeleted;
+    private String taskStatusUpdated;
+    private String taskAssigneesUpdated;
+    private String attachmentCreated;
+    private String attachmentDeleted;
 }

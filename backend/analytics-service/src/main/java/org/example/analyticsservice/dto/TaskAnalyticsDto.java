@@ -1,0 +1,13 @@
+package org.example.analyticsservice.dto;
+
+import java.util.Map;
+
+public record TaskAnalyticsDto(
+    Long totalTasks,
+    Long createdTasks,
+    Long completedTasks,
+    Long deletedTasks,
+    Double averageCompletionTimeHours,
+    Map<String, Long> tasksByPriority,
+    Map<String, Long> tasksByStatus
+) {}

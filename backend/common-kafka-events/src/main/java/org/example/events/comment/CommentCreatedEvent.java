@@ -1,4 +1,13 @@
 package org.example.events.comment;
 
-public record CommentCreatedEvent() {
+import java.time.Instant;
+
+public record CommentCreatedEvent(
+        String id,
+        String content,
+        String authorId,
+        Instant createdAt,
+        Instant updatedAt,
+        String taskId
+) {
 }
