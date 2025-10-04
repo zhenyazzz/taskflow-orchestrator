@@ -1,6 +1,11 @@
-import React from 'react';
+// components/layout/Header.tsx
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Для навигации
 
 const Header: React.FC = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false); // Состояние авторизации
+    const navigate = useNavigate(); // Хук для навигации
+
     const menuItems = [
         { name: 'Dashboard', icon: '📊', href: '#' },
         { name: 'All Tasks', icon: '📝', href: '#' },
@@ -9,6 +14,15 @@ const Header: React.FC = () => {
         { name: 'Analytics', icon: '📈', href: '#' },
         { name: 'Departments', icon: '🏢', href: '#' },
     ];
+
+    // Функции для навигации к эндпоинтам
+    const handleLogin = () => {
+        navigate('/login'); // Переход к странице логина (предполагаемый эндпоинт /api/auth/login)
+    };
+
+    const handleRegister = () => {
+        navigate('/register'); // Переход к странице регистрации (предполагаемый эндпоинт /api/auth/register)
+    };
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
@@ -26,15 +40,33 @@ const Header: React.FC = () => {
                         </li>
                     ))}
                 </ul>
-                {/* Profile icon and info */}
                 <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                        <p className="font-medium">John Doe</p>
-                        <p className="text-sm text-gray-600">Development Department</p>
-                    </div>
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        JD
-                    </div>
+                    {isAuthenticated ? (
+                        <>
+                            <div className="text-right">
+                                <p className="font-medium">John Doe</p>
+                                <p className="text-sm text-gray-600">Development Department</p>
+                            </div>
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                JD
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                onClick={handleLogin}
+                            >
+                                Войти
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                onClick={handleRegister}
+                            >
+                                Зарегистрироваться
+                            </button>
+                        </>
+                    )}
                 </div>
             </nav>
         </header>
