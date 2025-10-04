@@ -9,8 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.notificationservice.dto.response.UserDto;
 import org.example.notificationservice.service.cache.UserCacheService;
 
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.Duration;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,12 @@ public class UserServiceClient {
         
         return userServiceWebClient.get()
             .uri("/api/users/{userId}", userId)
+            .headers(headers -> {
+                String jwt = getCurrentUserJwt();
+                if (jwt != null) {
+                    headers.setBearerAuth(jwt);
+                }
+            })
             .retrieve()
             .bodyToMono(UserDto.class)
             .timeout(Duration.ofSeconds(10))
@@ -51,4 +60,18 @@ public class UserServiceClient {
     private Mono<Void> cacheUser(String userId, UserDto user) {
         return userCacheService.cacheUser(userId, user);
     }
+
+    private String getCurrentUserJwt() {
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+                .filter(ServletRequestAttributes.class::isInstance)
+                .map(ServletRequestAttributes.class::cast)
+                .map(ServletRequestAttributes::getRequest)
+                .map(request -> request.getHeader(AUTHORIZATION))
+                .filter(authHeader -> authHeader.startsWith(BEARER_PREFIX))
+                .map(authHeader -> authHeader.substring(BEARER_PREFIX.length()))
+                .orElse(null);
+    }
+
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 }

@@ -24,8 +24,6 @@ public record CreateTaskRequest(
         @Schema(description = "Task description", example = "Develop REST API for task management", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         String description,
 
-        @NotBlank(message = "Priority is required")
-        @Pattern(regexp = "LOW|MEDIUM|HIGH", message = "Priority must be LOW, MEDIUM or HIGH")
         @Schema(description = "Task priority", example = "HIGH", allowableValues = {"LOW", "MEDIUM", "HIGH"}, requiredMode = Schema.RequiredMode.REQUIRED)
         TaskPriority priority,
 
@@ -38,8 +36,6 @@ public record CreateTaskRequest(
         @Schema(description = "Task tags", example = "[\"urgent\", \"backend\"]", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         List<String> tags,
 
-        @NotBlank(message = "Department is required")
-        @Pattern(regexp = "IT|HR|Sales", message = "Department must be IT, HR or Sales")
         @Schema(description = "Department", example = "IT", allowableValues = {"IT", "HR", "Sales"}, requiredMode = Schema.RequiredMode.REQUIRED)
         Department department
 ) {
