@@ -1,4 +1,3 @@
-// components/layout/Sidebar.tsx
 import React from 'react';
 
 const Sidebar: React.FC = () => {

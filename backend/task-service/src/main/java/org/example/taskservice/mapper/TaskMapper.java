@@ -22,19 +22,26 @@ public interface TaskMapper {
     @Mappings({
             @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())"),
             @Mapping(target = "creatorId", source = "creatorId"),
-            @Mapping(target = "status", expression = "java(TaskStatus.AVAILABLE)")
+            @Mapping(target = "status", expression = "java(TaskStatus.AVAILABLE)"),
+            @Mapping(target = "createdAt", ignore = true),
+            @Mapping(target = "updatedAt", ignore = true),
+            @Mapping(target = "comments", ignore = true)
     })
     Task toTask(CreateTaskRequest createTaskRequest, String creatorId);
 
     @Mapping(target = "comments", expression = "java(task.getComments().stream().map(commentMapper::toCommentResponse).toList())")
     TaskResponse toResponse(Task task, CommentMapper commentMapper);
 
+
     void updateTask(UpdateTaskRequest updateTaskRequest, @MappingTarget Task task);
 
+    
     void updateStatus(UpdateStatusRequest updateStatusRequest, @MappingTarget Task task);
 
     void updateAssignees(UpdateAssigneesRequest updateAssigneesRequest, @MappingTarget Task task);
 
+    @Mapping(target = "timestamp", expression = "java(java.time.Instant.now())")
+    @Mapping(target = "createdAt", source = "task.createdAt")
     TaskCreatedEvent toTaskCreatedEvent(Task task);
 
     @Mapping(target = "timestamp", expression = "java(java.time.Instant.now())")
