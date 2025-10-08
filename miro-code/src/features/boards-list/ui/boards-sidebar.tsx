@@ -1,7 +1,7 @@
 import { ROUTES } from "@/shared/model/routes";
 import { Button } from "@/shared/ui/kit/button";
 import { Link } from "react-router-dom";
-import { LayoutGridIcon, StarIcon, ClockIcon } from "lucide-react";
+import {LayoutGridIcon, StarIcon, ClockIcon, AlbumIcon, BabyIcon} from "lucide-react";
 import { cn } from "@/shared/lib/css";
 
 interface BoardsSidebarProps {
@@ -29,6 +29,18 @@ export function BoardsSidebar({ className }: BoardsSidebarProps) {
           <Link to={ROUTES.RECENT_BOARDS}>
             <ClockIcon className="mr-2 h-4 w-4" />
             Недавние
+          </Link>
+        </Button>
+        <Button variant="ghost" className="w-full justify-start" asChild>
+          <Link to={ROUTES.ANALYTIC_BOARDS}>
+            <AlbumIcon className="mr-2 h-4 w-4" />
+            Аналитика
+          </Link>
+        </Button>
+        <Button variant="ghost" className="w-full justify-start" asChild>
+          <Link to={ROUTES.USER_BOARDS}>
+            <BabyIcon className="mr-2 h-4 w-4" />
+            Пользователи
           </Link>
         </Button>
       </div>
