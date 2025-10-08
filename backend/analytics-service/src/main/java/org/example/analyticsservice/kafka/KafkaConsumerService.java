@@ -20,6 +20,7 @@ public class KafkaConsumerService {
     private final AnalyticsService analyticsService;
     private final ObjectMapper objectMapper;
     private final KafkaTopicsProperties kafkaTopicsProperties;
+    
     // Task Events
     @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskCreated()}", groupId = "analytics-service-group")
     public void consumeTaskCreated(String eventJson) {
