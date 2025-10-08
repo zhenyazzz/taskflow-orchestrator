@@ -1,0 +1,77 @@
+schemas:
+  ProfileResponse:
+    type: object
+    required:
+      - id
+      - username
+      - email
+      - roles
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      email:
+        type: string
+        format: email
+      firstName:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+          enum: [USER, ADMIN]
+
+getMyProfile:
+  summary: Get my profile
+  description: Returns profile of the authenticated user
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: User profile object
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/ProfileResponse'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+
+updateMyProfile:
+  summary: Update my profile
+  description: Updates profile of the authenticated user
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../user.yaml#/schemas/UpdateUserRequest'
+  responses:
+    '200':
+      description: User profile updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/ProfileResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+
+deleteMyProfile:
+  summary: Delete my profile
+  description: Delete profile of the authenticated user
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: User profile deleted successfully
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'

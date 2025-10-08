@@ -1,0 +1,173 @@
+schemas:
+  CreateCommentRequest:
+    type: object
+    required:
+      - content
+    properties:
+      content:
+        type: string
+
+  UpdateCommentRequest:
+    type: object
+    required:
+      - content
+    properties:
+      content:
+        type: string
+
+addComment:
+  summary: Add a comment to a task
+  description: Adds a new comment to a specified task.
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: taskId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to add a comment to
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CreateCommentRequest'
+  responses:
+    '201':
+      description: Comment added successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../tasks.yaml#/schemas/CommentResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+getComments:
+  summary: Get comments for a task
+  description: Returns a paginated list of comments for a specified task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: taskId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to retrieve comments for
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+  responses:
+    '200':
+      description: A paginated list of comments
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '../tasks.yaml#/schemas/CommentResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+updateComment:
+  summary: Update a comment
+  description: Updates an existing comment for a specified task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: taskId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task the comment belongs to
+    - in: path
+      name: commentId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the comment to update
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UpdateCommentRequest'
+  responses:
+    '200':
+      description: Comment updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../tasks.yaml#/schemas/CommentResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+deleteComment:
+  summary: Delete a comment
+  description: Deletes a comment from a specified task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: taskId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task the comment belongs to
+    - in: path
+      name: commentId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the comment to delete
+  responses:
+    '204':
+      description: Comment deleted successfully
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'

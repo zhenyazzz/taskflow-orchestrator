@@ -1,0 +1,664 @@
+schemas:
+  Task:
+    type: object
+    required:
+      - id
+      - title
+      - status
+      - creatorId
+      - createdAt
+      - updatedAt
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+        enum: [AVAILABLE, ASSIGNED, IN_PROGRESS, REVIEW, COMPLETED, CANCELLED]
+      priority:
+        type: string
+        enum: [LOW, MEDIUM, HIGH, URGENT]
+      assigneeIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+      creatorId:
+        type: string
+        format: uuid
+      department:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+      dueDate:
+        type: string
+        format: date-time
+      tags:
+        type: array
+        items:
+          type: string
+      comments:
+        type: array
+        items:
+          $ref: '#/schemas/Comment'
+
+  Comment:
+    type: object
+    required:
+      - id
+      - authorId
+      - content
+      - createdAt
+    properties:
+      id:
+        type: string
+      authorId:
+        type: string
+        format: uuid
+      content:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+
+  CreateTaskRequest:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      priority:
+        type: string
+        enum: [LOW, MEDIUM, HIGH, URGENT]
+      department:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      dueDate:
+        type: string
+        format: date-time
+      tags:
+        type: array
+        items:
+          type: string
+
+  UpdateTaskRequest:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+        enum: [AVAILABLE, ASSIGNED, IN_PROGRESS, REVIEW, COMPLETED, CANCELLED]
+      priority:
+        type: string
+        enum: [LOW, MEDIUM, HIGH, URGENT]
+      dueDate:
+        type: string
+        format: date-time
+      tags:
+        type: array
+        items:
+          type: string
+
+  AssignTaskRequest:
+    type: object
+    required:
+      - assigneeIds
+    properties:
+      assigneeIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+
+  TasksList:
+    type: object
+    required:
+      - content
+      - totalElements
+      - totalPages
+      - size
+      - number
+    properties:
+      content:
+        type: array
+        items:
+          $ref: '#/schemas/Task'
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+      size:
+        type: integer
+      number:
+        type: integer
+      first:
+        type: boolean
+      last:
+        type: boolean
+
+  UpdateAssigneesRequest:
+    type: object
+    properties:
+      assigneeIds:
+        type: array
+        items:
+          type: string
+
+  UpdateStatusRequest:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      comment:
+        type: string
+
+  CommentResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      content:
+        type: string
+      authorId:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+
+  TaskResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      priority:
+        type: string
+        enum: [LOW, MEDIUM, HIGH]
+      assigneeIds:
+        type: array
+        items:
+          type: string
+      creatorId:
+        type: string
+      department:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      createdAt:
+        type: string
+        format: date-time
+      dueDate:
+        type: string
+        format: date-time
+      tags:
+        type: array
+        items:
+          type: string
+      comments:
+        type: array
+        items:
+          $ref: '#/schemas/CommentResponse'
+
+getTasks:
+  summary: Get tasks with pagination and filtering
+  description: Returns a paginated and filtered list of tasks
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+    - in: query
+      name: status
+      schema:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      description: Filter by task status
+    - in: query
+      name: assigneeId
+      schema:
+        type: string
+      description: Filter by assignee ID
+    - in: query
+      name: creatorId
+      schema:
+        type: string
+      description: Filter by creator ID
+    - in: query
+      name: department
+      schema:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      description: Filter by department
+  responses:
+    '200':
+      description: A paginated list of tasks
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getAllTasks:
+  summary: Get all tasks
+  description: Returns a list of all tasks
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: A list of tasks
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/schemas/TaskResponse'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getTaskById:
+  summary: Get task by ID
+  description: Returns a single task by its ID
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to retrieve
+  responses:
+    '200':
+      description: Task object
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+createTask:
+  summary: Create a new task
+  description: Creates a new task in the system
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CreateTaskRequest'
+  responses:
+    '201':
+      description: Task created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+updateTask:
+  summary: Update an existing task
+  description: Updates an existing task in the system by its ID
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to update
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UpdateTaskRequest'
+  responses:
+    '200':
+      description: Task updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+updateTaskStatus:
+  summary: Update task status
+  description: Updates the status of an existing task by its ID
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to update status for
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UpdateStatusRequest'
+  responses:
+    '200':
+      description: Task status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+deleteTask:
+  summary: Delete a task
+  description: Deletes a task from the system by its ID
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to delete
+  responses:
+    '204':
+      description: Task deleted successfully
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+getTasksByAssignee:
+  summary: Get tasks by assignee
+  description: Returns a paginated list of tasks assigned to a specific user
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: userId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the assignee
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+    - in: query
+      name: status
+      schema:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      description: Filter by task status
+  responses:
+    '200':
+      description: A paginated list of tasks for the assignee
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+updateAssignees:
+  summary: Update assignees for a task
+  description: Updates the assignees for an existing task by its ID
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to update assignees for
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UpdateAssigneesRequest'
+  responses:
+    '200':
+      description: Task assignees updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+createBulkTasks:
+  summary: Create tasks in bulk
+  description: Creates multiple tasks in the system
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/schemas/CreateTaskRequest'
+  responses:
+    '201':
+      description: Tasks created successfully
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getTaskHistory:
+  summary: Get task history
+  description: Returns a paginated history of changes for a specific task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to retrieve history for
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+  responses:
+    '200':
+      description: A paginated list of task history events
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '403':  
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+getDueSoonTasks:
+  summary: Get tasks due soon
+  description: Returns a paginated list of tasks due within a specified number of hours
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: hours
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of hours until due date
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+    - in: query
+      name: status
+      schema:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      description: Filter by task status
+    - in: query
+      name: assigneeId
+      schema:
+        type: string
+      description: Filter by assignee ID
+  responses:
+    '200':
+      description: A paginated list of tasks due soon
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'

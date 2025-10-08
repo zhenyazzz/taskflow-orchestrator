@@ -1,0 +1,174 @@
+openapi: 3.0.0
+info:
+  title: Miro-like Collaborative Whiteboard API
+  description: API for a collaborative whiteboard application similar to Miro
+  version: 1.0.0
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
+paths:
+
+  /auth/login:
+    post:
+      $ref: "./endpoints/auth.yaml#/signIn"
+
+  /auth/register:
+    post:
+      $ref: "./endpoints/auth.yaml#/signUp"
+
+  /auth/assign-role:
+    put:
+      $ref: "./endpoints/auth.yaml#/assignRole"
+
+  /auth/remove-role:
+    put:
+      $ref: "./endpoints/auth.yaml#/removeRole"
+
+  /auth/validate:
+    get:
+      $ref: "./endpoints/auth.yaml#/validateToken"
+
+  /users:
+    get:
+      $ref: "./endpoints/user.yaml#/getAllUsers"
+    post:
+      $ref: "./endpoints/user.yaml#/createUser"
+
+  /users/{id}:
+    get:
+      $ref: "./endpoints/user.yaml#/getUserById"
+    put:
+      $ref: "./endpoints/user.yaml#/updateUser"
+    delete:
+      $ref: "./endpoints/user.yaml#/deleteUser"
+
+  /me/profile:
+    get:
+      $ref: "./endpoints/me.yaml#/getMyProfile"
+
+  /me/profile/update:
+    put:
+      $ref: "./endpoints/me.yaml#/updateMyProfile"
+
+  /me/profile/delete:
+    post:
+      $ref: "./endpoints/me.yaml#/deleteMyProfile"
+
+  /v1/me/tasks:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getMyTasks"
+
+  /v1/me/tasks/{id}/subscribe:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/subscribeToMeTask"
+
+  /v1/me/tasks/{id}/unsubscribe:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/unsubscribeFromMeTask"
+
+  /v1/me/tasks/{id}/complete:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/completeMeTask"
+
+  /v1/me/history:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getMyTaskHistory"
+
+  /v1/me/available-tasks:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getAvailableTasksForMe"
+
+  /v1/attachments/task/{taskId}/batch:
+    post:
+      $ref: "./endpoints/attachments.yaml#/addAttachments"
+
+  /v1/attachments/task/{taskId}:
+    get:
+      $ref: "./endpoints/attachments.yaml#/getAttachments"
+
+  /v1/attachments/task/{taskId}/{attachmentIds}:
+    delete:
+      $ref: "./endpoints/attachments.yaml#/deleteAttachment"
+
+  /v1/comments/task/{taskId}:
+    post:
+      $ref: "./endpoints/comments.yaml#/addComment"
+    get:
+      $ref: "./endpoints/comments.yaml#/getComments"
+
+  /v1/comments/task/{taskId}/{commentId}:
+    put:
+      $ref: "./endpoints/comments.yaml#/updateComment"
+    delete:
+      $ref: "./endpoints/comments.yaml#/deleteComment"
+
+  /v1/tasks:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTasks"
+    post:
+      $ref: "./endpoints/tasks.yaml#/createTask"
+
+  /v1/tasks/all:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getAllTasks"
+
+  /v1/tasks/bulk:
+    post:
+      $ref: "./endpoints/tasks.yaml#/createBulkTasks"
+
+  /v1/tasks/due-soon:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getDueSoonTasks"
+
+  /v1/tasks/{id}:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTaskById"
+    put:
+      $ref: "./endpoints/tasks.yaml#/updateTask"
+    delete:
+      $ref: "./endpoints/tasks.yaml#/deleteTask"
+
+  /v1/tasks/{id}/status:
+    patch:
+      $ref: "./endpoints/tasks.yaml#/updateTaskStatus"
+
+  /v1/tasks/{id}/assignees:
+    patch:
+      $ref: "./endpoints/tasks.yaml#/updateAssignees"
+
+  /v1/tasks/{id}/history:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTaskHistory"
+
+  /v1/tasks/assignee/{userId}:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTasksByAssignee"
+
+  # Временная совместимость с boards - будет удалено после трансформации
+  /boards:
+    get:
+      $ref: "./endpoints/boards.yaml#/getAllBoards"
+    post:
+      $ref: "./endpoints/boards.yaml#/createBoard"
+
+  /boards/{boardId}:
+    get:
+      $ref: "./endpoints/boards.yaml#/getBoardById"
+    delete:
+      $ref: "./endpoints/boards.yaml#/deleteBoard"
+
+  /boards/{boardId}/favorite:
+    put:
+      $ref: "./endpoints/boards.yaml#/updateBoardFavorite"
+
+  /boards/{boardId}/rename:
+    put:
+      $ref: "./endpoints/boards.yaml#/renameBoard"
+
+      

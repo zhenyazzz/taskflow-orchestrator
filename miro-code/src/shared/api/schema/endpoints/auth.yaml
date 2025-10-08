@@ -1,0 +1,201 @@
+schemas:
+  User:
+    type: object
+    required:
+      - id
+      - username
+      - email
+      - roles
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      email:
+        type: string
+        format: email
+      roles:
+        type: array
+        items:
+          type: string
+          enum: [EMPLOYEE, ADMIN, MANAGER]
+
+  LoginRequest:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        format: email
+      password:
+        type: string
+        format: password
+
+  RegisterRequest:
+    type: object
+    required:
+      - username
+      - email
+      - password
+    properties:
+      username:
+        type: string
+      email:
+        type: string
+        format: email
+      password:
+        type: string
+        format: password
+
+  JwtResponse:
+    type: object
+    required:
+      - accessToken
+      - user
+    properties:
+      accessToken:
+        type: string
+      user:
+        $ref: '#/schemas/User'
+
+  AssignRoleRequest:
+    type: object
+    required:
+      - id
+      - username
+      - role
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      role:
+        type: string
+        enum: [USER, ADMIN]
+
+  RemoveRoleRequest:
+    type: object
+    required:
+      - id
+      - username
+      - role
+    properties:
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      role:
+        type: string
+        enum: [USER, ADMIN]
+
+signIn:
+  summary: Вход пользователя в систему
+  description: Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным ресурсам
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/LoginRequest'
+  responses:
+    '200':
+      description: Вход выполнен успешно
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+
+signUp:
+  summary: Регистрация нового пользователя
+  description: Создает нового пользователя в системе с указанными учетными данными
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/RegisterRequest'
+  responses:
+    '201':
+      description: Регистрация выполнена успешно
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '409':
+      description: Пользователь уже существует
+
+assignRole:
+  summary: Назначение роли пользователю
+  description: Назначает или изменяет роль существующему пользователю в системе
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/AssignRoleRequest'
+  responses:
+    '200':
+      description: Роль успешно назначена
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+removeRole:
+  summary: Удаление роли у пользователя
+  description: Удаляет роль у существующего пользователя в системе
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/RemoveRoleRequest'
+  responses:
+    '200':
+      description: Роль успешно удалена
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+validateToken:
+  summary: Валидация JWT токена
+  description: Проверяет валидность JWT токена из заголовка Authorization
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: Токен валиден
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'

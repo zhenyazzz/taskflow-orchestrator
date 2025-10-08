@@ -1,0 +1,232 @@
+schemas:
+  # Reusing TaskResponse from tasks.yaml
+
+subscribeToMeTask:
+  summary: Subscribe to a task
+  description: Allows the authenticated user to subscribe to a task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to subscribe to
+  responses:
+    '200':
+      description: Task subscribed successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../tasks.yaml#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+unsubscribeFromMeTask:
+  summary: Unsubscribe from a task
+  description: Allows the authenticated user to unsubscribe from a task
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to unsubscribe from
+  responses:
+    '200':
+      description: Task unsubscribed successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../tasks.yaml#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+completeMeTask:
+  summary: Complete a task
+  description: Allows the authenticated user to mark a task as complete
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to complete
+  responses:
+    '200':
+      description: Task completed successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../tasks.yaml#/schemas/TaskResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
+getMyTasks:
+  summary: Get my tasks
+  description: Returns a paginated list of tasks assigned to the authenticated user
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+    - in: query
+      name: status
+      schema:
+        type: string
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
+      description: Filter by task status
+    - in: query
+      name: department
+      schema:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      description: Filter by department
+  responses:
+    '200':
+      description: A paginated list of tasks for the authenticated user
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '../tasks.yaml#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getMyTaskHistory:
+  summary: Get my task history
+  description: Returns a paginated history of tasks associated with the authenticated user
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+  responses:
+    '200':
+      description: A paginated list of task history events for the authenticated user
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '../tasks.yaml#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getAvailableTasksForMe:
+  summary: Get available tasks for me
+  description: Returns a paginated list of tasks available for the authenticated user to subscribe to
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-indexed)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Number of items per page
+    - in: query
+      name: department
+      schema:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      description: Filter by department
+  responses:
+    '200':
+      description: A paginated list of available tasks
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: '../tasks.yaml#/schemas/TaskResponse'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
