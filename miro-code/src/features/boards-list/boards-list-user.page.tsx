@@ -1,81 +1,87 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/kit/button";
-import { useBoardsList } from "./model/use-boards-list";
-import { useBoardsFilters } from "./model/use-boards-filters";
-import { useDebouncedValue } from "@/shared/lib/react";
-import { useCreateBoard } from "./model/use-create-board";
-
 import { PlusIcon } from "lucide-react";
+import { useUsersList } from "./model/use-users-list";
+import { useUsersFilters } from "./model/use-users-filters";
+import { useDebouncedValue } from "@/shared/lib/react";
+import { useCreateUser } from "./model/use-create-user";
 import {
-    BoardsListLayout,
-    BoardsListLayoutContent,
-    BoardsListLayoutFilters,
-    BoardsListLayoutHeader,
-} from "./ui/boards-list-layout";
+    UsersListLayout,
+    UsersListLayoutContent,
+    UsersListLayoutFilters,
+    UsersListLayoutHeader,
+} from "./ui/users-list-layout";
 import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
-import { BoardsSortSelect } from "./ui/boards-sort-select";
-import { BoardsSearchInput } from "./ui/boards-search-input";
-import { BoardItem } from "./compose/board-item";
-import { BoardCard } from "./compose/board-card";
-import { BoardsSidebar } from "./ui/boards-sidebar";
+import { UsersSortSelect } from "./ui/users-sort-select";
+import { UsersSearchInput } from "./ui/users-search-input";
+import { UsersStatusFilterSelect } from "./ui/users-status-filter-select";
+import { UserItem } from "./compose/user-item";
+import { UserCard } from "./compose/user-card";
+//import { UsersSidebar } from "./ui/users-sidebar";
 import {
-    TemplatesGallery,
-    TemplatesModal,
-    useTemplatesModal,
-} from "@/features/board-templates";
+    UsersTemplatesGallery,
+    UsersTemplatesModal,
+    useUsersTemplatesModal,
+} from "@/features/boards-list/user-templates.tsx";
+import {BoardsSidebar} from "@/features/boards-list/ui/boards-sidebar.tsx";
 
-function BoardsListPage() {
-    const boardsFilters = useBoardsFilters();
-    const boardsQuery = useBoardsList({
-        sort: boardsFilters.sort,
-        search: useDebouncedValue(boardsFilters.search, 300),
+function UsersListPage() {
+    const usersFilters = useUsersFilters();
+    const usersQuery = useUsersList({
+        sort: usersFilters.sort,
+        search: useDebouncedValue(usersFilters.search, 300),
+        status: usersFilters.status,
     });
 
-    const templatesModal = useTemplatesModal();
-
-    const createBoard = useCreateBoard();
-
+    const templatesModal = useUsersTemplatesModal();
+    const createUser = useCreateUser();
     const [viewMode, setViewMode] = useState<ViewMode>("list");
 
     return (
         <>
-            <TemplatesModal />
-            <BoardsListLayout
-                templates={<TemplatesGallery />}
+            <UsersTemplatesModal />
+            <UsersListLayout
+                templates={<UsersTemplatesGallery />}
                 sidebar={<BoardsSidebar />}
                 header={
-                    <BoardsListLayoutHeader
-                        title="Доски"
-                        description="Здесь вы можете просматривать и управлять своими досками"
+                    <UsersListLayoutHeader
+                        title="Пользователи"
+                        description="Здесь вы можете просматривать и управлять пользователями системы"
                         actions={
                             <>
                                 <Button variant="outline" onClick={() => templatesModal.open()}>
                                     Выбрать шаблон
                                 </Button>
                                 <Button
-                                    disabled={createBoard.isPending}
-                                    onClick={createBoard.createBoard}
+                                    disabled={createUser.isPending}
+                                    onClick={() => createUser.createUser()}
                                 >
                                     <PlusIcon />
-                                    Создать доску
+                                    Создать пользователя
                                 </Button>
                             </>
                         }
                     />
                 }
                 filters={
-                    <BoardsListLayoutFilters
+                    <UsersListLayoutFilters
                         sort={
-                            <BoardsSortSelect
-                                value={boardsFilters.sort}
-                                onValueChange={boardsFilters.setSort}
+                            <UsersSortSelect
+                                value={usersFilters.sort}
+                                onValueChange={usersFilters.setSort}
                             />
                         }
                         filters={
-                            <BoardsSearchInput
-                                value={boardsFilters.search}
-                                onChange={boardsFilters.setSearch}
-                            />
+                            <div className="flex gap-4">
+                                <UsersSearchInput
+                                    value={usersFilters.search}
+                                    onChange={usersFilters.setSearch}
+                                />
+                                <UsersStatusFilterSelect
+                                    value={usersFilters.status}
+                                    onValueChange={usersFilters.setStatus}
+                                />
+                            </div>
                         }
                         actions={
                             <ViewModeToggle
@@ -86,27 +92,27 @@ function BoardsListPage() {
                     />
                 }
             >
-                <BoardsListLayoutContent
-                    isEmpty={boardsQuery.boards.length === 0}
-                    isPending={boardsQuery.isPending}
-                    isPendingNext={boardsQuery.isFetchingNextPage}
-                    cursorRef={boardsQuery.cursorRef}
-                    hasCursor={boardsQuery.hasNextPage}
+                <UsersListLayoutContent
+                    isEmpty={usersQuery.users.length === 0}
+                    isPending={usersQuery.isPending}
+                    isPendingNext={usersQuery.isFetchingNextPage}
+                    cursorRef={usersQuery.cursorRef}
+                    hasCursor={usersQuery.hasNextPage}
                     mode={viewMode}
                     renderList={() =>
-                        boardsQuery.boards.map((board) => (
-                            <BoardItem key={board.id} board={board} />
+                        usersQuery.users.map((user) => (
+                            <UserItem key={user.id} user={user} />
                         ))
                     }
                     renderGrid={() =>
-                        boardsQuery.boards.map((board) => (
-                            <BoardCard key={board.id} board={board} />
+                        usersQuery.users.map((user) => (
+                            <UserCard key={user.id} user={user} />
                         ))
                     }
                 />
-            </BoardsListLayout>
+            </UsersListLayout>
         </>
     );
 }
 
-export const Component = BoardsListPage;
+export const Component = UsersListPage;
