@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -23,12 +25,9 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
-        if (startDate == null) {
-            startDate = LocalDateTime.now().minusDays(30);
-        }
-        if (endDate == null) {
-            endDate = LocalDateTime.now();
-        }
+        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
+        startDate = dates.get("startDate");
+        endDate = dates.get("endDate");
 
         log.info("Получение аналитики задач с {} по {}", startDate, endDate);
         
@@ -41,12 +40,9 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
-        if (startDate == null) {
-            startDate = LocalDateTime.now().minusDays(30);
-        }
-        if (endDate == null) {
-            endDate = LocalDateTime.now();
-        }
+        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
+        startDate = dates.get("startDate");
+        endDate = dates.get("endDate");
 
         log.info("Получение аналитики пользователей с {} по {}", startDate, endDate);
         
@@ -59,12 +55,9 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
-        if (startDate == null) {
-            startDate = LocalDateTime.now().minusDays(30);
-        }
-        if (endDate == null) {
-            endDate = LocalDateTime.now();
-        }
+        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
+        startDate = dates.get("startDate");
+        endDate = dates.get("endDate");
 
         log.info("Получение аналитики логинов с {} по {}", startDate, endDate);
         
@@ -77,12 +70,9 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
-        if (startDate == null) {
-            startDate = LocalDateTime.now().minusDays(30);
-        }
-        if (endDate == null) {
-            endDate = LocalDateTime.now();
-        }
+        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
+        startDate = dates.get("startDate");
+        endDate = dates.get("endDate");
 
         log.info("Получение данных дашборда с {} по {}", startDate, endDate);
         
@@ -109,4 +99,17 @@ public class AnalyticsController {
         LocalDateTime periodStart,
         LocalDateTime periodEnd
     ) {}
+
+    private Map<String, LocalDateTime> getDefaultStartAndEndDates(LocalDateTime startDate, LocalDateTime endDate) {
+        Map<String, LocalDateTime> dates = new HashMap<>();
+        if (startDate == null) {
+            startDate = LocalDateTime.now().minusDays(30);
+        }
+        if (endDate == null) {
+            endDate = LocalDateTime.now();
+        }
+        dates.put("startDate", startDate);
+        dates.put("endDate", endDate);
+        return dates;
+    }
 }

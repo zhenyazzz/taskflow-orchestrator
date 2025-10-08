@@ -12,11 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/v1/attachments")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Attachments", description = "Attachment management operations")
 public class AttachmentController {
     private final AttachmentService attachmentService;
 
@@ -39,7 +41,7 @@ public class AttachmentController {
         return ResponseEntity.ok(attachmentService.getAttachments(taskId));
     }
 
-    @DeleteMapping("/task/{taskId}/{attachmentId}")
+    @DeleteMapping("/task/{taskId}/{attachmentIds}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAttachment(@PathVariable String taskId, @PathVariable List<String> attachmentIds) {

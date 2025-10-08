@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 @RequestMapping("/api/v1/tasks")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Tasks", description = "Task management operations")
 public class TaskController {
     private final TaskService taskService;
 

@@ -9,5 +9,7 @@ public record TaskAnalyticsDto(
     Long deletedTasks,
     Double averageCompletionTimeHours,
     Map<String, Long> tasksByPriority,
-    Map<String, Long> tasksByStatus
+    Map<String, Long> tasksByStatus,
+    Map<java.time.LocalDate, Long> dailyCreatedTasks,
+    Map<java.time.LocalDate, Long> dailyCompletedTasks
 ) {}

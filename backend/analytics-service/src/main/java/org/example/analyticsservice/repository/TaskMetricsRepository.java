@@ -43,4 +43,9 @@ public interface TaskMetricsRepository extends JpaRepository<TaskMetrics, Long> 
            "AND tm1.eventTimestamp BETWEEN :start AND :end")
     Double getAverageCompletionTimeInSeconds(@Param("start") Instant start, 
                                            @Param("end") Instant end);
+
+    @Query("SELECT DATE(tm.eventTimestamp), COUNT(tm) FROM TaskMetrics tm WHERE tm.eventType = :eventType AND tm.eventTimestamp BETWEEN :start AND :end GROUP BY DATE(tm.eventTimestamp) ORDER BY DATE(tm.eventTimestamp)")
+    List<Object[]> countDailyTasksByEventTypeAndTimeBetween(@Param("eventType") String eventType,
+                                                                @Param("start") Instant start,
+                                                                @Param("end") Instant end);
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.example.common.kafka.config.KafkaTopicsProperties;
+import org.example.analyticsservice.config.KafkaTopicsProperties;
 import org.example.analyticsservice.service.AnalyticsService;
 import org.example.events.task.*;
 import org.example.events.user.*;
@@ -108,7 +108,7 @@ public class KafkaConsumerService {
             log.info("Получено событие неуспешного логина: {}", eventJson);
             analyticsService.handleUserLoginFailed(loginFailEvent);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Ошибка десериализации LoginFailEvent: {}", eventJson, e);
         }
 
     }

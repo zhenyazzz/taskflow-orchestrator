@@ -47,6 +47,14 @@ public class AnalyticsReportService {
                 taskMetricsRepository.countTasksByStatusAndTimeBetween(startInstant, endInstant)
         );
 
+        Map<java.time.LocalDate, Long> dailyCreatedTasks = convertDateToMap(
+                taskMetricsRepository.countDailyTasksByEventTypeAndTimeBetween("CREATED", startInstant, endInstant)
+        );
+
+        Map<java.time.LocalDate, Long> dailyCompletedTasks = convertDateToMap(
+                taskMetricsRepository.countDailyTasksByEventTypeAndTimeBetween("COMPLETED", startInstant, endInstant)
+        );
+
         return new TaskAnalyticsDto(
                 totalTasks,
                 createdTasks,
@@ -54,7 +62,9 @@ public class AnalyticsReportService {
                 deletedTasks,
                 averageCompletionTimeHours,
                 tasksByPriority,
-                tasksByStatus
+                tasksByStatus,
+                dailyCreatedTasks,
+                dailyCompletedTasks
         );
     }
 
