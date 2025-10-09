@@ -104,7 +104,7 @@ export const userHandlers = [
         });
 
         // Пагинация
-        const pageSize = 2;
+        const pageSize = 5;
         let startIndex = 0;
         if (cursor) {
             startIndex = filteredUsers.findIndex((user) => user.id === cursor) + 1;

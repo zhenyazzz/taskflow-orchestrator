@@ -11,13 +11,13 @@ import {
   BoardsListLayoutContent,
   BoardsListLayoutFilters,
   BoardsListLayoutHeader,
-} from "./ui/boards-list-layout";
+} from "./ui/task/boards-list-layout";
 import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
-import { BoardsSortSelect } from "./ui/boards-sort-select";
-import { BoardsSearchInput } from "./ui/boards-search-input";
+import { BoardsSortSelect } from "./ui/task/boards-sort-select";
+import { BoardsSearchInput } from "./ui/task/boards-search-input";
 import { BoardItem } from "./compose/board-item";
 import { BoardCard } from "./compose/board-card";
-import { BoardsSidebar } from "./ui/boards-sidebar";
+import { BoardsSidebar } from "./ui/task/boards-sidebar";
 import {
   TemplatesGallery,
   TemplatesModal,

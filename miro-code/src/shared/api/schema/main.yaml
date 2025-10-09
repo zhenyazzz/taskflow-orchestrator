@@ -33,20 +33,23 @@ paths:
   /auth/validate:
     get:
       $ref: "./endpoints/auth.yaml#/validateToken"
+      
+  /auth/refresh:
+    $ref: './endpoints/auth.yaml#/refresh'
 
   /users:
     get:
-      $ref: "./endpoints/user.yaml#/getAllUsers"
+      $ref: "./user.yaml#/getAllUsers"
     post:
-      $ref: "./endpoints/user.yaml#/createUser"
+      $ref: "./user.yaml#/createUser"
 
   /users/{id}:
     get:
-      $ref: "./endpoints/user.yaml#/getUserById"
+      $ref: "./user.yaml#/getUserById"
     put:
-      $ref: "./endpoints/user.yaml#/updateUser"
+      $ref: "./user.yaml#/updateUser"
     delete:
-      $ref: "./endpoints/user.yaml#/deleteUser"
+      $ref: "./user.yaml#/deleteUser"
 
   /me/profile:
     get:
@@ -110,45 +113,45 @@ paths:
 
   /v1/tasks:
     get:
-      $ref: "./endpoints/tasks.yaml#/getTasks"
+      $ref: "./tasks.yaml#/getTasks"
     post:
-      $ref: "./endpoints/tasks.yaml#/createTask"
+      $ref: "./tasks.yaml#/createTask"
 
   /v1/tasks/all:
     get:
-      $ref: "./endpoints/tasks.yaml#/getAllTasks"
+      $ref: "./tasks.yaml#/getAllTasks"
 
   /v1/tasks/bulk:
     post:
-      $ref: "./endpoints/tasks.yaml#/createBulkTasks"
+      $ref: "./tasks.yaml#/createBulkTasks"
 
   /v1/tasks/due-soon:
     get:
-      $ref: "./endpoints/tasks.yaml#/getDueSoonTasks"
+      $ref: "./tasks.yaml#/getDueSoonTasks"
 
   /v1/tasks/{id}:
     get:
-      $ref: "./endpoints/tasks.yaml#/getTaskById"
+      $ref: "./tasks.yaml#/getTaskById"
     put:
-      $ref: "./endpoints/tasks.yaml#/updateTask"
+      $ref: "./tasks.yaml#/updateTask"
     delete:
-      $ref: "./endpoints/tasks.yaml#/deleteTask"
+      $ref: "./tasks.yaml#/deleteTask"
 
   /v1/tasks/{id}/status:
     patch:
-      $ref: "./endpoints/tasks.yaml#/updateTaskStatus"
+      $ref: "./tasks.yaml#/updateTaskStatus"
 
   /v1/tasks/{id}/assignees:
     patch:
-      $ref: "./endpoints/tasks.yaml#/updateAssignees"
+      $ref: "./tasks.yaml#/updateAssignees"
 
   /v1/tasks/{id}/history:
     get:
-      $ref: "./endpoints/tasks.yaml#/getTaskHistory"
+      $ref: "./tasks.yaml#/getTaskHistory"
 
   /v1/tasks/assignee/{userId}:
     get:
-      $ref: "./endpoints/tasks.yaml#/getTasksByAssignee"
+      $ref: "./tasks.yaml#/getTasksByAssignee"
 
   # Временная совместимость с boards - будет удалено после трансформации
   /boards:

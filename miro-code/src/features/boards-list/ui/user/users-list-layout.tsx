@@ -15,7 +15,7 @@ export function UsersListLayout({
                                 }: UsersListLayoutProps) {
     return (
         <div className="flex h-screen">
-            {sidebar && <div className="w-64 bg-gray-100 p-4">{sidebar}</div>}
+            {sidebar}
             <div className="flex-1 flex flex-col">
                 {header && <div className="p-6 border-b">{header}</div>}
                 {filters && <div className="p-4 border-b">{filters}</div>}
@@ -73,7 +73,7 @@ interface UsersListLayoutContentProps {
     isEmpty: boolean;
     isPending: boolean;
     isPendingNext: boolean;
-    cursorRef: React.RefObject<HTMLDivElement>;
+    cursorRef: React.RefObject<HTMLDivElement | null>;
     hasCursor: boolean;
     mode: "list" | "grid";
     renderList: () => ReactNode;

@@ -5,12 +5,12 @@ import {
   BoardsListLayout,
   BoardsListLayoutContent,
   BoardsListLayoutHeader,
-} from "./ui/boards-list-layout";
+} from "./ui/task/boards-list-layout";
 import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
 
 import { BoardItem } from "./compose/board-item";
 import { BoardCard } from "./compose/board-card";
-import { BoardsSidebar } from "./ui/boards-sidebar";
+import { BoardsSidebar } from "./ui/task/boards-sidebar";
 
 function BoardsListPage() {
   const boardsQuery = useBoardsList({

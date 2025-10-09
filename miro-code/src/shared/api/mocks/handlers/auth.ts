@@ -118,4 +118,55 @@ export const authHandlers = [
       },
     );
   }),
+
+  http.post("/auth/refresh", async ({ request }) => {
+    await delay();
+
+    const cookieHeader = request.headers.get("Cookie");
+    const refreshTokenCookie = cookieHeader
+      ?.split("; ")
+      .find((row) => row.startsWith("refreshToken="));
+    const refreshToken = refreshTokenCookie?.split("=")[1];
+
+    if (!refreshToken) {
+      return HttpResponse.json(
+        {
+          message: "Refresh token not found",
+          code: "INVALID_TOKEN",
+        },
+        { status: 401 },
+      );
+    }
+
+    try {
+      const session = await verifyToken(refreshToken);
+      const { accessToken, refreshToken: newRefreshToken } = await generateTokens(session);
+
+      return HttpResponse.json(
+        {
+          accessToken: accessToken,
+          user: {
+            id: session.userId,
+            username: session.username,
+            email: session.email,
+            roles: session.roles,
+          },
+        },
+        {
+          status: 200,
+          headers: {
+            "Set-Cookie": createRefreshTokenCookie(newRefreshToken),
+          },
+        },
+      );
+    } catch (error) {
+      return HttpResponse.json(
+        {
+          message: "Invalid refresh token",
+          code: "INVALID_TOKEN",
+        },
+        { status: 401 },
+      );
+    }
+  }),
 ];

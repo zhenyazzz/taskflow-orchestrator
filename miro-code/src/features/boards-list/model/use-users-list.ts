@@ -1,58 +1,83 @@
-import { useEffect, useRef } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-//import { UserResponse } from "@/shared/api/types";
+import { RefCallback, useCallback } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { rqClient } from "@/shared/api/instance";
+import { useDebouncedValue } from "@/shared/lib/react"; // Assuming this path
 
 interface UseUsersListProps {
-    sort: string;
-    search: string;
-    status: string | null;
+  limit?: number;
+  sort?: string;
+  search?: string;
+  status?: string | null;
+  role?: string | null;
 }
 
-export function useUsersList({ sort, search, status }: UseUsersListProps) {
-    const cursorRef = useRef<HTMLDivElement>(null);
+export function useUsersList({
+  limit = 20,
+  sort,
+  search: rawSearch,
+  status,
+  role,
+}: UseUsersListProps) {
+  const search = useDebouncedValue(rawSearch, 300);
 
-    const fetchUsers = async ({ pageParam = null }) => {
-        const params = new URLSearchParams({ sort, search });
-        if (status) {
-            params.append("status", status);
-        }
-        if (pageParam) {
-            params.append("cursor", pageParam);
-        }
-        const response = await fetch(`/api/users?${params.toString()}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (!response.ok) throw new Error("Failed to fetch users");
-        return response.json();
-    };
+  const { fetchNextPage, data, isFetchingNextPage, isPending, hasNextPage } =
+    rqClient.useInfiniteQuery(
+      "get",
+      
+      "/users",
+      {
+        params: {
+          query: {
+            page: 1,
+            limit,
+            sort,
+            search,
+            status,
+            role,
+          },
+        },
+      },
+      {
+        initialPageParam: 1,
+        pageParamName: "page",
+        getNextPageParam: (lastPage, _, lastPageParams) =>
+          Number(lastPageParams) < lastPage.totalPages
+            ? Number(lastPageParams) + 1
+            : null,
 
-    const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
-        useInfiniteQuery({
-            queryKey: ["users", sort, search, status],
-            queryFn: fetchUsers,
-            getNextPageParam: (lastPage) => lastPage.nextCursor || null,
-            initialPageParam: null,
-        });
+        placeholderData: keepPreviousData,
+      },
+    );
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasNextPage) {
-                    fetchNextPage();
-                }
-            },
-            { threshold: 1.0 }
-        );
+  const cursorRef: RefCallback<HTMLDivElement> = useCallback(
+    (el) => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.5 },
+      );
 
-        if (cursorRef.current) observer.observe(cursorRef.current);
-        return () => observer.disconnect();
-    }, [hasNextPage, fetchNextPage]);
+      if (el) {
+        observer.observe(el);
 
-    return {
-        users: data?.pages.flatMap((page) => page.items) || [],
-        isPending,
-        isFetchingNextPage,
-        hasNextPage,
-        cursorRef,
-    };
+        return () => {
+          observer.disconnect();
+        };
+      }
+    },
+    [fetchNextPage],
+  );
+
+  const users = data?.pages.flatMap((page) => page.items) ?? [];
+
+  return {
+    users,
+    isFetchingNextPage,
+    isPending,
+    hasNextPage,
+    cursorRef,
+  };
 }

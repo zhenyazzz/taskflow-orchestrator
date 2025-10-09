@@ -19,6 +19,13 @@ BadRequestError:
       schema:
         $ref: "#/schemas/Error"
 
+ForbiddenError:
+  description: Forbidden
+  content:
+    application/json:
+      schema:
+        $ref: "#/schemas/Error"
+
 schemas:
   Error:
     type: object

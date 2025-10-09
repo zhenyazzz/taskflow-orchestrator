@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/kit/tabs";
-import { ImagesIcon, ListIcon } from "lucide-react";
+import { LayoutList, LayoutGrid } from "lucide-react";
 
-export type ViewMode = "list" | "cards";
+export type ViewMode = "list" | "grid";
 export function ViewModeToggle({
   value,
   onChange,
@@ -13,10 +13,10 @@ export function ViewModeToggle({
     <Tabs defaultValue={value} onValueChange={(e) => onChange(e as ViewMode)}>
       <TabsList>
         <TabsTrigger value="list">
-          <ListIcon />
+          <LayoutList />
         </TabsTrigger>
-        <TabsTrigger value="cards">
-          <ImagesIcon />
+        <TabsTrigger value="grid">
+          <LayoutGrid />
         </TabsTrigger>
       </TabsList>
     </Tabs>

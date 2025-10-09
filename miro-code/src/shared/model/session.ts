@@ -2,6 +2,7 @@ import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { createGStore } from "create-gstore";
 import { publicFetchClient } from "../api/instance";
+import { ApiSchemas } from "../api/schema";
 
 type Session = {
   sub: string; // username
@@ -36,12 +37,37 @@ export const useSession = createGStore(() => {
       return null;
     }
 
-    const session = jwtDecode<Session>(token);
-
-    // Если токен истек, разлогиниваем пользователя
-    if (session.exp < Date.now() / 1000) {
+    let currentSession: Session;
+    try {
+      currentSession = jwtDecode<Session>(token);
+    } catch (e) {
       logout();
       return null;
+    }
+
+    // Если токен истек, пытаемся обновить его
+    if (currentSession.exp < Date.now() / 1000) {
+      if (!refreshTokenPromise) {
+        refreshTokenPromise = publicFetchClient.POST("/auth/refresh", {
+          body: {},
+        }).then(({ data, error }: { data?: ApiSchemas['JwtResponse'], error?: ApiSchemas['Error'] }) => {
+          refreshTokenPromise = null;
+          if (error) {
+            logout();
+            return null;
+          }
+          if (data?.accessToken) {
+            login(data.accessToken);
+            return data.accessToken;
+          }
+          return null;
+        }).catch(() => {
+          refreshTokenPromise = null;
+          logout();
+          return null;
+        });
+      }
+      return refreshTokenPromise;
     }
 
     return token;

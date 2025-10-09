@@ -1,6 +1,6 @@
 import { Skeleton } from "@/shared/ui/kit/skeleton";
 import React from "react";
-import { ViewMode } from "./view-mode-toggle";
+import { ViewMode } from "../view-mode-toggle";
 
 export function BoardsListLayout({
   header,

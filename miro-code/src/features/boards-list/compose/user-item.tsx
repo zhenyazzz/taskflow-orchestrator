@@ -4,13 +4,14 @@ import { useDeleteUser } from "../model/use-delete-user.ts";
 
 interface UserItemProps {
     user: UserResponse;
+    className?: string;
 }
 
-export function UserItem({ user }: UserItemProps) {
+export function UserItem({ user, className }: UserItemProps) {
     const deleteUser = useDeleteUser();
 
     return (
-        <div className="flex justify-between items-center p-4 border rounded-lg">
+        <div className={`flex justify-between items-center p-4 border rounded-lg ${className}`}>
             <div>
                 <h3 className="font-semibold">{user.username}</h3>
                 <p className="text-sm text-gray-600">{user.email}</p>
@@ -20,7 +21,10 @@ export function UserItem({ user }: UserItemProps) {
             <Button
                 variant="destructive"
                 disabled={deleteUser.isPending}
-                onClick={() => deleteUser.deleteUser(user.id)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    deleteUser.deleteUser(user.id);
+                }}
             >
                 Удалить
             </Button>

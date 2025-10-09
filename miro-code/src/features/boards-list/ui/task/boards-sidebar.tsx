@@ -20,7 +20,7 @@ export function BoardsSidebar({ className }: BoardsSidebarProps) {
         <Button variant="ghost" className="w-full justify-start" asChild>
           <Link to={ROUTES.BOARDS}>
             <LayoutGridIcon className="mr-2 h-4 w-4" />
-            Все доски
+            Все задачи
           </Link>
         </Button>
         <Button variant="ghost" className="w-full justify-start" asChild>

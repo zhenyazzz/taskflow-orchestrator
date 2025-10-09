@@ -50,6 +50,10 @@ export const router = createBrowserRouter([
             path: ROUTES.BOARD,
             lazy: () => import("@/features/board/board.page"),
           },
+          {
+            path: ROUTES.USER_DETAILS,
+            lazy: () => import("@/features/users/user-details.page"),
+          },
         ],
       },
 

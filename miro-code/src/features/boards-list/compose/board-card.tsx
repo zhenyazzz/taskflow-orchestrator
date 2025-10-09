@@ -1,6 +1,6 @@
 import { ApiSchemas } from "@/shared/api/schema";
-import { BoardsFavoriteToggle } from "../ui/boards-favorite-toggle";
-import { BoardsListCard } from "../ui/boards-list-card";
+import { BoardsFavoriteToggle } from "../ui/task/boards-favorite-toggle";
+import { BoardsListCard } from "../ui/task/boards-list-card";
 import { Button } from "@/shared/ui/kit/button";
 import { useUpdateFavorite } from "../model/use-update-favorite";
 import { useDeleteBoard } from "../model/use-delete-board";

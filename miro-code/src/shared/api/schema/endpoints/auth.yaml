@@ -199,3 +199,16 @@ validateToken:
             $ref: '#/schemas/JwtResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
+
+refresh:
+  summary: Обновление JWT токена
+  description: Обновляет access токен, используя refresh токен из куки.
+  responses:
+    '200':
+      description: Токен успешно обновлен
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/JwtResponse'
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
