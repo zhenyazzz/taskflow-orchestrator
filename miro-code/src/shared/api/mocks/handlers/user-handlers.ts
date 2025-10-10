@@ -58,6 +58,23 @@ mockUsers.forEach((user) => {
 });
 
 export const userHandlers = [
+    // Получение текущего пользователя
+    http.get("/api/users/me", async ({ request }) => {
+        await delay();
+
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return HttpResponse.json(
+                { message: "Требуется авторизация", code: "UNAUTHORIZED" },
+                { status: 401 }
+            );
+        }
+
+        // Для тестов возвращаем первого пользователя (admin_user)
+        const user = mockUsers[0];
+        return HttpResponse.json(user, { status: 200 });
+    }),
+
     // Получение списка пользователей с фильтрацией, сортировкой и пагинацией
     http.get("/api/users", async ({ request }) => {
         await delay();
@@ -104,7 +121,7 @@ export const userHandlers = [
         });
 
         // Пагинация
-        const pageSize = 5;
+        const pageSize = 2; // Изменено с 5 на 2 для соответствия предыдущим версиям
         let startIndex = 0;
         if (cursor) {
             startIndex = filteredUsers.findIndex((user) => user.id === cursor) + 1;
