@@ -14,7 +14,7 @@ import {
 } from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
 import { Checkbox } from "@/shared/ui/kit/checkbox";
-import { Badge } from "@/shared/ui/kit/badge";
+import { Badge } from "@/shared/ui/layouts/badge";
 import { Loader2, Save, X, Shield, Mail, User as UserIcon } from "lucide-react";
 import { editUserSchema, EditUserFormData } from "../../lib/validations";
 import { useUpdateUser } from "../../model/use-user";

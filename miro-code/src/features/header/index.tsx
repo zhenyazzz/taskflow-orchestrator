@@ -1,5 +1,7 @@
 import { useSession } from "@/shared/model/session";
 import { Button } from "@/shared/ui/kit/button";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/shared/model/routes";
 
 export function AppHeader() {
   const { session, logout } = useSession();
@@ -14,7 +16,15 @@ export function AppHeader() {
         <div className="text-xl font-semibold">TaskFlow Orchestrator</div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{session.sub}</span>
+          <span className="text-sm text-muted-foreground">
+            <Link
+              to={ROUTES.USER_PROFILE.replace(":id", session.userId)}
+              className="px-2 py-1 rounded transition-colors hover:bg-muted hover:text-foreground"
+              style={{ textDecoration: "none" }}
+            >
+              {session.sub}
+            </Link>
+          </span>
           <Button
             variant="outline"
             size="sm"

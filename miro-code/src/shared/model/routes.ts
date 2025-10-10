@@ -11,6 +11,7 @@ export const ROUTES = {
   ANALYTIC_BOARDS: "/boards/analytic",
   USER_BOARDS: "/boards/user",
   USER_DETAILS: "/users/:id",
+  USER_PROFILE: "/profile/:id"
 } as const;
 
 export type PathParams = {
@@ -18,6 +19,9 @@ export type PathParams = {
     boardId: string;
   };
   [ROUTES.USER_DETAILS]: {
+    id: string;
+  };
+  [ROUTES.USER_PROFILE]: {
     id: string;
   };
 };
