@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/kit/button";
 import { PlusIcon } from "lucide-react";
-import { useUsersList } from "./model/use-users-list";
-import { useUsersFilters } from "./model/use-users-filters";
+import { useUsersList } from "./model/user/use-users-list";
+import { useUsersFilters } from "./model/task/use-users-filters";
 import { useDebouncedValue } from "@/shared/lib/react";
-import { useCreateUser } from "./model/use-create-user";
+import { useCreateUser } from "./model/user/use-create-user";
 import {
     UsersListLayout,
     UsersListLayoutContent,

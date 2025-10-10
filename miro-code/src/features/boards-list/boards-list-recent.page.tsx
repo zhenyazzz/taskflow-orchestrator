@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useBoardsList } from "./model/use-boards-list";
+import { useBoardsList } from "./model/task/use-boards-list";
 
 import {
   BoardsLayoutContentGroups,
@@ -11,7 +11,7 @@ import {
 } from "./ui/task/boards-list-layout";
 import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
 
-import { useRecentGroups } from "./model/use-recent-groups";
+import { useRecentGroups } from "./model/task/use-recent-groups";
 
 import { BoardCard } from "./compose/board-card";
 import { BoardItem } from "./compose/board-item";

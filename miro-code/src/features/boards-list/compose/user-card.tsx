@@ -1,6 +1,6 @@
 import { UserResponse } from "@/shared/api/types";
 import { Button } from "@/shared/ui/kit/button.tsx";
-import { useDeleteUser } from "../model/use-delete-user.ts";
+import { useDeleteUser } from "../model/user/use-delete-user.ts";
 
 interface UserCardProps {
     user: UserResponse;

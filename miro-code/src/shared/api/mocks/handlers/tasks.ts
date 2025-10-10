@@ -1,6 +1,6 @@
 import { delay, HttpResponse } from "msw";
 import { http } from "../http";
-import { ApiSchemas } from "../../schema";
+import { components } from "../../schema/generated";
 import { verifyTokenOrThrow } from "../session";
 
 // Функция для генерации случайной даты в пределах последних 30 дней
@@ -73,24 +73,18 @@ const mockUserIds = [
 ];
 
 // Генерация случайных задач
-function generateRandomTasks(count: number): ApiSchemas["Task"][] {
-  const result: ApiSchemas["Task"][] = [];
-  const statuses: ApiSchemas["Task"]["status"][] = ["AVAILABLE", "ASSIGNED", "IN_PROGRESS", "REVIEW", "COMPLETED", "CANCELLED"];
-  const priorities: ApiSchemas["Task"]["priority"][] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
-  const departments: ApiSchemas["Task"]["department"][] = ["IT", "HR", "FINANCE", "MARKETING", "SALES", "OPERATIONS", "MANAGEMENT"];
+function generateRandomTasks(count: number): components["schemas"]["TaskResponse"][] {
+  const result: components["schemas"]["TaskResponse"][] = [];
+  const statuses: NonNullable<components["schemas"]["TaskResponse"]["status"]>[] = ["AVAILABLE", "IN_PROGRESS", "COMPLETED", "BLOCKED"];
+  const priorities: NonNullable<components["schemas"]["TaskResponse"]["priority"]>[] = ["LOW", "MEDIUM", "HIGH"];
+  const departments: NonNullable<components["schemas"]["TaskResponse"]["department"]>[] = ["IT", "HR", "FINANCE", "MARKETING", "SALES", "CUSTOMER_SERVICE", "PRODUCTION", "LOGISTICS", "RESEARCH_AND_DEVELOPMENT", "OTHER"];
 
   for (let i = 0; i < count; i++) {
     const createdAt = randomDate();
-    const updatedAt = new Date(
-      Math.min(
-        new Date(createdAt).getTime() + Math.random() * 86400000 * 10,
-        new Date().getTime(),
-      ),
-    ).toISOString();
 
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const assigneeIds = status === "AVAILABLE" ? [] : 
-      Math.random() > 0.5 ? [mockUserIds[Math.floor(Math.random() * mockUserIds.length)]] : [];
+    const assigneeIds = status === "AVAILABLE" ? undefined : 
+      Math.random() > 0.5 ? [mockUserIds[Math.floor(Math.random() * mockUserIds.length)]] : undefined;
 
     result.push({
       id: crypto.randomUUID(),
@@ -98,16 +92,15 @@ function generateRandomTasks(count: number): ApiSchemas["Task"][] {
       description: Math.random() > 0.3 ? generateTaskDescription() : undefined,
       status,
       priority: priorities[Math.floor(Math.random() * priorities.length)],
-      assigneeIds,
+      assigneeIds: assigneeIds,
       creatorId: mockUserIds[Math.floor(Math.random() * mockUserIds.length)],
       department: departments[Math.floor(Math.random() * departments.length)],
       createdAt,
-      updatedAt,
       dueDate: Math.random() > 0.4 ? randomFutureDate() : undefined,
       tags: Math.random() > 0.6 ? 
         ["frontend", "backend", "urgent", "bug", "feature"].slice(0, Math.floor(Math.random() * 3) + 1) : 
         undefined,
-      comments: [], // пустые комментарии пока
+      comments: undefined, 
     });
   }
 
@@ -115,19 +108,19 @@ function generateRandomTasks(count: number): ApiSchemas["Task"][] {
 }
 
 // Создаем 1000 случайных задач
-const tasks: ApiSchemas["Task"][] = generateRandomTasks(1000);
+const tasks: components["schemas"]["TaskResponse"][] = generateRandomTasks(1000);
 
 export const tasksHandlers = [
   // Получить все задачи
-  http.get("/tasks", async (ctx) => {
+  http.get("/v1/tasks", async (ctx) => {
     await verifyTokenOrThrow(ctx.request);
 
     const url = new URL(ctx.request.url);
     const page = Number(url.searchParams.get("page") || 0);
     const size = Number(url.searchParams.get("size") || 10);
     const search = url.searchParams.get("search");
-    const status = url.searchParams.get("status");
-    const department = url.searchParams.get("department");
+    const status = url.searchParams.get("status") as components["schemas"]["TaskResponse"]["status"];
+    const department = url.searchParams.get("department") as components["schemas"]["TaskResponse"]["department"];
     const assigneeId = url.searchParams.get("assigneeId");
     const creatorId = url.searchParams.get("creatorId");
     const sort = url.searchParams.get("sort") || "createdAt";
@@ -137,7 +130,7 @@ export const tasksHandlers = [
     // Фильтрация по поиску
     if (search) {
       filteredTasks = filteredTasks.filter((task) =>
-        task.title.toLowerCase().includes(search.toLowerCase()) ||
+        task.title?.toLowerCase().includes(search.toLowerCase()) ||
         task.description?.toLowerCase().includes(search.toLowerCase())
       );
     }
@@ -167,15 +160,15 @@ export const tasksHandlers = [
     // Сортировка
     filteredTasks.sort((a, b) => {
       if (sort === "title") {
-        return a.title.localeCompare(b.title);
+        return (a.title || "").localeCompare(b.title || "");
       } else if (sort === "priority") {
-        const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 };
-        return priorityOrder[b.priority!] - priorityOrder[a.priority!];
+        const priorityOrder: Record<NonNullable<components["schemas"]["TaskResponse"]["priority"]>, number> = { LOW: 1, MEDIUM: 2, HIGH: 3 };
+        return (priorityOrder[b.priority!] || 0) - (priorityOrder[a.priority!] || 0);
       } else {
-        // Для дат (createdAt, updatedAt, dueDate)
-        const aDate = a[sort as keyof ApiSchemas["Task"]] as string;
-        const bDate = b[sort as keyof ApiSchemas["Task"]] as string;
-        return new Date(bDate).getTime() - new Date(aDate).getTime();
+        // Для дат (createdAt, dueDate)
+        const aDate = a[sort as keyof components["schemas"]["TaskResponse"]] as string | undefined;
+        const bDate = b[sort as keyof components["schemas"]["TaskResponse"]] as string | undefined;
+        return new Date(bDate || 0).getTime() - new Date(aDate || 0).getTime();
       }
     });
 
@@ -193,19 +186,17 @@ export const tasksHandlers = [
       totalPages,
       size,
       number: page,
-      first: page === 0,
-      last: page >= totalPages - 1,
     });
   }),
 
   // Получить мои задачи
-  http.get("/tasks/my", async (ctx) => {
+  http.get("/v1/me/tasks", async (ctx) => {
     const session = await verifyTokenOrThrow(ctx.request);
     
     const url = new URL(ctx.request.url);
     const page = Number(url.searchParams.get("page") || 0);
     const size = Number(url.searchParams.get("size") || 10);
-    const status = url.searchParams.get("status");
+    const status = url.searchParams.get("status") as components["schemas"]["TaskResponse"]["status"];
 
     let filteredTasks = tasks.filter((task) => 
       task.assigneeIds && task.assigneeIds.includes(session.userId)
@@ -218,7 +209,7 @@ export const tasksHandlers = [
 
     // Сортировка по дате создания (новые сначала)
     filteredTasks.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     );
 
     const totalElements = filteredTasks.length;
@@ -235,19 +226,17 @@ export const tasksHandlers = [
       totalPages,
       size,
       number: page,
-      first: page === 0,
-      last: page >= totalPages - 1,
     });
   }),
 
   // Получить доступные задачи
-  http.get("/tasks/available", async (ctx) => {
+  http.get("/v1/me/available-tasks", async (ctx) => {
     await verifyTokenOrThrow(ctx.request);
     
     const url = new URL(ctx.request.url);
     const page = Number(url.searchParams.get("page") || 0);
     const size = Number(url.searchParams.get("size") || 10);
-    const department = url.searchParams.get("department");
+    const department = url.searchParams.get("department") as components["schemas"]["TaskResponse"]["department"];
 
     let filteredTasks = tasks.filter((task) => task.status === "AVAILABLE");
 
@@ -258,10 +247,10 @@ export const tasksHandlers = [
 
     // Сортировка по приоритету и дате создания
     filteredTasks.sort((a, b) => {
-      const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 };
-      const priorityDiff = priorityOrder[b.priority!] - priorityOrder[a.priority!];
+      const priorityOrder: Record<NonNullable<components["schemas"]["TaskResponse"]["priority"]>, number> = { LOW: 1, MEDIUM: 2, HIGH: 3 };
+      const priorityDiff = (priorityOrder[b.priority!] || 0) - (priorityOrder[a.priority!] || 0);
       if (priorityDiff !== 0) return priorityDiff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
 
     const totalElements = filteredTasks.length;
@@ -278,20 +267,18 @@ export const tasksHandlers = [
       totalPages,
       size,
       number: page,
-      first: page === 0,
-      last: page >= totalPages - 1,
     });
   }),
 
   // Получить задачу по ID
-  http.get("/tasks/{taskId}", async ({ params, request }) => {
+  http.get("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const task = tasks.find((task) => task.id === taskId);
+    const { id } = params;
+    const task = tasks.find((task) => task.id === id);
 
     if (!task) {
       return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
+        { message: "Task not found", code: "NOT_FOUND" } as components["responses"]["NotFoundError"]["content"]["application/json"],
         { status: 404 },
       );
     }
@@ -301,25 +288,26 @@ export const tasksHandlers = [
   }),
 
   // Создать новую задачу
-  http.post("/tasks", async (ctx) => {
+  http.post("/v1/tasks", async (ctx) => {
     const session = await verifyTokenOrThrow(ctx.request);
-    const body = await ctx.request.json();
+    const body = await ctx.request.json() as components["schemas"]["CreateTaskRequest"];
 
     const now = new Date().toISOString();
-    const task: ApiSchemas["Task"] = {
+    const priority: NonNullable<components["schemas"]["TaskResponse"]["priority"]> = body.priority === "URGENT" ? "HIGH" : body.priority || "MEDIUM";
+
+    const task: components["schemas"]["TaskResponse"] = {
       id: crypto.randomUUID(),
       title: body.title,
       description: body.description,
-      status: "AVAILABLE",
-      priority: body.priority || "MEDIUM",
-      assigneeIds: [],
+      status: "AVAILABLE", // Default status for new tasks
+      priority,
+      assigneeIds: undefined,
       creatorId: session.userId,
       department: body.department || "IT",
       createdAt: now,
-      updatedAt: now,
       dueDate: body.dueDate,
-      tags: body.tags || [],
-      comments: [],
+      tags: body.tags || undefined,
+      comments: undefined, 
     };
 
     tasks.push(task);
@@ -328,43 +316,47 @@ export const tasksHandlers = [
   }),
 
   // Обновить задачу
-  http.put("/tasks/{taskId}", async ({ params, request }) => {
+  http.put("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const task = tasks.find((task) => task.id === taskId);
+    const { id } = params;
+    const task = tasks.find((task) => task.id === id);
 
     if (!task) {
       return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
+        { message: "Task not found", code: "NOT_FOUND" } as components["responses"]["NotFoundError"]["content"]["application/json"],
         { status: 404 },
       );
     }
 
-    const body = await request.json();
+    const body = await request.json() as components["schemas"]["UpdateTaskRequest"];
     
     // Обновляем поля
     if (body.title !== undefined) task.title = body.title;
     if (body.description !== undefined) task.description = body.description;
-    if (body.status !== undefined) task.status = body.status;
-    if (body.priority !== undefined) task.priority = body.priority;
+    if (body.status !== undefined) {
+        const newStatus: NonNullable<components["schemas"]["TaskResponse"]["status"]> = body.status === "ASSIGNED" || body.status === "REVIEW" || body.status === "CANCELLED" ? "IN_PROGRESS" : body.status;
+        task.status = newStatus;
+    }
+    if (body.priority !== undefined) {
+        const newPriority: NonNullable<components["schemas"]["TaskResponse"]["priority"]> = body.priority === "URGENT" ? "HIGH" : body.priority;
+        task.priority = newPriority;
+    }
     if (body.dueDate !== undefined) task.dueDate = body.dueDate;
     if (body.tags !== undefined) task.tags = body.tags;
     
-    task.updatedAt = new Date().toISOString();
-
     await delay(400);
     return HttpResponse.json(task);
   }),
 
   // Удалить задачу
-  http.delete("/tasks/{taskId}", async ({ params, request }) => {
+  http.delete("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const index = tasks.findIndex((task) => task.id === taskId);
+    const { id } = params;
+    const index = tasks.findIndex((task) => task.id === id);
 
     if (index === -1) {
       return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
+        { message: "Task not found", code: "NOT_FOUND" } as components["responses"]["NotFoundError"]["content"]["application/json"],
         { status: 404 },
       );
     }
@@ -374,72 +366,53 @@ export const tasksHandlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // Назначить задачу
-  http.post("/tasks/{taskId}/assign", async ({ params, request }) => {
+  // Обновить исполнителей задачи (PATCH)
+  http.patch("/v1/tasks/{id}/assignees", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const task = tasks.find((task) => task.id === taskId);
+    const { id } = params;
+    const task = tasks.find((task) => task.id === id);
 
     if (!task) {
       return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
+        { message: "Task not found", code: "NOT_FOUND" } as components["responses"]["NotFoundError"]["content"]["application/json"],
         { status: 404 },
       );
     }
 
-    const body = await request.json();
+    const body = await request.json() as components["schemas"]["UpdateAssigneesRequest"];
     task.assigneeIds = body.assigneeIds;
-    task.status = "ASSIGNED";
-    task.updatedAt = new Date().toISOString();
-
-    await delay(400);
-    return HttpResponse.json(task);
-  }),
-
-  // Снять назначение задачи
-  http.delete("/tasks/{taskId}/assign", async ({ params, request }) => {
-    await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const task = tasks.find((task) => task.id === taskId);
-
-    if (!task) {
-      return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
-        { status: 404 },
-      );
+    if (task.assigneeIds && task.assigneeIds.length > 0) {
+        task.status = "IN_PROGRESS";
+    } else {
+        task.status = "AVAILABLE";
     }
 
-    task.assigneeIds = [];
-    task.status = "AVAILABLE";
-    task.updatedAt = new Date().toISOString();
-
     await delay(400);
     return HttpResponse.json(task);
   }),
 
-  // Подписаться на задачу (самоназначение)
-  http.post("/tasks/{taskId}/subscribe", async ({ params, request }) => {
+  // Подписаться на задачу (самоназначение) (PATCH)
+  http.patch("/v1/me/tasks/{id}/subscribe", async ({ params, request }) => {
     const session = await verifyTokenOrThrow(request);
-    const { taskId } = params;
-    const task = tasks.find((task) => task.id === taskId);
+    const { id } = params;
+    const task = tasks.find((task) => task.id === id);
 
     if (!task) {
       return HttpResponse.json(
-        { message: "Task not found", code: "NOT_FOUND" },
+        { message: "Task not found", code: "NOT_FOUND" } as components["responses"]["NotFoundError"]["content"]["application/json"],
         { status: 404 },
       );
     }
 
     if (task.status !== "AVAILABLE") {
       return HttpResponse.json(
-        { message: "Task is not available for subscription", code: "TASK_NOT_AVAILABLE" },
+        { message: "Task is not available for subscription", code: "TASK_NOT_AVAILABLE" } as components["schemas"]["Error"],
         { status: 400 },
       );
     }
 
     task.assigneeIds = [session.userId];
-    task.status = "ASSIGNED";
-    task.updatedAt = new Date().toISOString();
+    task.status = "IN_PROGRESS";
 
     await delay(400);
     return HttpResponse.json(task);

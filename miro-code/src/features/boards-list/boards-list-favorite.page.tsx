@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useBoardsList } from "./model/use-boards-list";
+import { useBoardsList } from "./model/task/use-boards-list";
 
 import {
   BoardsListLayout,

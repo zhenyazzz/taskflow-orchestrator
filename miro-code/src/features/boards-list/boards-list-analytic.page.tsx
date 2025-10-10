@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/kit/button";
-import { useBoardsList } from "./model/use-boards-list";
-import { useBoardsFilters } from "./model/use-boards-filters";
+import { useBoardsList } from "./model/task/use-boards-list";
+import { useBoardsFilters } from "./model/task/use-boards-filters";
 import { useDebouncedValue } from "@/shared/lib/react";
-import { useCreateBoard } from "./model/use-create-board";
+import { useCreateBoard } from "./model/task/use-create-board";
 
 import { PlusIcon } from "lucide-react";
 import {

@@ -2,8 +2,8 @@ import { ApiSchemas } from "@/shared/api/schema";
 import { BoardsFavoriteToggle } from "../ui/task/boards-favorite-toggle";
 import { BoardsListItem } from "../ui/task/boards-list-item";
 import { DropdownMenuItem } from "@/shared/ui/kit/dropdown-menu";
-import { useDeleteBoard } from "../model/use-delete-board";
-import { useUpdateFavorite } from "../model/use-update-favorite";
+import { useDeleteBoard } from "../model/task/use-delete-board";
+import { useUpdateFavorite } from "../model/task/use-update-favorite";
 
 export function BoardItem({ board }: { board: ApiSchemas["Board"] }) {
   const deleteBoard = useDeleteBoard();
