@@ -12,7 +12,6 @@ public record UserCreatedEvent(
     String email,
     String firstName,
     String lastName,
-    String phone,
     Set<Role> roles,
     Instant createdAt
 ) {

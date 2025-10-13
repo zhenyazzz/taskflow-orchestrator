@@ -74,6 +74,7 @@ function UserDetailsPage() {
                   <Button
                     onClick={() => setIsEditing(true)}
                     variant="outline"
+                    className="hover:bg-emerald-500/10"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Редактировать
@@ -81,6 +82,7 @@ function UserDetailsPage() {
                   <Button
                     onClick={() => setIsEditing(true)}
                     variant="outline"
+                    className="hover:bg-destructive/10"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Удалить пользователя

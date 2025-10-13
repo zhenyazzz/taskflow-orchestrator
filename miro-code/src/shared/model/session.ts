@@ -2,7 +2,7 @@ import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { createGStore } from "create-gstore";
 import { publicFetchClient } from "../api/instance";
-import { ApiSchemas } from "../api/schema";
+import { components } from "../api/schema/generated";
 
 type Session = {
   sub: string; // username
@@ -48,9 +48,9 @@ export const useSession = createGStore(() => {
     // Если токен истек, пытаемся обновить его
     if (currentSession.exp < Date.now() / 1000) {
       if (!refreshTokenPromise) {
-        refreshTokenPromise = publicFetchClient.POST("/auth/refresh", {
+        refreshTokenPromise = publicFetchClient.POST('/auth/refresh' as const, {
           body: {},
-        }).then(({ data, error }: { data?: ApiSchemas['JwtResponse'], error?: ApiSchemas['Error'] }) => {
+        }).then(({ data, error }: { data?: components['schemas']['JwtResponse'], error?: any }) => {
           refreshTokenPromise = null;
           if (error) {
             logout();
@@ -75,3 +75,8 @@ export const useSession = createGStore(() => {
 
   return { refreshToken, login, logout, session };
 });
+
+export const useIsAdmin = () => {
+  const { session } = useSession();
+  return session?.roles.includes("ADMIN") || false;
+};

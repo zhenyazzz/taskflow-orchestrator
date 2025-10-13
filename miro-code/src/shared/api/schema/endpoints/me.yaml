@@ -52,7 +52,7 @@ updateMyProfile:
     content:
       application/json:
         schema:
-          $ref: '../user.yaml#/schemas/UpdateUserRequest'
+          $ref: '../endpoints/user.yaml#/schemas/UpdateUserRequest'
   responses:
     '200':
       description: User profile updated successfully

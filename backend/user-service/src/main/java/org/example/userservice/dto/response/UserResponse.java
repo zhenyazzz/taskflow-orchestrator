@@ -20,8 +20,6 @@ public record UserResponse(
         String firstName,
         @Schema(description = "Last name", example = "Doe")
         String lastName,
-        @Schema(description = "Phone", example = "+12345678901")
-        String phone,
         @Schema(description = "Assigned roles")
         Set<Role> roles,
         @Schema(description = "User status")

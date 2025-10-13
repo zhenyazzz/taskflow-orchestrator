@@ -13,7 +13,6 @@ public record UserRegistrationEvent(
     String email,
     String firstName,
     String lastName,
-    String phone,
     Set<Role> roles
 ) {
 

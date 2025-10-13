@@ -34,12 +34,12 @@ export const router = createBrowserRouter([
           {
             path: ROUTES.RECENT_BOARDS,
             lazy: () =>
-              import("@/features/boards-list/boards-list-recent.page"),
+              import("@/features/boards-list/boards-list-myTasks.page"),
           },
           {
             path: ROUTES.ANALYTIC_BOARDS,
             lazy: () =>
-                import("@/features/boards-list/boards-list-analytic.page"),
+                import("@/features/analityc/boards-list-analytic.page"),
           },
           {
             path: ROUTES.USER_BOARDS,

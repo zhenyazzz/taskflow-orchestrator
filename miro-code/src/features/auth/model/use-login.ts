@@ -1,21 +1,23 @@
 import { publicRqClient } from "@/shared/api/instance";
-import { ApiSchemas } from "@/shared/api/schema";
+import { components } from "@/shared/api/schema/generated";
 import { ROUTES } from "@/shared/model/routes";
 import { useSession } from "@/shared/model/session";
 import { useNavigate } from "react-router-dom";
+
+type LoginRequest = components["schemas"]["LoginRequest"];
 
 export function useLogin() {
   const navigate = useNavigate();
 
   const session = useSession();
-  const loginMutation = publicRqClient.useMutation("post", "/auth/login", {
+  const loginMutation = publicRqClient.useMutation("post", "/auth/signIn", {
     onSuccess(data) {
       session.login(data.accessToken);
       navigate(ROUTES.HOME);
     },
   });
 
-  const login = (data: ApiSchemas["LoginRequest"]) => {
+  const login = (data: LoginRequest) => {
     loginMutation.mutate({ body: data });
   };
 

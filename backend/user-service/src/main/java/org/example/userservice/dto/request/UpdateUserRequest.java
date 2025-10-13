@@ -27,9 +27,6 @@ public record UpdateUserRequest(
 
     @Schema(description = "Last name", example = "Doe")
     @Size(max = 100, message = "Last name must be at most 100 characters")
-    String lastName,
+    String lastName
 
-    @Schema(description = "Phone number", example = "+12345678901")
-    @Size(max = 20, message = "Phone must be at most 20 characters")
-    String phone
 ) {}

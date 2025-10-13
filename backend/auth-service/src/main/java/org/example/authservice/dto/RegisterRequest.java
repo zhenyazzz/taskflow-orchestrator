@@ -3,7 +3,6 @@ package org.example.authservice.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Запрос для регистрации нового пользователя")
@@ -28,11 +27,7 @@ public record RegisterRequest(
 
         @Schema(description = "Фамилия", example = "Иванов")
         @NotBlank(message = "Фамилия обязательна")
-        String lastName,
-
-        @Schema(description = "Номер телефона (10 цифр)", example = "1234567890")
-        @NotBlank(message = "Телефон обязателен")
-        @Pattern(regexp = "^[0-9]{10}$", message = "Телефон должен содержать 10 цифр")
-        String phone
+        String lastName
+        
 ) {}
 

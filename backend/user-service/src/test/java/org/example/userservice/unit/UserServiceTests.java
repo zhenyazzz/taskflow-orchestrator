@@ -64,14 +64,13 @@ class UserServiceTests {
         user.setUsername("testuser");
         user.setFirstName("Test");
         user.setLastName("User");
-        user.setPhone("1234567890");
         user.setRoles(new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
         user.setStatus(UserStatus.ACTIVE);
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
 
-        userResponse = new UserResponse(userId, "testuser", "test@example.com", "Test", "User", "1234567890", new java.util.HashSet<>(Set.of(Role.ROLE_USER)), UserStatus.ACTIVE, Instant.now(), Instant.now());
-        profileResponse = new ProfileResponse(userId, "testuser", "test@example.com", "Test", "User", "1234567890", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
+        userResponse = new UserResponse(userId, "testuser", "test@example.com", "Test", "User", new java.util.HashSet<>(Set.of(Role.ROLE_USER)), UserStatus.ACTIVE, Instant.now(), Instant.now());
+        profileResponse = new ProfileResponse(userId, "testuser", "test@example.com", "Test", "User", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
     }
 
     @Test
@@ -145,7 +144,7 @@ class UserServiceTests {
 
     @Test
     void createUser_NewUser_ReturnsUserResponseAndSendsEvent() {
-        CreateUserRequest createUserRequest = new CreateUserRequest("newuser", "password", "newuser@example.com", "John", "Doe", "1234567890", Set.of(Role.ROLE_USER));
+        CreateUserRequest createUserRequest = new CreateUserRequest("newuser", "password", "newuser@example.com", "John", "Doe", Set.of(Role.ROLE_USER));
         when(userRepository.existsByEmail(createUserRequest.email())).thenReturn(false);
         when(userMapper.toUser(createUserRequest)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(user);
@@ -164,7 +163,7 @@ class UserServiceTests {
 
     @Test
     void createUser_UserAlreadyExists_ThrowsUserAlreadyExistsException() {
-        CreateUserRequest createUserRequest = new CreateUserRequest("existinguser", "password", "test@example.com", "Jane", "Doe", "0987654321", Set.of(Role.ROLE_USER));
+        CreateUserRequest createUserRequest = new CreateUserRequest("existinguser", "password", "test@example.com", "Jane", "Doe", Set.of(Role.ROLE_USER));
         when(userRepository.existsByEmail(createUserRequest.email())).thenReturn(true);
 
         assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(createUserRequest));
@@ -177,7 +176,7 @@ class UserServiceTests {
 
     @Test
     void updateUser_UserFound_ReturnsUpdatedUserResponseAndSendsEvent() {
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updateduser", "password", "updated@example.com", "Jane", "Doe", "0987654321");
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updateduser", "password", "updated@example.com", "Jane", "Doe");
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         doNothing().when(userMapper).updateUserFromRequest(updateUserRequest, user);
         when(userRepository.save(user)).thenReturn(user);
@@ -196,7 +195,7 @@ class UserServiceTests {
 
     @Test
     void updateUser_UserNotFound_ThrowsUserNotFoundException() {
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updateduser", "password", "updated@example.com", "Jane", "Doe", "0987654321");
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updateduser", "password", "updated@example.com", "Jane", "Doe");
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updateUser(userId, updateUserRequest));
@@ -254,7 +253,7 @@ class UserServiceTests {
 
     @Test
     void updateMyProfile_UserFound_ReturnsUpdatedProfileResponseAndSendsEvent() {
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updatedprofile", "password", "updatedprofile@example.com", "John", "D", "1122334455");
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updatedprofile", "password", "updatedprofile@example.com", "John", "D");
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         doNothing().when(userMapper).updateUserFromRequest(updateUserRequest, user);
         when(userRepository.save(user)).thenReturn(user);
@@ -273,7 +272,7 @@ class UserServiceTests {
 
     @Test
     void updateMyProfile_UserNotFound_ThrowsUserNotFoundException() {
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updatedprofile", "password", "updatedprofile@example.com", "John", "D", "1122334455");
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest("updatedprofile", "password", "updatedprofile@example.com", "John", "D");
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updateMyProfile(userId, updateUserRequest));
@@ -311,14 +310,14 @@ class UserServiceTests {
         UserRegistrationEvent event = new UserRegistrationEvent(userId, "newuser", "new@example.com", "John", "Doe", "1234567890", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
         when(userRepository.existsById(event.id())).thenReturn(false);
         when(userMapper.toUser(event)).thenReturn(user);
-        doNothing().when(userRepository).insertWithCustomId(any(UUID.class), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
+        doNothing().when(userRepository).insertWithCustomId(any(UUID.class), anyString(), anyString(), anyString(), anyString(), anyString());
         doNothing().when(userRepository).insertUserRole(any(UUID.class), anyString());
 
         userService.handleUserRegistration(event);
 
         verify(userRepository, times(1)).existsById(event.id());
         verify(userMapper, times(1)).toUser(event);
-        verify(userRepository, times(1)).insertWithCustomId(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhone(), UserStatus.ACTIVE.name());
+        verify(userRepository, times(1)).insertWithCustomId(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), UserStatus.ACTIVE.name());
         verify(userRepository, times(1)).insertUserRole(user.getId(), Role.ROLE_USER.name());
     }
 
@@ -330,7 +329,7 @@ class UserServiceTests {
         assertThrows(UserAlreadyExistsException.class, () -> userService.handleUserRegistration(event));
         verify(userRepository, times(1)).existsById(event.id());
         verify(userMapper, never()).toUser(any(UserRegistrationEvent.class));
-        verify(userRepository, never()).insertWithCustomId(any(), any(), any(), any(), any(), any(), any());
+        verify(userRepository, never()).insertWithCustomId(any(), any(), any(), any(), any(), any());
         verify(userRepository, never()).insertUserRole(any(), any());
     }
 

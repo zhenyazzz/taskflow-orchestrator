@@ -4,6 +4,10 @@ info:
   description: API for a collaborative whiteboard application similar to Miro
   version: 1.0.0
 
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+
 components:
   securitySchemes:
     bearerAuth:
@@ -11,14 +15,15 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
+security:
+  - bearerAuth: []
 
 paths:
-
-  /auth/login:
+  /auth/signIn:
     post:
       $ref: "./endpoints/auth.yaml#/signIn"
 
-  /auth/register:
+  /auth/signUp:
     post:
       $ref: "./endpoints/auth.yaml#/signUp"
 
@@ -35,123 +40,125 @@ paths:
       $ref: "./endpoints/auth.yaml#/validateToken"
       
   /auth/refresh:
-    $ref: './endpoints/auth.yaml#/refresh'
+    post:  # ← добавил метод POST
+      $ref: './endpoints/auth.yaml#/refresh'
 
-  /users:
+  /api/users:
     get:
-      $ref: "./user.yaml#/getAllUsers"
+      $ref: "./endpoints/user.yaml#/getAllUsers"  # ← у тебя нет такой операции
     post:
-      $ref: "./user.yaml#/createUser"
+      $ref: "./endpoints/user.yaml#/createUser"
 
-  /users/{id}:
+  /api/users/{id}:
     get:
-      $ref: "./user.yaml#/getUserById"
+      $ref: "./endpoints/user.yaml#/getUserById"
     put:
-      $ref: "./user.yaml#/updateUser"
+      $ref: "./endpoints/user.yaml#/updateUser"
     delete:
-      $ref: "./user.yaml#/deleteUser"
+      $ref: "./endpoints/user.yaml#/deleteUser"
+
+  /api/users/all:
+    get:
+      $ref: "./endpoints/user.yaml#/getAllUsersList"
 
   /me/profile:
     get:
       $ref: "./endpoints/me.yaml#/getMyProfile"
-
-  /me/profile/update:
     put:
       $ref: "./endpoints/me.yaml#/updateMyProfile"
-
-  /me/profile/delete:
     post:
       $ref: "./endpoints/me.yaml#/deleteMyProfile"
 
-  /v1/me/tasks:
-    get:
-      $ref: "./endpoints/meTasks.yaml#/getMyTasks"
 
-  /v1/me/tasks/{id}/subscribe:
-    patch:
-      $ref: "./endpoints/meTasks.yaml#/subscribeToMeTask"
+  # /v1/me/tasks:
+  #   get:
+  #     $ref: "./endpoints/meTasks.yaml#/getMyTasks"
 
-  /v1/me/tasks/{id}/unsubscribe:
-    patch:
-      $ref: "./endpoints/meTasks.yaml#/unsubscribeFromMeTask"
+  # /v1/me/tasks/{id}/subscribe:
+  #   patch:
+  #     $ref: "./endpoints/meTasks.yaml#/subscribeToMeTask"
 
-  /v1/me/tasks/{id}/complete:
-    patch:
-      $ref: "./endpoints/meTasks.yaml#/completeMeTask"
+  # /v1/me/tasks/{id}/unsubscribe:
+  #   patch:
+  #     $ref: "./endpoints/meTasks.yaml#/unsubscribeFromMeTask"
 
-  /v1/me/history:
-    get:
-      $ref: "./endpoints/meTasks.yaml#/getMyTaskHistory"
+  # /v1/me/tasks/{id}/complete:
+  #   patch:
+  #     $ref: "./endpoints/meTasks.yaml#/completeMeTask"
 
-  /v1/me/available-tasks:
-    get:
-      $ref: "./endpoints/meTasks.yaml#/getAvailableTasksForMe"
+  # /v1/me/history:
+  #   get:
+  #     $ref: "./endpoints/meTasks.yaml#/getMyTaskHistory"
 
-  /v1/attachments/task/{taskId}/batch:
-    post:
-      $ref: "./endpoints/attachments.yaml#/addAttachments"
+  # /v1/me/available-tasks:
+  #   get:
+  #     $ref: "./endpoints/meTasks.yaml#/getAvailableTasksForMe"
 
-  /v1/attachments/task/{taskId}:
-    get:
-      $ref: "./endpoints/attachments.yaml#/getAttachments"
+  # /v1/attachments/task/{taskId}/batch:
+  #   post:
+  #     $ref: "./endpoints/attachments.yaml#/addAttachments"
 
-  /v1/attachments/task/{taskId}/{attachmentIds}:
-    delete:
-      $ref: "./endpoints/attachments.yaml#/deleteAttachment"
+  # /v1/attachments/task/{taskId}:
+  #   get:
+  #     $ref: "./endpoints/attachments.yaml#/getAttachments"
 
-  /v1/comments/task/{taskId}:
-    post:
-      $ref: "./endpoints/comments.yaml#/addComment"
-    get:
-      $ref: "./endpoints/comments.yaml#/getComments"
+  # /v1/attachments/task/{taskId}/{attachmentIds}:
+  #   delete:
+  #     $ref: "./endpoints/attachments.yaml#/deleteAttachment"
 
-  /v1/comments/task/{taskId}/{commentId}:
-    put:
-      $ref: "./endpoints/comments.yaml#/updateComment"
-    delete:
-      $ref: "./endpoints/comments.yaml#/deleteComment"
+  # /v1/comments/task/{taskId}:
+  #   post:
+  #     $ref: "./endpoints/comments.yaml#/addComment"
+  #   get:
+  #     $ref: "./endpoints/comments.yaml#/getComments"
 
-  /v1/tasks:
-    get:
-      $ref: "./tasks.yaml#/getTasks"
-    post:
-      $ref: "./tasks.yaml#/createTask"
+  # /v1/comments/task/{taskId}/{commentId}:
+  #   put:
+  #     $ref: "./endpoints/comments.yaml#/updateComment"
+  #   delete:
+  #     $ref: "./endpoints/comments.yaml#/deleteComment"
 
-  /v1/tasks/all:
-    get:
-      $ref: "./tasks.yaml#/getAllTasks"
+  # /v1/tasks:
+  #   get:
+  #     $ref: "./tasks.yaml#/getTasks"
+  #   post:
+  #     $ref: "./tasks.yaml#/createTask"
 
-  /v1/tasks/bulk:
-    post:
-      $ref: "./tasks.yaml#/createBulkTasks"
+  # /v1/tasks/all:
+  #   get:
+  #     $ref: "./tasks.yaml#/getAllTasks"
 
-  /v1/tasks/due-soon:
-    get:
-      $ref: "./tasks.yaml#/getDueSoonTasks"
+  # /v1/tasks/bulk:
+  #   post:
+  #     $ref: "./tasks.yaml#/createBulkTasks"
 
-  /v1/tasks/{id}:
-    get:
-      $ref: "./tasks.yaml#/getTaskById"
-    put:
-      $ref: "./tasks.yaml#/updateTask"
-    delete:
-      $ref: "./tasks.yaml#/deleteTask"
+  # /v1/tasks/due-soon:
+  #   get:
+  #     $ref: "./tasks.yaml#/getDueSoonTasks"
 
-  /v1/tasks/{id}/status:
-    patch:
-      $ref: "./tasks.yaml#/updateTaskStatus"
+  # /v1/tasks/{id}:
+  #   get:
+  #     $ref: "./tasks.yaml#/getTaskById"
+  #   put:
+  #     $ref: "./tasks.yaml#/updateTask"
+  #   delete:
+  #     $ref: "./tasks.yaml#/deleteTask"
 
-  /v1/tasks/{id}/assignees:
-    patch:
-      $ref: "./tasks.yaml#/updateAssignees"
+  # /v1/tasks/{id}/status:
+  #   patch:
+  #     $ref: "./tasks.yaml#/updateTaskStatus"
 
-  /v1/tasks/{id}/history:
-    get:
-      $ref: "./tasks.yaml#/getTaskHistory"
+  # /v1/tasks/{id}/assignees:
+  #   patch:
+  #     $ref: "./tasks.yaml#/updateAssignees"
 
-  /v1/tasks/assignee/{userId}:
-    get:
-      $ref: "./tasks.yaml#/getTasksByAssignee"
+  # /v1/tasks/{id}/history:
+  #   get:
+  #     $ref: "./tasks.yaml#/getTaskHistory"
+
+  # /v1/tasks/assignee/{userId}:
+  #   get:
+  #     $ref: "./tasks.yaml#/getTasksByAssignee"
 
   # Временная совместимость с boards - будет удалено после трансформации
   /boards:

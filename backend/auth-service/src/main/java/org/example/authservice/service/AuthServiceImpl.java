@@ -34,6 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.transaction.Transactional;
+import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,8 +73,8 @@ public class AuthServiceImpl implements AuthService {
                 userMapper.toUserRegistrationEvent(
                         savedUser,
                         registerRequest.firstName(),
-                        registerRequest.lastName(),
-                        registerRequest.phone())
+                        registerRequest.lastName()
+                        )
         );
 
         return userMapper.toJwtResponse(savedUser, jwtUtil);
@@ -190,6 +191,25 @@ public class AuthServiceImpl implements AuthService {
                         RoleAction.REMOVE
                 )
         );
+
+        return userMapper.toJwtResponse(user, jwtUtil);
+    }
+
+    @Override
+    public JwtResponse refreshToken(HttpServletRequest request) {
+        String refreshToken = jwtUtil.getRefreshJwtFromCookies(request);
+
+        if (refreshToken == null) {
+            throw new InvalidTokenException("Refresh токен отсутствует");
+        }
+
+        if (!jwtUtil.validateJwtToken(refreshToken)) {
+            throw new InvalidTokenException("Неверный Refresh токен");
+        }
+
+        String username = jwtUtil.getUserNameFromJwtToken(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
         return userMapper.toJwtResponse(user, jwtUtil);
     }

@@ -1,9 +1,9 @@
 package org.example.userservice.service;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.example.events.enums.UserStatus;
 import org.example.events.user.UserRegistrationEvent;
 import org.example.events.user.UserRoleUpdateEvent;
@@ -20,6 +20,10 @@ import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.model.User;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,12 +37,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final KafkaProducerService kafkaProducerService;
     private final UserMapper userMapper;
-    private final EntityManager entityManager;
 
     public User findUserById(UUID id) {
         log.info("Getting user with id: {}", id);
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
     public List<UserResponse> getAllUsers() {
@@ -46,6 +49,26 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .toList();
+    }
+
+    public Page<UserResponse> getUsersWithPagination(int page, int size, String sort, String username, String email, String role) {
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        
+        Page<User> users = userRepository.findUsersWithFilters(username, email, role, pageable);
+        return users.map(userMapper::toUserResponse);
+    }
+    
+    private Sort parseSort(String sort) {
+        try {
+            String[] sortParams = sort.split(",");
+            String property = sortParams[0];
+            Sort.Direction direction = sortParams.length > 1 && "desc".equalsIgnoreCase(sortParams[1]) 
+                ? Sort.Direction.DESC 
+                : Sort.Direction.ASC;
+            return Sort.by(direction, property);
+        } catch (Exception e) {
+            return Sort.by(Sort.Direction.ASC, "username");
+        }
     }
 
     public UserResponse getUserById(UUID id) {
@@ -145,7 +168,6 @@ public class UserService {
                     user.getEmail(),
                     user.getFirstName(),
                     user.getLastName(),
-                    user.getPhone(),
                     UserStatus.ACTIVE.name()
             );
             event.roles().forEach(role -> {

@@ -31,11 +31,13 @@ public interface UserMapper {
     @Mapping(target = "token", expression = "java(jwtUtil.generateTokenFromUser(user))")
     JwtResponse toJwtResponse(User user, @Context JwtUtil jwtUtil);
 
-    @Mapping(target = "firstName", source = "firstName")
-    @Mapping(target = "lastName", source = "lastName")
-    @Mapping(target = "phone", source = "phone")
-    UserRegistrationEvent toUserRegistrationEvent(User user, String firstName, String lastName, String phone);
-
+    @Mappings({
+        @Mapping(target = "firstName", source = "firstName"),
+        @Mapping(target = "lastName", source = "lastName")
+    })
+    UserRegistrationEvent toUserRegistrationEvent(User user, String firstName, String lastName);
+    
+    @Mapping(target = "userAgent", source = "userAgent")
     UserLoginEvent toUserLoginEvent(User user, String userAgent);
 
     @Mapping(target = "password", source = "password", qualifiedByName = "encodePassword")

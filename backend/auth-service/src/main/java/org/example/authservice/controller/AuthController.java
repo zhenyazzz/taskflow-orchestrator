@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
- 
+import jakarta.servlet.http.HttpServletRequest;
+
 
 import org.example.authservice.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Аутентификация", description = "API для регистрации, входа и управления ролями пользователей")
@@ -63,8 +64,8 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/remove-role")
     @Operation(
-        summary = "Назначение роли пользователю",
-        description = "Назначает или изменяет роль существующему пользователю в системе"
+        summary = "Удаление роли у пользователя",
+        description = "Удаляет роль у существующего пользователя в системе"
     )
     public ResponseEntity<JwtResponse> removeRole(@Valid @RequestBody RemoveRoleRequest request) {
         log.info("Получен запрос на назначение роли пользователю: {}", request.username());
@@ -79,5 +80,15 @@ public class AuthController {
     public ResponseEntity<JwtResponse> validateToken(@RequestHeader("Authorization") String authHeader) {
         log.info("Получен запрос на валидацию токена: {}", authHeader);
         return ResponseEntity.ok(authService.validateToken(authHeader));
+    }
+
+    @PostMapping("/refresh")
+    @Operation(
+        summary = "Обновление JWT токена",
+        description = "Обновляет access токен, используя refresh токен из куки."
+    )
+    public ResponseEntity<JwtResponse> refresh(HttpServletRequest request) {
+        log.info("Получен запрос на обновление токена");
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 }

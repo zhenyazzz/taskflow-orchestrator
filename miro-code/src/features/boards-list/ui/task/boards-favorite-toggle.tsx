@@ -16,7 +16,8 @@ export function BoardsFavoriteToggle({
     <button
       onClick={onToggle}
       className={cn(
-        "p-1 rounded-full hover:bg-gray-100 transition-colors",
+        "flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus-visible:ring-gray-300",
+        "hover:bg-yellow-400/10", // This will override the default hover for outline button
         className,
       )}
     >
@@ -26,6 +27,9 @@ export function BoardsFavoriteToggle({
           isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400",
         )}
       />
+      <span className="text-sm text-gray-700">
+        {isFavorite ? "Отписаться" : "Подписаться"}
+      </span>
     </button>
   );
 }

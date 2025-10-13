@@ -16,10 +16,10 @@ export function AppHeader() {
         <div className="text-xl font-semibold">TaskFlow Orchestrator</div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm ">
             <Link
               to={ROUTES.USER_PROFILE.replace(":id", session.userId)}
-              className="px-2 py-1 rounded transition-colors hover:bg-muted hover:text-foreground"
+              className="px-2 py-1 rounded transition-colors hover:bg-emerald-500/10 hover:text-foreground"
               style={{ textDecoration: "none" }}
             >
               {session.sub}

@@ -1,24 +1,18 @@
-package org.example.authservice.util;
+package org.example.gatewayservice.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.Cookie;
-import org.example.authservice.model.User;
-import org.example.events.enums.Role;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.util.Date;
+import org.example.events.enums.Role;
 import java.util.List;
 import java.util.UUID;
+
+import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtil {
@@ -46,59 +40,9 @@ public class JwtUtil {
         }
         return null;
     }
-    public String getJwtFromHeader(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        logger.debug("Authorization Header: {}", bearerToken);
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
+    
 
-    public String getRefreshJwtFromCookies(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("refreshToken")) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    public String generateTokenFromUsername(Authentication authentication, UUID userId) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        List<String> roles = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-        return Jwts.builder()
-                .subject(username)
-                .claim("roles", roles)
-                .claim("userId", userId) 
-                .issuer(issuer)
-                .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key)
-                .compact();
-    }
-    public String generateTokenFromUser(User user) {
-        String username = user.getUsername();
-        List<String> roles = user.getRoles()
-                .stream()
-                .map(Enum::name)
-                .toList();
-        return Jwts.builder()
-                .subject(username)
-                .claim("roles", roles)
-                .claim("userId", user.getId()) 
-                .issuer(issuer)
-                .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key)
-                .compact();
-    }
+    
 
     public String getUserNameFromJwtToken(String token) {
         return jwtParser
@@ -133,8 +77,7 @@ public class JwtUtil {
         }
         return false;
     }
-    
-    @SuppressWarnings("unchecked")
+
     public List<Role> getRoles(String token) {
         Claims claims = jwtParser
                 .parseSignedClaims(token)

@@ -32,10 +32,6 @@ public record CreateUserRequest(
         @Size(max = 100, message = "Last name must be at most 100 characters")
         String lastName,
 
-        @Schema(description = "Phone number in E.164", example = "+12345678901")
-        @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone must be a valid number with 10-15 digits, optional +")
-        String phone,
-
         @Schema(description = "Assigned roles")
         Set<Role> roles
 ) {}

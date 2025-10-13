@@ -3,6 +3,6 @@ export async function enableMocking() {
     return;
   }
 
-  const { worker } = await import("@/shared/api/mocks/browser");
-  return worker.start();
+  // Моки отключены - просто возвращаемся
+  return;
 }

@@ -1,6 +1,5 @@
 package org.example.userservice.dto.response;
 
-import org.example.userservice.model.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;

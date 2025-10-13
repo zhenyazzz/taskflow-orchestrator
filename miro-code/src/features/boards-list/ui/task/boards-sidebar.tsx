@@ -23,16 +23,16 @@ export function BoardsSidebar({ className }: BoardsSidebarProps) {
             Все задачи
           </Link>
         </Button>
-        <Button variant="ghost" className="w-full justify-start" asChild>
+        <Button variant="ghost" className="w-full justify-start hover:bg-yellow-500/10" asChild>
           <Link to={ROUTES.FAVORITE_BOARDS}>
-            <StarIcon className="mr-2 h-4 w-4" />
+            <StarIcon className="mr-2 h-4 w-4 " />
             Избранное
           </Link>
         </Button>
         <Button variant="ghost" className="w-full justify-start" asChild>
           <Link to={ROUTES.RECENT_BOARDS}>
             <ClockIcon className="mr-2 h-4 w-4" />
-            Недавние
+            Due soon задачи
           </Link>
         </Button>
         {isAdmin && (

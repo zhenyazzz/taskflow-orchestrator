@@ -15,12 +15,22 @@ import {
   UserPageLayoutHeader,
 } from "@/features/users/ui/user-page-layout";
 import { useTask } from "./model/use-task";
+import { useIsAdmin } from "@/shared/model/session"; // Import useIsAdmin hook
+import { BoardsFavoriteToggle } from "@/features/boards-list/ui/task/boards-favorite-toggle";
+import { useSubscribeToTask } from "./model/use-subscribe-task";
+import { useUnsubscribeFromTask } from "./model/use-unsubscribe-task";
+import { useIsTaskAssignedToCurrentUser } from "./model/use-is-task-assigned-to-current-user";
 
 function BoardPage() {
   const params = useParams<PathParams[typeof ROUTES.BOARD]>();
   const taskId = params.boardId!;
   
   const { data: task, isLoading, isError } = useTask({ taskId });
+  const isAdmin = useIsAdmin(); // Get admin status
+  const subscribeMutation = useSubscribeToTask();
+  const unsubscribeMutation = useUnsubscribeFromTask();
+
+  const isSubscribed = useIsTaskAssignedToCurrentUser({ task });
 
   const board = {
     name: task?.title || `Task ${task?.title}`,
@@ -58,11 +68,12 @@ function BoardPage() {
           description="Детальная информация о задаче"
           actions={
             <div className="flex items-center gap-2">
-              {!isEditing && (
+              {isAdmin && !isEditing && (
                 <>
                   <Button
                     onClick={() => setIsEditing(true)}
                     variant="outline"
+                    className="hover:bg-emerald-500/10"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Редактировать
@@ -70,12 +81,24 @@ function BoardPage() {
                   <Button
                     onClick={handleDeleteBoard}
                     variant="outline"
+                    className="hover:bg-destructive/10"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Удалить задачу
                   </Button>
                 </>
               )}
+              <BoardsFavoriteToggle
+                isFavorite={isSubscribed}
+                onToggle={() => {
+                  if (isSubscribed) {
+                    unsubscribeMutation.mutate({ taskId });
+                  } else {
+                    subscribeMutation.mutate({ taskId });
+                  }
+                }}
+                className="hover:bg-yellow-400/10 border-gray-200 border" // Added custom class for yellow hover
+              />
             </div>
           }
         />

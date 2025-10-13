@@ -3,6 +3,8 @@ package org.example.userservice.repository;
 import jakarta.transaction.Transactional;
 
 import org.example.userservice.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,11 +22,21 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
+    @Query("SELECT u FROM User u WHERE " +
+           "(:username IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
+           "(:email IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
+           "(:role IS NULL OR :role IN (SELECT r FROM u.roles r))")
+    Page<User> findUsersWithFilters(
+        @Param("username") String username,
+        @Param("email") String email, 
+        @Param("role") String role,
+        Pageable pageable);
+
     @Modifying
     @Transactional
     @Query(value = """
-    INSERT INTO users (id, username,email, first_name, last_name, phone, status) 
-    VALUES (:id, :username, :email, :firstName, :lastName, :phone, :status)
+    INSERT INTO users (id, username,email, first_name, last_name, status) 
+    VALUES (:id, :username, :email, :firstName, :lastName, :status)
     """, nativeQuery = true)
     void insertWithCustomId(
             @Param("id") UUID id,
@@ -32,7 +44,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("email") String email,
             @Param("firstName") String firstName,
             @Param("lastName") String lastName,
-            @Param("phone") String phone,
             @Param("status") String status
     );
 

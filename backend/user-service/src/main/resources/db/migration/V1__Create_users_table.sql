@@ -4,7 +4,6 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    phone VARCHAR(20),
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

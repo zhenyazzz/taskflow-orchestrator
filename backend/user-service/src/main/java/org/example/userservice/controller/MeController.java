@@ -26,7 +26,7 @@ public class MeController {
         return ResponseEntity.ok(userService.getMyProfile(principal.getUUID()));
     }
 
-    @PutMapping("/update")
+    @PutMapping
     @Operation(summary = "Update my profile", description = "Updates profile of the authenticated user")
     public ResponseEntity<ProfileResponse> updateMyProfile(
             @AuthenticationPrincipal UserDetailsImpl principal,
@@ -35,7 +35,7 @@ public class MeController {
         return ResponseEntity.ok(userService.updateMyProfile(principal.getUUID(), request));
     }
 
-    @PostMapping("/delete")
+    @PostMapping
     @Operation(summary = "Delete my profile", description = "Delete profile of the authenticated user")
     public ResponseEntity<Void> deleteMyProfile(@AuthenticationPrincipal UserDetailsImpl principal) {
         userService.deleteMyProfile(principal.getUUID());

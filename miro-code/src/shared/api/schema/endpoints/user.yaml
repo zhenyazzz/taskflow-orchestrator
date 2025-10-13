@@ -17,8 +17,6 @@ schemas:
         type: string
       lastName:
         type: string
-      phone:
-        type: string
       roles:
         type: array
         items:
@@ -27,10 +25,6 @@ schemas:
 
   UpdateUserRequest:
     type: object
-    required:
-      - username
-      - password
-      - email
     properties:
       username:
         type: string
@@ -42,8 +36,6 @@ schemas:
       firstName:
         type: string
       lastName:
-        type: string
-      phone:
         type: string
 
   UserResponse:
@@ -68,8 +60,6 @@ schemas:
         type: string
       lastName:
         type: string
-      phone:
-        type: string
       roles:
         type: array
         items:
@@ -85,7 +75,100 @@ schemas:
         type: string
         format: date-time
 
+
+  UserPageResponse:
+    type: object
+    required:
+      - content
+      - totalElements
+      - totalPages
+      - size
+      - number
+    properties:
+      content:
+        type: array
+        items:
+          $ref: '#/schemas/UserResponse'
+      totalElements:
+        type: integer
+        description: Total number of elements across all pages
+      totalPages:
+        type: integer
+        description: Total number of pages
+      size:
+        type: integer
+        description: Number of elements per page
+      number:
+        type: integer
+        description: Current page number (0-based)
+      first:
+        type: boolean
+        description: Is this the first page?
+      last:
+        type: boolean
+        description: Is this the last page?
+      numberOfElements:
+        type: integer
+        description: Number of elements in current page
+      empty:
+        type: boolean
+        description: Is the page empty?
+
 getAllUsers:
+  summary: Get users with pagination
+  description: Returns a paginated list of users with sorting and filtering options
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Page number (0-based)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page
+    - in: query
+      name: sort
+      schema:
+        type: string
+        default: "username,asc"
+      description: Sort criteria (e.g., "username,asc" or "email,desc")
+    - in: query
+      name: username
+      schema:
+        type: string
+        default: ""
+      description: Filter by username (case-insensitive contains)
+    - in: query
+      name: email
+      schema:
+        type: string
+      description: Filter by email (case-insensitive contains)
+    - in: query
+      name: role
+      schema:
+        type: string
+        enum: [USER, ADMIN]
+      description: Filter by role
+  responses:
+    '200':
+      description: Paginated list of users
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/UserPageResponse'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getAllUsersList:
   summary: Get all users
   description: Returns a list of all users
   security:
@@ -126,31 +209,6 @@ getUserById:
       $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
-
-createUser:
-  summary: Create a new user
-  description: Creates a new user in the system
-  security:
-    - bearerAuth: []
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: '#/schemas/CreateUserRequest'
-  responses:
-    '201':
-      description: User created successfully
-      content:
-        application/json:
-          schema:
-            $ref: '#/schemas/UserResponse'
-    '400':
-      $ref: '../shared/responses.yaml#/BadRequestError'
-    '403':
-      $ref: '../shared/responses.yaml#/ForbiddenError'
-    '409':
-      description: User with provided username or email already exists
 
 updateUser:
   summary: Update an existing user
@@ -205,3 +263,28 @@ deleteUser:
       $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
+
+createUser:
+  summary: Create a new user
+  description: Creates a new user in the system
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CreateUserRequest'
+  responses:
+    '201':
+      description: User created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/UserResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '409':
+      description: User with provided username or email already exists

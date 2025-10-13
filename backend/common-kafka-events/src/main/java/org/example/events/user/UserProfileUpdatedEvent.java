@@ -16,7 +16,6 @@ public record UserProfileUpdatedEvent(
     String email,
     String firstName,
     String lastName,
-    String phone,
     Set<Role> roles,
     Instant updatedAt
 ) {

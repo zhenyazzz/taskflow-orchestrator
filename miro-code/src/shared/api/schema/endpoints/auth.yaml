@@ -1,35 +1,12 @@
 schemas:
-  User:
-    type: object
-    required:
-      - id
-      - username
-      - email
-      - roles
-    properties:
-      id:
-        type: string
-        format: uuid
-      username:
-        type: string
-      email:
-        type: string
-        format: email
-      roles:
-        type: array
-        items:
-          type: string
-          enum: [EMPLOYEE, ADMIN, MANAGER]
-
   LoginRequest:
     type: object
     required:
-      - email
+      - username
       - password
     properties:
-      email:
+      username:
         type: string
-        format: email
       password:
         type: string
         format: password
@@ -40,6 +17,8 @@ schemas:
       - username
       - email
       - password
+      - firstName
+      - lastName
     properties:
       username:
         type: string
@@ -49,17 +28,31 @@ schemas:
       password:
         type: string
         format: password
+      firstName:
+        type: string
+      lastName:
+        type: string
 
   JwtResponse:
     type: object
     required:
-      - accessToken
-      - user
+      - token
+      - id
+      - username
+      - roles
     properties:
-      accessToken:
+      token:
         type: string
-      user:
-        $ref: '#/schemas/User'
+      id:
+        type: string
+        format: uuid
+      username:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+          enum: [ADMIN, USER, MODERATOR]
 
   AssignRoleRequest:
     type: object
@@ -96,6 +89,7 @@ schemas:
 signIn:
   summary: Вход пользователя в систему
   description: Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным ресурсам
+  security: []
   requestBody:
     required: true
     content:
@@ -117,6 +111,7 @@ signIn:
 signUp:
   summary: Регистрация нового пользователя
   description: Создает нового пользователя в системе с указанными учетными данными
+  security: []
   requestBody:
     required: true
     content:
@@ -190,6 +185,13 @@ validateToken:
   description: Проверяет валидность JWT токена из заголовка Authorization
   security:
     - bearerAuth: []
+  parameters:
+    - in: header
+      name: Authorization
+      required: true
+      schema:
+        type: string
+      description: JWT токен в формате "Bearer {token}"
   responses:
     '200':
       description: Токен валиден
@@ -203,6 +205,7 @@ validateToken:
 refresh:
   summary: Обновление JWT токена
   description: Обновляет access токен, используя refresh токен из куки.
+  security: []
   responses:
     '200':
       description: Токен успешно обновлен

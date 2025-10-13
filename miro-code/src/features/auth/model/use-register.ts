@@ -1,8 +1,10 @@
 import { publicRqClient } from "@/shared/api/instance";
-import { ApiSchemas } from "@/shared/api/schema";
+import { components } from "@/shared/api/schema/generated";
 import { ROUTES } from "@/shared/model/routes";
 import { useSession } from "@/shared/model/session";
 import { useNavigate } from "react-router-dom";
+
+type RegisterRequest = components["schemas"]["RegisterRequest"];
 
 export function useRegister() {
   const navigate = useNavigate();
@@ -10,7 +12,7 @@ export function useRegister() {
   const session = useSession();
   const registerMutation = publicRqClient.useMutation(
     "post",
-    "/auth/register",
+    "/auth/signUp",
     {
       onSuccess(data) {
         session.login(data.accessToken);
@@ -19,7 +21,7 @@ export function useRegister() {
     },
   );
 
-  const register = (data: ApiSchemas["RegisterRequest"]) => {
+  const register = (data: RegisterRequest) => {
     registerMutation.mutate({ body: data });
   };
 

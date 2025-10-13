@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -34,8 +33,6 @@ public class User {
     @Column(length = 100)
     private String lastName;
 
-    @Column(length = 20)
-    private String phone;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
