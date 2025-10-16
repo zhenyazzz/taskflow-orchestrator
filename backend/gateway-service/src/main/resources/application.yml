@@ -18,16 +18,43 @@ spring:
             - id: auth-service
               uri: lb://auth-service
               predicates:
-                - Path=/auth/**
+                - Path=/api/auth/**
               filters:
                 - StripPrefix=1
-
+              
             - id: user-service
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**
+                - Path=/api/me/profile
+                - Path=/api/me/profile/**
               filters:
                 - StripPrefix=1
+
+            - id: task-service
+              uri: lb://task-service
+              predicates:
+                - Path=/api/tasks/**
+                - Path=/api/me/tasks/**
+                - Path=/api/comments/**
+                - Path=/api/attachments/**
+              filters:
+                - StripPrefix=1
+
+            - id: analytics-service
+              uri: lb://analytics-service
+              predicates:
+                - Path=/api/analytics/**
+              filters:
+                - StripPrefix=1
+      default-filters:
+        - name: Logging
+          args:
+            level: INFO
+            showHeaders: true
+            showBody: false
+            showRequestHeaders: true
+            showResponseHeaders: true
 
 
 

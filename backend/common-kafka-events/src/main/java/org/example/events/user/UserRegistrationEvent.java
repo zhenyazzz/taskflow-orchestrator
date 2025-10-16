@@ -4,9 +4,6 @@ import java.util.UUID;
 
 import org.example.events.enums.Role;
 
-import lombok.Builder;
-
-@Builder
 public record UserRegistrationEvent(
     UUID id,
     String username,

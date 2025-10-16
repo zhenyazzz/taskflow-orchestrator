@@ -15,6 +15,11 @@ import { useRegister } from "../model/use-register";
 
 const registerSchema = z
   .object({
+    username: z
+      .string({
+        required_error: "Имя пользователя обязательно",
+      })
+      .min(3, "Имя пользователя должно быть не менее 3 символов"),
     email: z
       .string({
         required_error: "Email обязателен",
@@ -26,6 +31,16 @@ const registerSchema = z
       })
       .min(6, "Пароль должен быть не менее 6 символов"),
     confirmPassword: z.string().optional(),
+    firstName: z
+      .string({
+        required_error: "Имя обязательно",
+      })
+      .min(2, "Имя должно быть не менее 2 символов"),
+    lastName: z
+      .string({
+        required_error: "Фамилия обязательна",
+      })
+      .min(2, "Фамилия должна быть не менее 2 символов"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -35,6 +50,14 @@ const registerSchema = z
 export function RegisterForm() {
   const form = useForm({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+    },
   });
 
   const { errorMessage, isPending, register } = useRegister();
@@ -44,6 +67,45 @@ export function RegisterForm() {
   return (
     <Form {...form}>
       <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Имя пользователя</FormLabel>
+              <FormControl>
+                <Input placeholder="username" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Имя</FormLabel>
+              <FormControl>
+                <Input placeholder="Иван" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Фамилия</FormLabel>
+              <FormControl>
+                <Input placeholder="Иванов" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
@@ -79,7 +141,7 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Подтвердите пароль</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input placeholder="******" type="password" {...field} />
               </FormControl>
 
               <FormMessage />

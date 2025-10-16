@@ -14,11 +14,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "../model/use-login";
 
 const loginSchema = z.object({
-  email: z
+  username: z
     .string({
-      required_error: "Email обязателен",
+      required_error: "Имя пользователя обязательно",
     })
-    .email("Неверный email"),
+    .min(3, "Имя пользователя должно быть не менее 3 символов"),
   password: z
     .string({
       required_error: "Пароль обязателен",
@@ -29,6 +29,10 @@ const loginSchema = z.object({
 export function LoginForm() {
   const form = useForm({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
   });
 
   const { errorMessage, isPending, login } = useLogin();
@@ -40,12 +44,12 @@ export function LoginForm() {
       <form className="flex flex-col gap-4" onSubmit={onSubmit}>
         <FormField
           control={form.control}
-          name="email"
+          name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Имя пользователя</FormLabel>
               <FormControl>
-                <Input placeholder="admin@company.com" {...field} />
+                <Input placeholder="username" {...field} />
               </FormControl>
 
               <FormMessage />

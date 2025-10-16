@@ -23,7 +23,7 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     private final JwtUtil jwtUtil;
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/", "/public/", "/eureka/", "/actuator/", "/favicon.ico"
+            "/api/auth/signUp", "/api/auth/signIn", "/public/", "/eureka/", "/actuator/", "/favicon.ico"
     );
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
@@ -34,16 +34,18 @@ public class JwtAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
-
-        // Пропускаем публичные эндпоинты
+        System.out.println("Path: " + path);
+        
         if (isPublicEndpoint(path)) {
+            System.out.println("Filter: Allowing request to proceed");
             return chain.filter(exchange);
         }
-
+        System.out.println("Not public endpoint: " + path);
+        
         String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String token = jwtUtil.getJwtFromHeader(authorizationHeader);
 
-        // Для защищенных эндпоинтов токен обязателен
+        System.out.println("Token: " + token);
         if (token == null) {
             return unauthorized(exchange, "Missing JWT token");
         }

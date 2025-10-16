@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/v1/attachments")
+@RequestMapping("/attachments")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Attachments", description = "Attachment management operations")

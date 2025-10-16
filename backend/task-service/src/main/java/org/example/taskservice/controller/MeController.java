@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/v1/me")
+@RequestMapping("/me/tasks")
 @RequiredArgsConstructor
 @Slf4j
 public class MeController {
     private final TaskService taskService;
 
-    @PatchMapping("/tasks/{id}/subscribe")
+    @PatchMapping("/{id}/subscribe")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TaskResponse> subscribeToTask(
             @AuthenticationPrincipal UserDetailsImpl principal,
@@ -31,7 +31,7 @@ public class MeController {
         return ResponseEntity.ok(taskService.subscribeToTask(id, principal.getId()));
     }
 
-    @PatchMapping("/tasks/{id}/unsubscribe")
+    @PatchMapping("/{id}/unsubscribe")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TaskResponse> unsubscribeFromTask(
             @AuthenticationPrincipal UserDetailsImpl principal,
@@ -40,7 +40,7 @@ public class MeController {
         return ResponseEntity.ok(taskService.unsubscribeFromTask(id, principal.getId()));
     }
 
-    @PatchMapping("/tasks/{id}/complete")
+    @PatchMapping("/{id}/complete")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<TaskResponse> completeTask(
             @AuthenticationPrincipal UserDetailsImpl principal,
@@ -49,7 +49,7 @@ public class MeController {
         return ResponseEntity.ok(taskService.completeTask(id, principal.getId()));
     }
 
-    @GetMapping("/tasks")
+    @GetMapping("")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<TaskResponse>> getMyTasks(
             @RequestParam(defaultValue = "0") @Min(0) int page,

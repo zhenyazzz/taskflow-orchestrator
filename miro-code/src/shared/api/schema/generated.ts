@@ -275,7 +275,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users": {
+    "/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -364,7 +364,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}": {
+    "/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -467,7 +467,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/all": {
+    "/users/all": {
         parameters: {
             query?: never;
             header?: never;
@@ -819,17 +819,12 @@ export interface components {
             /** Format: password */
             password: string;
         };
-        User: {
+        JwtResponse: {
+            token: string;
             /** Format: uuid */
             id: string;
             username: string;
-            /** Format: email */
-            email: string;
-            roles: ("USER" | "ADMIN")[];
-        };
-        JwtResponse: {
-            accessToken: string;
-            user: components["schemas"]["User"];
+            roles: ("ADMIN" | "USER" | "MODERATOR")[];
         };
         Error: {
             message: string;
@@ -841,13 +836,19 @@ export interface components {
             email: string;
             /** Format: password */
             password: string;
+            firstName: string;
+            lastName: string;
         };
         AssignRoleRequest: {
+            /** Format: uuid */
+            id: string;
             username: string;
             /** @enum {string} */
             role: "USER" | "ADMIN";
         };
         RemoveRoleRequest: {
+            /** Format: uuid */
+            id: string;
             username: string;
             /** @enum {string} */
             role: "USER" | "ADMIN";

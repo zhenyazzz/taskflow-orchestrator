@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
-                            "/auth/**", 
+                            "/api/auth/**", 
                             "/public/**", 
                             "/eureka/**", 
                             "/actuator/**",

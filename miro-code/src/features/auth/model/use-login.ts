@@ -12,7 +12,7 @@ export function useLogin() {
   const session = useSession();
   const loginMutation = publicRqClient.useMutation("post", "/auth/signIn", {
     onSuccess(data) {
-      session.login(data.accessToken);
+      session.login(data.token);
       navigate(ROUTES.HOME);
     },
   });
@@ -22,7 +22,7 @@ export function useLogin() {
   };
 
   const errorMessage = loginMutation.isError
-    ? loginMutation.error.message
+    ? loginMutation.error?.message
     : undefined;
 
   return {

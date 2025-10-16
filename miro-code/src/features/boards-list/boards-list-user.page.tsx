@@ -25,8 +25,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
+  DialogTrigger
 } from "@/shared/ui/kit/dialog";
 import { CreateUserForm } from "./ui/user/create-user-form";
 import { useEffect } from "react";

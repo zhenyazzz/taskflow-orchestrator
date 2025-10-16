@@ -42,12 +42,12 @@ public class KafkaProducerService {
 
     public void sendUserLoginEvent(UUID key, UserLoginEvent event) {
         log.info("Отправляем UserLoginEvent с ключом {}: {}", key, event);
-        sendEvent(kafkaTopicsProperties.getUserLogin(), key.toString(), event);
+        sendEvent(kafkaTopicsProperties.getUserLoginSuccess(), key.toString(), event);
     }
 
     public void sendUserRoleUpdateEvent(UUID key, UserRoleUpdateEvent event) {
         log.info("Отправляем UserRoleUpdateEvent с ключом {}: {}", key, event);
-        sendEvent(kafkaTopicsProperties.getUserRoleUpdate(), key.toString(), event);
+        sendEvent(kafkaTopicsProperties.getUserRoleUpdated(), key.toString(), event);
     }
 
     public void sendLoginFailEvent(String key, LoginFailEvent event) {

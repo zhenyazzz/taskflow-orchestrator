@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/tasks")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Tasks", description = "Task management operations")

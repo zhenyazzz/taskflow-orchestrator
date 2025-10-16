@@ -14,6 +14,7 @@ export const publicFetchClient = createFetchClient<paths>({
 });
 export const publicRqClient = createClient(publicFetchClient);
 
+
 fetchClient.use({
   async onRequest({ request }) {
     const token = await useSession.getState().refreshToken();

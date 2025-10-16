@@ -17,19 +17,19 @@ import lombok.extern.slf4j.Slf4j;
 public class KafkaConsumerService {
     private final AuthService authService;
 
-    @KafkaListener(topics = "${app.kafka.topics.user-created}", groupId = "auth-service-group", containerFactory = "kafkaListenerContainerFactory")
-    public void consumeUserCreate(UserCreatedEvent event) {
+    @KafkaListener(topics = "${kafka.topics.user-created}", groupId = "${spring.kafka.consumer.group-id}", containerFactory = "kafkaListenerContainerFactory")
+    public void consumeUserCreated(UserCreatedEvent event) {
         log.info("Получено событие UserCreatedEvent: {}", event);
         authService.handleUserCreation(event);
     }
 
-    @KafkaListener(topics = "${app.kafka.topics.user-delete}", groupId = "auth-service-group", containerFactory = "kafkaListenerContainerFactory")
-    public void consumeUserDelete(UserDeletedEvent event) {
+    @KafkaListener(topics = "${kafka.topics.user-deleted}", groupId = "${spring.kafka.consumer.group-id}", containerFactory = "kafkaListenerContainerFactory")
+    public void consumeUserDeleted(UserDeletedEvent event) {
         log.info("Получено событие UserDeletedEvent: {}", event);
         authService.handleUserDelete(event);
     }
-    @KafkaListener(topics = "${app.kafka.topics.user-profile-update}", groupId = "auth-service-group", containerFactory = "kafkaListenerContainerFactory")
-    public void consumeUserProfileUpdate(UserProfileUpdatedEvent event) {
+    @KafkaListener(topics = "${kafka.topics.user-profile-updated}", groupId = "${spring.kafka.consumer.group-id}", containerFactory = "kafkaListenerContainerFactory")
+    public void consumeUserProfileUpdated(UserProfileUpdatedEvent event) {
         log.info("Получено событие UserProfileUpdatedEvent: {}", event);
         authService.handleUserProfileUpdate(event);
     }

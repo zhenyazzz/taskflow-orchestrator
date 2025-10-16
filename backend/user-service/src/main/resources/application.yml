@@ -11,15 +11,13 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
+      ddl-auto: update
       properties:
         hibernate.format_sql: true
         hibernate.highlight_sql: true
         hibernate.show_sql: false
         hibernate.jdbc.time_zone: UTC
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
   flyway:
@@ -41,32 +39,28 @@ spring:
       retries: 3
       acks: all
       properties:
-        linger.ms: 5
+        "linger.ms": 5
     consumer:
       group-id: user-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "*"
+        "spring.json.trusted.packages": "*"
     listener:
       ack-mode: record
+
+    topics:
+      user-created: "user-created-topic"
+      user-deleted: "user-deleted-topic"
+      user-profile-updated: "user-profile-updated-topic"
+      user-role-updated: "user-role-updated-topic"
 
 springdoc:
   api-docs:
     path: /openapi
   swagger-ui:
     path: /swagger-ui.html
-
-app:
-  kafka:
-    topics:
-      user-registration: user-registered
-      user-login: user-login
-      user-role-update: user-role-updated
-      user-created: user-created
-      user-profile-update: user-profile-updated
-      user-delete: user-deleted
 
 management:
   endpoints:

@@ -41,12 +41,12 @@ public class KafkaProducerService {
 
     public void sendUserDeletedEvent(UUID key, UserDeletedEvent event) {
         log.info("Отправляем UserDeletedEvent с ключом {}: {}", key, event);
-        sendEvent(topics.getUserDelete(), key.toString(), event);
+        sendEvent(topics.getUserDeleted(), key.toString(), event);
     }
 
     public void sendUserProfileUpdatedEvent(UUID key, UserProfileUpdatedEvent event) {
-        log.info("Отправляем UserRoleUpdateEvent с ключом {}: {}", key, event);
-        sendEvent(topics.getUserProfileUpdate(), key.toString(), event);
+        log.info("Отправляем UserProfileUpdatedEvent с ключом {}: {}", key, event);
+        sendEvent(topics.getUserProfileUpdated(), key.toString(), event);
     }
 
 }

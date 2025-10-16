@@ -15,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentController {

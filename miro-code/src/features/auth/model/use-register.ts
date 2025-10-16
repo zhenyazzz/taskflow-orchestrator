@@ -15,7 +15,7 @@ export function useRegister() {
     "/auth/signUp",
     {
       onSuccess(data) {
-        session.login(data.accessToken);
+        session.login(data.token);
         navigate(ROUTES.HOME);
       },
     },
@@ -26,7 +26,7 @@ export function useRegister() {
   };
 
   const errorMessage = registerMutation.isError
-    ? registerMutation.error.message
+    ? registerMutation.error?.message
     : undefined;
 
   return {

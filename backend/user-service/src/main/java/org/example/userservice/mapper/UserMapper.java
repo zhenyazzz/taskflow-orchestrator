@@ -15,9 +15,8 @@ import org.mapstruct.*;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
-import org.example.events.enums.UserStatus;
 
-@Mapper(componentModel = "spring", imports = {Instant.class, Collectors.class})
+@Mapper(componentModel = "spring", imports = {Instant.class, Collectors.class, org.example.events.enums.UserStatus.class})
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)

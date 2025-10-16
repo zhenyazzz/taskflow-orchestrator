@@ -40,16 +40,16 @@ paths:
       $ref: "./endpoints/auth.yaml#/validateToken"
       
   /auth/refresh:
-    post:  # ← добавил метод POST
+    post:  
       $ref: './endpoints/auth.yaml#/refresh'
 
-  /api/users:
+  /users:
     get:
-      $ref: "./endpoints/user.yaml#/getAllUsers"  # ← у тебя нет такой операции
+      $ref: "./endpoints/user.yaml#/getAllUsers"  
     post:
       $ref: "./endpoints/user.yaml#/createUser"
 
-  /api/users/{id}:
+  /users/{id}:
     get:
       $ref: "./endpoints/user.yaml#/getUserById"
     put:
@@ -57,7 +57,7 @@ paths:
     delete:
       $ref: "./endpoints/user.yaml#/deleteUser"
 
-  /api/users/all:
+  /users/all:
     get:
       $ref: "./endpoints/user.yaml#/getAllUsersList"
 

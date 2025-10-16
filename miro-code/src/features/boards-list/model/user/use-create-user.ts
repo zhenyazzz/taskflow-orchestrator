@@ -7,7 +7,7 @@ type CreateUserRequest = components["schemas"]["CreateUserRequest"];
 export function useCreateUser() {
     const queryClient = useQueryClient();
 
-    return rqClient.useMutation("post", "/api/users", {
+    return rqClient.useMutation("post", "/users", {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
         },
