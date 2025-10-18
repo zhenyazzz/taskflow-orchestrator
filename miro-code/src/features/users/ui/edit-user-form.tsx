@@ -16,14 +16,11 @@ import { Input } from "@/shared/ui/kit/input";
 import { Checkbox } from "@/shared/ui/kit/checkbox";
 //import { Badge } from "@/shared/ui/layouts/badge";
 import { Loader2, Save, X, Shield, Mail, User as UserIcon } from "lucide-react";
-import { editUserSchema, EditUserFormData } from "../../lib/validations";
 import { useUpdateUser } from "../model/use-update-user.tsx";
-import type { components } from "@/shared/api/schema";
-
-type User = components["schemas"]["User"];
+import { ApiSchemas } from "@/shared/api/schema/index.ts";
 
 interface EditUserFormProps {
-  user: User;
+  user: ApiSchemas["UserResponse"];
   onCancel: () => void;
   onSuccess?: () => void;
 }
@@ -35,26 +32,21 @@ const ROLE_OPTIONS = [
 ];
 
 export function EditUserForm({ user, onCancel, onSuccess }: EditUserFormProps) {
-  const updateUserMutation = useUpdateUser();
+  const updateUserMutation = useUpdateUser(user.id);
 
-  const form = useForm<EditUserFormData>({
-    resolver: zodResolver(editUserSchema),
+    const form = useForm<ApiSchemas["UpdateUserRequest"]>({
     defaultValues: {
       email: user.email || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      roles: user.roles || ["USER"],
+      firstName: user.firstName || undefined,
+      lastName: user.lastName || undefined,
+      username: user.username || "",
+      password: "",
     },
   });
 
-  const onSubmit = (data: EditUserFormData) => {
+  const onSubmit = (data: ApiSchemas["UpdateUserRequest"]) => {
     updateUserMutation.mutate(
-      { userId: user.id, data },
-      {
-        onSuccess: () => {
-          onSuccess?.();
-        },
-      }
+      { params: { path: { id: user.id } }, body: data },
     );
   };
 
@@ -63,7 +55,6 @@ export function EditUserForm({ user, onCancel, onSuccess }: EditUserFormProps) {
       email: user.email || "",
       firstName: user.firstName || "",
       lastName: user.lastName || "",
-      roles: user.roles || ["USER"],
     });
   }, [user, form]);
 
@@ -119,7 +110,7 @@ export function EditUserForm({ user, onCancel, onSuccess }: EditUserFormProps) {
 
         <FormField
           control={form.control}
-          name="roles"
+          name="username"
           render={() => (
             <FormItem>
               <FormLabel className="flex items-center gap-2">
@@ -131,7 +122,7 @@ export function EditUserForm({ user, onCancel, onSuccess }: EditUserFormProps) {
                   <FormField
                     key={role.value}
                     control={form.control}
-                    name="roles"
+                    name="username"
                     render={({ field }) => {
                       return (
                         <FormItem
