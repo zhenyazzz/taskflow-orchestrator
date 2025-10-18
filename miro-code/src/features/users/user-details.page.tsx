@@ -75,7 +75,7 @@ function UserDetailsPage() {
                     title={
                         <div className="flex items-center">
                             <Button variant="ghost" size="icon" asChild>
-                                <Link to="/users">
+                                <Link to="/boards/user">
                                     <ArrowLeft className="w-4 h-4" />
                                 </Link>
                             </Button>
