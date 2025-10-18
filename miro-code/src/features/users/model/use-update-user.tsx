@@ -1,18 +1,16 @@
 // features/users/model/use-user.ts
 
-import { keepPreviousData } from "@tanstack/react-query";
 import { rqClient } from "@/shared/api/instance";
+import { useQueryClient } from "@tanstack/react-query";
 
-export function useUpdateUser(userId?: string) {
-    return rqClient.useQuery("get", "/users/{id}", {
-        params: {
-            path: {
-                id: userId!,
-            },
-        },
-    }, {
-        enabled: !!userId,
-        placeholderData: keepPreviousData,
-    });
+export function useUpdateUser(userId: string) {
+  const queryClient = useQueryClient();
+
+  return rqClient.useMutation("put", "/users/{id}", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get", "/users", { id: userId }] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
+    },
+  });
 }
 
