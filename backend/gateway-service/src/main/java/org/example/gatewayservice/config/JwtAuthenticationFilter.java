@@ -34,18 +34,19 @@ public class JwtAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
-        System.out.println("Path: " + path);
+        String method = request.getMethod().name();
+        System.out.println("Path: " + method + " " + path);
+        
         
         if (isPublicEndpoint(path)) {
             System.out.println("Filter: Allowing request to proceed");
             return chain.filter(exchange);
         }
-        System.out.println("Not public endpoint: " + path);
+        
         
         String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String token = jwtUtil.getJwtFromHeader(authorizationHeader);
 
-        System.out.println("Token: " + token);
         if (token == null) {
             return unauthorized(exchange, "Missing JWT token");
         }
@@ -63,13 +64,15 @@ public class JwtAuthenticationFilter implements WebFilter {
             }
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                    .map(role -> new SimpleGrantedAuthority(role.name()))
                     .collect(Collectors.toList());
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     username, token, authorities); // Сохраняем токен в credentials
-
-            // Устанавливаем аутентификацию в контекст
+            // System.out.println("Username: " + username);
+            // System.out.println("Authorities: " + authorities);
+            // System.out.println("Forwarding  with path: " + path);
+            
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
 

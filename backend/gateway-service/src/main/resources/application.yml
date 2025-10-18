@@ -25,12 +25,17 @@ spring:
             - id: user-service
               uri: lb://user-service
               predicates:
-                - Path=/api/users/**
                 - Path=/api/me/profile
-                - Path=/api/me/profile/**
               filters:
                 - StripPrefix=1
 
+            - id: user-service-users # Новый маршрут для /api/users/**
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - StripPrefix=1
+              
             - id: task-service
               uri: lb://task-service
               predicates:

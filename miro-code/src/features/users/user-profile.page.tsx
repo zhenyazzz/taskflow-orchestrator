@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, Edit3, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar";
@@ -9,14 +9,13 @@ import {
     UserPageLayoutHeader,
 } from "@/features/users/ui/user-page-layout";
 import { EditProfileForm } from "@/features/users/edit-profile-form";
-import { useCurrentUser } from "@/features/boards-list/model/use-current-user";
 import { useUpdateUser } from "@/features/boards-list/model/use-update-user";
+import { useUserProfile } from "./model/use-user-profile";
 
 function ProfileEditPage() {
-    const navigate = useNavigate();
-    const { user, isLoading: isUserLoading } = useCurrentUser();
+    const { data: user, isLoading: isUserLoading } = useUserProfile();
     const [isEditing, setIsEditing] = useState(false); // Форма редактирования не открыта по умолчанию
-    const { updateUser, isPending: isUpdatePending, error: updateError } = useUpdateUser();
+    const { mutate: updateUser, isPending: isUpdatePending, error: updateError } = useUpdateUser();
 
     const handleEditSuccess = () => {
         setIsEditing(false);
@@ -80,11 +79,7 @@ function ProfileEditPage() {
                             <p><strong>Email:</strong> {user.email}</p>
                             <p><strong>Имя:</strong> {user.firstName || "Не указано"}</p>
                             <p><strong>Фамилия:</strong> {user.lastName || "Не указано"}</p>
-                            <p><strong>Телефон:</strong> {user.phone || "Не указано"}</p>
                             <p><strong>Роли:</strong> {user.roles.join(", ") || "Нет ролей"}</p>
-                            <p><strong>Статус:</strong> {user.status}</p>
-                            <p><strong>Дата создания:</strong> {new Date(user.createdAt).toLocaleString()}</p>
-                            <p><strong>Дата обновления:</strong> {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : "Не обновлялся"}</p>
                         </div>
                     )}
                 </div>

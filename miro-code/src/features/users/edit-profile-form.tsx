@@ -1,18 +1,19 @@
 import { useForm } from "react-hook-form";
-import { UserResponse, UpdateUserRequest } from "@/shared/api/types";
+import { UpdateUserRequest } from "@/shared/api/types";
 import { Button } from "@/shared/ui/kit/button";
 import { Input } from "@/shared/ui/kit/input";
 import { Label } from "@/shared/ui/kit/label";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
 import {AlertCircle, Loader2} from "lucide-react";
+import { ApiSchemas } from "@/shared/api/schema";
 
 interface EditProfileFormProps {
-    user: UserResponse;
+    user: ApiSchemas["ProfileResponse"];
     onCancel: () => void;
     onSuccess: () => void;
     isPending: boolean;
     error: Error | null;
-    updateUser: (data: { id: string; userData: UpdateUserRequest }) => void;
+    updateUser: (args: { path: { id: string }; body: UpdateUserRequest }) => void;
 }
 
 export function EditProfileForm({ user, onCancel, onSuccess, isPending, error, updateUser }: EditProfileFormProps) {
@@ -23,12 +24,11 @@ export function EditProfileForm({ user, onCancel, onSuccess, isPending, error, u
             password: "",
             firstName: user.firstName,
             lastName: user.lastName,
-            phone: user.phone,
         },
     });
 
     const onSubmit = (data: UpdateUserRequest) => {
-        updateUser({ id: user.id, userData: data });
+        updateUser({ path: { id: user.id }, body: data });
         onSuccess();
     };
 
@@ -92,20 +92,6 @@ export function EditProfileForm({ user, onCancel, onSuccess, isPending, error, u
                     className="mt-1"
                     {...register("lastName")}
                 />
-            </div>
-            <div>
-                <Label htmlFor="phone" className="block mb-2">Телефон</Label>
-                <Input
-                    id="phone"
-                    className="mt-1"
-                    {...register("phone", {
-                        pattern: {
-                            value: /^\+?\d{10,15}$/,
-                            message: "Неверный формат телефона",
-                        },
-                    })}
-                />
-                {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
             </div>
             <div className="flex gap-2">
                 <Button type="submit" disabled={isPending}>

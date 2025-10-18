@@ -10,6 +10,7 @@ import org.example.userservice.dto.response.ProfileResponse;
 import org.example.userservice.model.UserDetailsImpl;
 import org.example.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +22,17 @@ public class MeController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Get my profile", description = "Returns profile of the authenticated user")
     public ResponseEntity<ProfileResponse> getMyProfile(@AuthenticationPrincipal UserDetailsImpl principal) {
-        return ResponseEntity.ok(userService.getMyProfile(principal.getUUID()));
+        System.out.println("Fetching profile for UUID: " + principal.getUUID());
+        ProfileResponse profile = userService.getMyProfile(principal.getUUID());
+        System.out.println("Profile fetched: " + profile);
+        return ResponseEntity.ok(profile);
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update my profile", description = "Updates profile of the authenticated user")
     public ResponseEntity<ProfileResponse> updateMyProfile(
             @AuthenticationPrincipal UserDetailsImpl principal,
@@ -36,6 +42,7 @@ public class MeController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete my profile", description = "Delete profile of the authenticated user")
     public ResponseEntity<Void> deleteMyProfile(@AuthenticationPrincipal UserDetailsImpl principal) {
         userService.deleteMyProfile(principal.getUUID());

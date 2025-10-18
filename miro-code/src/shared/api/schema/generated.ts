@@ -913,7 +913,6 @@ export interface components {
             email: string;
             firstName?: string;
             lastName?: string;
-            phone?: string;
             roles: ("USER" | "ADMIN")[];
         };
         Board: {

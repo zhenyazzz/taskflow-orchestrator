@@ -19,8 +19,6 @@ schemas:
         type: string
       lastName:
         type: string
-      phone:
-        type: string
       roles:
         type: array
         items:
