@@ -1,5 +1,5 @@
 // features/users/model/use-user.ts
-import { useQueryClient } from "@tanstack/react-query";
+
 import { keepPreviousData } from "@tanstack/react-query";
 import { rqClient } from "@/shared/api/instance";
 

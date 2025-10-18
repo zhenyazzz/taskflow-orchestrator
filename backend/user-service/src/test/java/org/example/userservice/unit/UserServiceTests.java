@@ -307,7 +307,7 @@ class UserServiceTests {
 
     @Test
     void handleUserRegistration_NewUser_CreatesUser() {
-        UserRegistrationEvent event = new UserRegistrationEvent(userId, "newuser", "new@example.com", "John", "Doe", "1234567890", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
+        UserRegistrationEvent event = new UserRegistrationEvent(userId, "newuser", "new@example.com", "John", "Doe", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
         when(userRepository.existsById(event.id())).thenReturn(false);
         when(userMapper.toUser(event)).thenReturn(user);
         doNothing().when(userRepository).insertWithCustomId(any(UUID.class), anyString(), anyString(), anyString(), anyString(), anyString());
@@ -323,7 +323,7 @@ class UserServiceTests {
 
     @Test
     void handleUserRegistration_UserAlreadyExists_ThrowsUserAlreadyExistsException() {
-        UserRegistrationEvent event = new UserRegistrationEvent(userId, "existinguser", "test@example.com", "John", "Doe", "1234567890", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
+        UserRegistrationEvent event = new UserRegistrationEvent(userId, "existinguser", "test@example.com", "John", "Doe", new java.util.HashSet<>(Set.of(Role.ROLE_USER)));
         when(userRepository.existsById(event.id())).thenReturn(true);
 
         assertThrows(UserAlreadyExistsException.class, () -> userService.handleUserRegistration(event));
