@@ -21,7 +21,7 @@ schemas:
         type: array
         items:
           type: string
-          enum: [USER, ADMIN]
+          enum: [ROLE_USER, ROLE_ADMIN]
 
   UpdateUserRequest:
     type: object
@@ -64,7 +64,7 @@ schemas:
         type: array
         items:
           type: string
-          enum: [USER, ADMIN]
+          enum: [ROLE_USER, ROLE_ADMIN]
       status:
         type: string
         enum: [ACTIVE, INACTIVE, PENDING]
@@ -156,7 +156,7 @@ getAllUsers:
       name: role
       schema:
         type: string
-        enum: [USER, ADMIN]
+        enum: [ROLE_USER, ROLE_ADMIN]
       description: Filter by role
   responses:
     '200':

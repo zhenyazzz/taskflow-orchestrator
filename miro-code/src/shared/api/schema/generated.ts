@@ -300,7 +300,7 @@ export interface paths {
                     /** @description Filter by email (case-insensitive contains) */
                     email?: string;
                     /** @description Filter by role */
-                    role?: "USER" | "ADMIN";
+                    role?: "ROLE_USER" | "ROLE_ADMIN";
                 };
                 header?: never;
                 path?: never;
@@ -824,7 +824,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             username: string;
-            roles: ("ADMIN" | "USER" | "MODERATOR")[];
+            roles: ("ROLE_ADMIN" | "ROLE_USER")[];
         };
         Error: {
             message: string;
@@ -844,14 +844,14 @@ export interface components {
             id: string;
             username: string;
             /** @enum {string} */
-            role: "USER" | "ADMIN";
+            role: "ROLE_USER" | "ROLE_ADMIN";
         };
         RemoveRoleRequest: {
             /** Format: uuid */
             id: string;
             username: string;
             /** @enum {string} */
-            role: "USER" | "ADMIN";
+            role: "ROLE_USER" | "ROLE_ADMIN";
         };
         UserResponse: {
             /** Format: uuid */
@@ -861,7 +861,7 @@ export interface components {
             email: string;
             firstName?: string;
             lastName?: string;
-            roles: ("USER" | "ADMIN")[];
+            roles: ("ROLE_USER" | "ROLE_ADMIN")[];
             /** @enum {string} */
             status: "ACTIVE" | "INACTIVE" | "PENDING";
             /** Format: date-time */
@@ -895,7 +895,7 @@ export interface components {
             email: string;
             firstName?: string;
             lastName?: string;
-            roles?: ("USER" | "ADMIN")[];
+            roles?: ("ROLE_USER" | "ROLE_ADMIN")[];
         };
         UpdateUserRequest: {
             username?: string;

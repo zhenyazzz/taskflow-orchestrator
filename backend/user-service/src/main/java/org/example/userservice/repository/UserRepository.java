@@ -22,10 +22,22 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE " +
-           "(:username IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
-           "(:email IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
-           "(:role IS NULL OR :role IN (SELECT r FROM u.roles r))")
+    @Query(value = """
+           SELECT u.* FROM users u
+           LEFT JOIN user_roles ur ON u.id = ur.user_id
+           WHERE (:username IS NULL OR LOWER(CAST(u.username AS TEXT)) LIKE LOWER(CONCAT('%', :username, '%'))) AND
+                 (:email IS NULL OR LOWER(CAST(u.email AS TEXT)) LIKE LOWER(CONCAT('%', :email, '%'))) AND
+                 (:role IS NULL OR :role = ur.roles)
+           GROUP BY u.id
+           """, 
+           countQuery = """
+           SELECT count(DISTINCT u.id) FROM users u
+           LEFT JOIN user_roles ur ON u.id = ur.user_id
+           WHERE (:username IS NULL OR LOWER(CAST(u.username AS TEXT)) LIKE LOWER(CONCAT('%', :username, '%'))) AND
+                 (:email IS NULL OR LOWER(CAST(u.email AS TEXT)) LIKE LOWER(CONCAT('%', :email, '%'))) AND
+                 (:role IS NULL OR :role = ur.roles)
+           """,
+           nativeQuery = true)
     Page<User> findUsersWithFilters(
         @Param("username") String username,
         @Param("email") String email, 

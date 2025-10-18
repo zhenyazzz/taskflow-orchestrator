@@ -52,7 +52,7 @@ schemas:
         type: array
         items:
           type: string
-          enum: [ADMIN, USER, MODERATOR]
+          enum: [ROLE_ADMIN, ROLE_USER]
 
   AssignRoleRequest:
     type: object
@@ -68,7 +68,7 @@ schemas:
         type: string
       role:
         type: string
-        enum: [USER, ADMIN]
+        enum: [ROLE_USER, ROLE_ADMIN]
 
   RemoveRoleRequest:
     type: object
@@ -84,7 +84,7 @@ schemas:
         type: string
       role:
         type: string
-        enum: [USER, ADMIN]
+        enum: [ROLE_USER, ROLE_ADMIN]
 
 signIn:
   summary: Вход пользователя в систему

@@ -11,7 +11,7 @@ interface BoardsSidebarProps {
 
 export function BoardsSidebar({ className }: BoardsSidebarProps) {
   const { session } = useSession();
-  const isAdmin = session?.roles.includes("ADMIN");
+  const isAdmin = session?.roles.includes("ROLE_ADMIN");
 
   return (
     <div className={cn("w-64 border-r p-4 space-y-4", className)}>

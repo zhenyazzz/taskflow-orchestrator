@@ -7,7 +7,7 @@ interface UseUsersListProps {
   size?: number;
   sort?: string;
   username?: string;
-  role?: "USER" | "ADMIN" | null;
+  role?: "ROLE_USER" | "ROLE_ADMIN" | null;
 }
 
 export function useUsersList({
@@ -24,39 +24,42 @@ export function useUsersList({
     isFetchingNextPage, 
     isPending, 
     hasNextPage 
-  } = rqClient.useInfiniteQuery({
-    queryKey: [
-      "/users", 
-      { 
-        size, 
-        sort, 
-        username, 
-        role: role || undefined 
-      }
-    ],
-    queryFn: ({ pageParam = 0 }) => 
-      rqClient.request({
-        method: "get",
-        url: "/users",
-        params: {
-          query: {
-            page: pageParam,
-            size,
-            sort,
-            username,
-            role: role || undefined,
-          },
+  } = rqClient.useInfiniteQuery(
+    "get",
+    "/users",
+    {
+      params: {
+        query: {
+          page: 0,
+          size,
+          sort,
+          username,
+          role: role || undefined,
         },
-      }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _, lastPageParam) => {
-      const currentPage = lastPageParam as number;
-      return currentPage < lastPage.totalPages - 1 
-        ? currentPage + 1 
-        : null;
+      },
     },
-    placeholderData: keepPreviousData,
-  });
+    {
+      queryKey: [
+        "get",
+        "/users",
+        {
+          size,
+          sort,
+          username,
+          role: role || undefined,
+        },
+      ],
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, _, lastPageParam) => {
+        const currentPage = lastPageParam as number;
+        return currentPage < lastPage.totalPages - 1 
+          ? currentPage + 1 
+          : null;
+      },
+      pageParamName: "page",
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const cursorRef: RefCallback<HTMLDivElement> = useCallback(
     (el) => {
