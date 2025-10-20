@@ -1,11 +1,8 @@
 package org.example.analyticsservice.kafka;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+    
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.example.analyticsservice.config.KafkaTopicsProperties;
 import org.example.analyticsservice.service.AnalyticsService;
 import org.example.events.task.*;
 import org.example.events.user.*;
@@ -18,122 +15,69 @@ import org.springframework.stereotype.Service;
 public class KafkaConsumerService {
 
     private final AnalyticsService analyticsService;
-    private final ObjectMapper objectMapper;
-    private final KafkaTopicsProperties kafkaTopicsProperties;
     
     // Task Events
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskCreated()}", groupId = "analytics-service-group")
-    public void consumeTaskCreated(String eventJson) {
-        try {
-            TaskCreatedEvent event = objectMapper.readValue(eventJson, TaskCreatedEvent.class);
+    @KafkaListener(topics = "#{kafka.topics.task-created}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskCreated(TaskCreatedEvent event) {
+        log.info("Received TaskCreatedEvent: {}", event);
             log.info("Получено событие TaskCreatedEvent для задачи: {}", event.id());
             analyticsService.handleTaskCreated(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskCreatedEvent: {}", eventJson, e);
-        }
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskUpdated()}", groupId = "analytics-service-group")
-    public void consumeTaskUpdated(String eventJson) {
-        try {
-            TaskUpdatedEvent event = objectMapper.readValue(eventJson, TaskUpdatedEvent.class);
-            log.info("Получено событие TaskUpdatedEvent для задачи: {}", event.id());
-            analyticsService.handleTaskUpdated(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskUpdatedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.task-updated}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskUpdated(TaskUpdatedEvent event) {
+        log.info("Received TaskUpdatedEvent for task: {}", event.id());
+        analyticsService.handleTaskUpdated(event);
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskCompleted()}", groupId = "analytics-service-group")
-    public void consumeTaskCompleted(String eventJson) {
-        try {
-            TaskCompletedEvent event = objectMapper.readValue(eventJson, TaskCompletedEvent.class);
-            log.info("Получено событие TaskCompletedEvent для задачи: {}", event.id());
-            analyticsService.handleTaskCompleted(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskCompletedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.task-completed}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskCompleted(TaskCompletedEvent event) {
+        log.info("Received TaskCompletedEvent for task: {}", event.id());
+        analyticsService.handleTaskCompleted(event);
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskDeleted()}", groupId = "analytics-service-group")
-    public void consumeTaskDeleted(String eventJson) {
-        try {
-            TaskDeletedEvent event = objectMapper.readValue(eventJson, TaskDeletedEvent.class);
-            log.info("Получено событие TaskDeletedEvent для задачи: {}", event.id());
-            analyticsService.handleTaskDeleted(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskDeletedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.task-deleted}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskDeleted(TaskDeletedEvent event) {
+        log.info("Received TaskDeletedEvent for task: {}", event.id());
+        analyticsService.handleTaskDeleted(event);
     }
 
     // User Events
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getUserRegistered()}", groupId = "analytics-service-group")
-    public void consumeUserRegistered(String eventJson) {
-        try {
-            UserCreatedEvent event = objectMapper.readValue(eventJson, UserCreatedEvent.class);
-            log.info("Получено событие UserCreatedEvent для пользователя: {}", event.id());
-            analyticsService.handleUserRegistered(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации UserCreatedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.user-registered}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeUserRegistered(UserCreatedEvent event) {
+        log.info("Received UserCreatedEvent for user: {}", event.id());
+        analyticsService.handleUserRegistered(event);
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getUserUpdated()}", groupId = "analytics-service-group")
-    public void consumeUserUpdated(String eventJson) {
-        try {
-            UserProfileUpdatedEvent event = objectMapper.readValue(eventJson, UserProfileUpdatedEvent.class);
-            log.info("Получено событие UserProfileUpdatedEvent для пользователя: {}", event.id());
-            analyticsService.handleUserUpdated(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации UserProfileUpdatedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.user-updated}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeUserUpdated(UserProfileUpdatedEvent event) {
+        log.info("Received UserProfileUpdatedEvent for user: {}", event.id());
+        analyticsService.handleUserUpdated(event);
     }
 
     // Auth Events
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getUserLoginSuccess()}", groupId = "analytics-service-group")
-    public void consumeUserLoginSuccess(String eventJson) {
-        try {
-            UserLoginEvent event = objectMapper.readValue(eventJson, UserLoginEvent.class);
-            log.info("Получено событие UserLoginEvent (успешный) для пользователя: {}", event.id());
-            analyticsService.handleUserLoginSuccess(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации UserLoginEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.user-login-success}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeUserLoginSuccess(UserLoginEvent event) {
+        log.info("Received UserLoginEvent (successful) for user: {}", event.id());
+        analyticsService.handleUserLoginSuccess(event);
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getUserLoginFailed()}", groupId = "analytics-service-group")
-    public void consumeUserLoginFailed(String eventJson) {
-
-        try {
-            LoginFailEvent loginFailEvent = objectMapper.readValue(eventJson, LoginFailEvent.class);
-            log.info("Получено событие неуспешного логина: {}", eventJson);
-            analyticsService.handleUserLoginFailed(loginFailEvent);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации LoginFailEvent: {}", eventJson, e);
-        }
-
+    @KafkaListener(topics = "#{kafka.topics.user-login-failed}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeUserLoginFailed(LoginFailEvent loginFailEvent) {
+        log.info("Received failed login event: {}", loginFailEvent.failureReason());
+        analyticsService.handleUserLoginFailed(loginFailEvent);
     }
 
     // Дополнительные события задач
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskStatusUpdated()}", groupId = "analytics-service-group")
-    public void consumeTaskStatusUpdated(String eventJson) {
-        try {
-            TaskStatusUpdatedEvent event = objectMapper.readValue(eventJson, TaskStatusUpdatedEvent.class);
-            log.info("Получено событие TaskStatusUpdatedEvent для задачи: {}", event.id());
-            analyticsService.handleTaskStatusUpdated(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskStatusUpdatedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.task-status-updated}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskStatusUpdated(TaskStatusUpdatedEvent event) {
+        log.info("Received TaskStatusUpdatedEvent for task: {}", event.id());
+        analyticsService.handleTaskStatusUpdated(event);
     }
 
-    @KafkaListener(topics = "#{kafkaTopicsProperties.getTaskAssigneesUpdated()}", groupId = "analytics-service-group")
-    public void consumeTaskAssigneesUpdated(String eventJson) {
-        try {
-            TaskAssigneesUpdatedEvent event = objectMapper.readValue(eventJson, TaskAssigneesUpdatedEvent.class);
-            log.info("Получено событие TaskAssigneesUpdatedEvent для задачи: {}", event.id());
-            analyticsService.handleTaskAssigneesUpdated(event);
-        } catch (JsonProcessingException e) {
-            log.error("Ошибка десериализации TaskAssigneesUpdatedEvent: {}", eventJson, e);
-        }
+    @KafkaListener(topics = "#{kafka.topics.task-assignees-updated}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeTaskAssigneesUpdated(TaskAssigneesUpdatedEvent event) {
+        log.info("Received TaskAssigneesUpdatedEvent for task: {}", event.id());
+        analyticsService.handleTaskAssigneesUpdated(event);
     }
 }

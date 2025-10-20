@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.example.events.attachment.AttachmentAddedEvent;
 import org.example.events.attachment.AttachmentDeletedEvent;
+import org.example.events.comment.CommentCreatedEvent;
+import org.example.events.comment.CommentUpdatedEvent;
+import org.example.events.comment.CommentDeletedEvent;
 import org.example.events.task.TaskAssigneesUpdatedEvent;
 import org.example.events.task.TaskCompletedEvent;
 import org.example.events.task.TaskCreatedEvent;
@@ -14,7 +17,7 @@ import org.example.events.task.TaskStatusUpdatedEvent;
 import org.example.events.task.TaskSubscribedEvent;
 import org.example.events.task.TaskUnsubscribedEvent;
 import org.example.events.task.TaskUpdatedEvent;
-import org.example.taskservice.config.KafkaTopicsProperties;
+import org.example.taskservice.kafka.KafkaTopicsProperties;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +86,7 @@ public class KafkaProducerService {
 
     public void sendAttachmentAddedEvent(String id, AttachmentAddedEvent attachmentAddedEvent) {
         log.info("Sending AttachmentAddedEvent with key {}: {}", id, attachmentAddedEvent);
-        sendEvent(topics.getAttachmentCreated(), id, attachmentAddedEvent);
+        sendEvent(topics.getAttachmentAdded(), id, attachmentAddedEvent);
     }
 
     public void sendAttachmentDeletedEvent(String attachmentId, AttachmentDeletedEvent attachmentDeletedEvent) {
@@ -91,6 +94,19 @@ public class KafkaProducerService {
         sendEvent(topics.getAttachmentDeleted(), attachmentId, attachmentDeletedEvent);
     }
 
+    public void sendCommentCreatedEvent(String id, CommentCreatedEvent commentCreatedEvent) {
+        log.info("Sending CommentCreatedEvent with key {}: {}", id, commentCreatedEvent);
+        sendEvent(topics.getCommentCreated(), id, commentCreatedEvent);
+    }
 
+    public void sendCommentUpdatedEvent(String id, CommentUpdatedEvent commentUpdatedEvent) {
+        log.info("Sending CommentUpdatedEvent with key {}: {}", id, commentUpdatedEvent);
+        sendEvent(topics.getCommentUpdated(), id, commentUpdatedEvent);
+    }
+
+    public void sendCommentDeletedEvent(String id, CommentDeletedEvent commentDeletedEvent) {
+        log.info("Sending CommentDeletedEvent with key {}: {}", id, commentDeletedEvent);
+        sendEvent(topics.getCommentDeleted(), id, commentDeletedEvent);
+    }
 
 }

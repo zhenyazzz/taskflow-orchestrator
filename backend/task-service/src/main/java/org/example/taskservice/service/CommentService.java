@@ -13,6 +13,7 @@ import org.example.taskservice.model.Comment;
 import org.example.taskservice.model.Task;
 import org.example.taskservice.model.UserDetailsImpl;
 import org.example.taskservice.repository.TaskRepository;
+import org.example.taskservice.kafka.producer.KafkaProducerService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import java.util.List;
 public class CommentService {
     private final TaskRepository taskRepository;
     private final CommentMapper commentMapper;
+    private final KafkaProducerService kafkaProducerService;
 
     @Transactional
     public CommentResponse addComment(String taskId, @Valid CreateCommentRequest request) {
@@ -40,6 +42,7 @@ public class CommentService {
         taskRepository.save(task);
 
         log.info("Comment added. ID: {}, Task: {}", comment.getId(), taskId);
+        kafkaProducerService.sendCommentCreatedEvent(comment.getId(), commentMapper.toCommentCreatedEvent(comment));
         return commentMapper.toCommentResponse(comment);
     }
 
@@ -60,14 +63,14 @@ public class CommentService {
     public void deleteComment(String taskId, String commentId) {
         log.info("Deleting comment: {} from task: {}", commentId, taskId);
         Task task = getTask(taskId);
-
-        if (!task.getComments().removeIf(comment -> comment.getId().equals(commentId))) {
-            log.warn("Comment not found: {}", commentId);
-            throw new CommentNotFoundException("Comment not found: " + commentId);
-        }
-
+        Comment comment = task.getComments().stream()
+                .filter(c -> c.getId().equals(commentId))
+                .findFirst()
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found: " + commentId));
+        task.getComments().remove(comment);
         taskRepository.save(task);
         log.info("Comment {} deleted", commentId);
+        kafkaProducerService.sendCommentDeletedEvent(commentId, commentMapper.toCommentDeletedEvent(comment));
     }
 
     @Transactional
@@ -83,6 +86,7 @@ public class CommentService {
         commentMapper.updateComment(request, comment);
         taskRepository.save(task);
 
+        kafkaProducerService.sendCommentUpdatedEvent(commentId, commentMapper.toCommentUpdatedEvent(comment));
         return commentMapper.toCommentResponse(comment);
     }
 
