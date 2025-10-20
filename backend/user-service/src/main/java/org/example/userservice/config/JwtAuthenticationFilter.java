@@ -12,8 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,14 +25,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-
+        System.out.println("JwtAuthenticationFilter: " + request.getMethod() + " " + request.getRequestURI());
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -43,13 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String jwt = jwtUtil.getJwtFromHeader(request);
         final String username = jwtUtil.getUserNameFromJwtToken(jwt);
-
+        System.out.println("Username: " + username);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UUID id = jwtUtil.getUserIdFromJwtToken(jwt);
             Collection<? extends GrantedAuthority> authorities = jwtUtil.getRoles(jwt)
                     .stream().map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toSet());
             UserDetailsImpl userDetails = new UserDetailsImpl(id, username, authorities);
-            System.out.println("UserDetails: " + userDetails);
+            System.out.println("Authorities: " + authorities);
             if (jwtUtil.validateJwtToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,

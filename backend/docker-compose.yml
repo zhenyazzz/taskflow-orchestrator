@@ -111,6 +111,40 @@ services:
     volumes:
       - redis_data:/data
 
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #     dockerfile: Dockerfile
+  #   container_name: auth-service
+  #   hostname: auth-service
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - config-service
+  #     - eureka-service
+  #     - kafka
+  #     - postgres
+  #     - vault
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #     dockerfile: Dockerfile
+  #   container_name: user-service
+  #   hostname: user-service
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     - config-service
+  #     - eureka-service
+  #     - kafka
+  #     - postgres
+  #     - vault
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+
 volumes:
   postgres_data:
   mongo_data:

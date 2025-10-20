@@ -1,4 +1,4 @@
-package org.example.userservice.config;
+package org.example.taskservice.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

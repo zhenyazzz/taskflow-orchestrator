@@ -1,14 +1,14 @@
 import { Button } from "@/shared/ui/kit/button";
 import { Input } from "@/shared/ui/kit/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/kit/select";
-import { CreateUserRequest } from "@/shared/api/types";
+import { components } from "@/shared/api/schema/generated";
 import { UseMutationResult } from "@tanstack/react-query";
 import { FormEvent } from "react";
 
 interface CreateUserFormProps {
-  formData: CreateUserRequest;
-  setFormData: (data: CreateUserRequest) => void;
-  mutation: UseMutationResult<any, unknown, CreateUserRequest>;
+  formData: components["schemas"]["CreateUserRequest"];
+  setFormData: (data: components["schemas"]["CreateUserRequest"]) => void;
+  mutation: UseMutationResult<any, unknown, components["schemas"]["CreateUserRequest"]>;
   onClose: () => void;
 }
 
@@ -48,15 +48,20 @@ export function CreateUserForm({ formData, setFormData, mutation, onClose }: Cre
           onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
         />
         <Select
-          value={formData.roles[0]}
-          onValueChange={(value) => setFormData({ ...formData, roles: [value] })}
+          value={formData.roles?.[0] || ""}
+          onValueChange={(value: "ROLE_USER" | "ROLE_ADMIN") =>
+            setFormData({
+              ...formData,
+              roles: value === "ROLE_ADMIN" ? ["ROLE_ADMIN", "ROLE_USER"] : [value],
+            })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="USER">User</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="ROLE_USER">User</SelectItem>
+            <SelectItem value="ROLE_ADMIN">Admin</SelectItem>
             {/* Добавьте другие роли по необходимости */}
           </SelectContent>
         </Select>

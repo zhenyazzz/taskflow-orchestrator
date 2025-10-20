@@ -68,6 +68,7 @@ public class UserController {
     @Operation(summary = "Create user")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest userRequest) {
         log.info("Creating user: {}", userRequest.username());
+        System.out.println("User request: " + userRequest);
         UserResponse createdUser = userService.createUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }

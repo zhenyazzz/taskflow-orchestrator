@@ -2,10 +2,11 @@
 import { z } from "zod";
 
 export const editUserSchema = z.object({
+  username: z.string().min(3, "Имя пользователя должно содержать минимум 3 символа"),
   email: z.string().email("Введите корректный email"),
   firstName: z.string().min(1, "Имя обязательно").max(50, "Имя слишком длинное"),
   lastName: z.string().min(1, "Фамилия обязательна").max(50, "Фамилия слишком длинная"),
-  roles: z.array(z.string()).min(1, "Выберите хотя бы одну роль"),
+  password: z.string().optional(),
 });
 
 export const createUserSchema = z.object({

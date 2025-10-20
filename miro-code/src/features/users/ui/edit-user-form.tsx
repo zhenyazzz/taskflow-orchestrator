@@ -1,234 +1,124 @@
 // features/users/ui/user/edit-user-form.tsx
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/shared/ui/kit/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
-import { Checkbox } from "@/shared/ui/kit/checkbox";
-//import { Badge } from "@/shared/ui/layouts/badge";
-import { Loader2, Save, X, Shield, Mail, User as UserIcon } from "lucide-react";
-import { useUpdateUser } from "../model/use-update-user.tsx";
+import { Loader2 } from "lucide-react";
 import { ApiSchemas } from "@/shared/api/schema/index.ts";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
+import { Label } from "@/shared/ui/kit/label";
+import { AlertCircle } from "lucide-react";
 
 interface EditUserFormProps {
   user: ApiSchemas["UserResponse"];
   onCancel: () => void;
-  onSuccess?: () => void;
+  onSuccess: () => void;
+  isPending: boolean;
+  error: Error | null;
+  updateUser: (body: ApiSchemas["UpdateUserRequest"]) => void;
 }
 
-const ROLE_OPTIONS = [
-  { value: "USER", label: "Пользователь" },
-  { value: "MODERATOR", label: "Модератор" },
-  { value: "ADMIN", label: "Администратор" },
-];
-
-export function EditUserForm({ user, onCancel, onSuccess }: EditUserFormProps) {
-  const updateUserMutation = useUpdateUser(user.id);
-
-    const form = useForm<ApiSchemas["UpdateUserRequest"]>({
+export function EditUserForm({ user, onCancel, onSuccess, isPending, error, updateUser }: EditUserFormProps) {
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<ApiSchemas["UpdateUserRequest"]>({
     defaultValues: {
-      email: user.email || "",
-      firstName: user.firstName || undefined,
-      lastName: user.lastName || undefined,
-      username: user.username || "",
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
       password: "",
     },
   });
 
   const onSubmit = (data: ApiSchemas["UpdateUserRequest"]) => {
-    updateUserMutation.mutate(
-      { params: { path: { id: user.id } }, body: data },
-    );
+    updateUser(data);
+    onSuccess();
   };
 
   useEffect(() => {
-    form.reset({
-      email: user.email || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
+    reset({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      password: "",
     });
-  }, [user, form]);
+  }, [user, reset]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Имя</FormLabel>
-                <FormControl>
-                  <Input placeholder="Введите имя" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="w-4 h-4" />
+          <AlertTitle>Ошибка</AlertTitle>
+          <AlertDescription>
+            {error.message === "USER_EXISTS"
+              ? "Пользователь с таким email уже существует"
+              : error.message || "Не удалось обновить профиль"}
+          </AlertDescription>
+        </Alert>
+      )}
 
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Фамилия</FormLabel>
-                <FormControl>
-                  <Input placeholder="Введите фамилию" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Email
-              </FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="user@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div>
+        <Label htmlFor="username" className="block mb-2">Имя пользователя</Label>
+        <Input
+          id="username"
+          className="mt-1"
+          {...register("username", { required: "Имя пользователя обязательно" })}
         />
+        {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+      </div>
 
-        <FormField
-          control={form.control}
-          name="username"
-          render={() => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Роли пользователя
-              </FormLabel>
-              <div className="space-y-2">
-                {ROLE_OPTIONS.map((role) => (
-                  <FormField
-                    key={role.value}
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={role.value}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(role.value)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, role.value])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== role.value
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {role.label}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
-              <FormDescription>
-                Выберите роли, которые будут назначены пользователю
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div>
+        <Label htmlFor="email" className="block mb-2">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          className="mt-1"
+          {...register("email", {
+            required: "Email обязателен",
+            pattern: { value: /^\S+@\S+$/i, message: "Неверный формат email" },
+          })}
         />
+        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+      </div>
 
-        {/* Статическая информация */}
-        <div className="pt-4 border-t space-y-4">
-          <h3 className="font-semibold flex items-center gap-2">
-            <UserIcon className="w-4 h-4" />
-            Системная информация
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <FormLabel>Имя пользователя</FormLabel>
-              <Input value={user.username} disabled className="mt-1 bg-muted" />
-              <FormDescription>Имя пользователя нельзя изменить</FormDescription>
-            </div>
-            
-            <div>
-              <FormLabel>ID пользователя</FormLabel>
-              <Input value={user.id} disabled className="mt-1 bg-muted font-mono text-sm" />
-            </div>
-          </div>
+      <div>
+        <Label htmlFor="password" className="block mb-2">Новый пароль (оставьте пустым, чтобы не менять)</Label>
+        <Input
+          id="password"
+          type="password"
+          className="mt-1"
+          {...register("password")}
+        />
+        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <FormLabel>Статус</FormLabel>
-              <div className="flex items-center gap-2 mt-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    user.status === "ACTIVE" ? "bg-green-500" : "bg-red-500"
-                  }`}
-                />
-                <span className="capitalize">
-                  {user.status === "ACTIVE" ? "Активный" : "Неактивный"}
-                </span>
-              </div>
-            </div>
-            
-            <div>
-              <FormLabel>Дата регистрации</FormLabel>
-              <Input 
-                value={user.createdAt ? new Date(user.createdAt).toLocaleDateString("ru-RU") : "Не указано"} 
-                disabled 
-                className="mt-1 bg-muted" 
-              />
-            </div>
-          </div>
-        </div>
+      <div>
+        <Label htmlFor="firstName" className="block mb-2">Имя</Label>
+        <Input
+          id="firstName"
+          className="mt-1"
+          {...register("firstName")}
+        />
+      </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={updateUserMutation.isPending}
-          >
-            <X className="w-4 h-4 mr-2" />
-            Отмена
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={updateUserMutation.isPending || !form.formState.isDirty}
-          >
-            {updateUserMutation.isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            Сохранить изменения
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div>
+        <Label htmlFor="lastName" className="block mb-2">Фамилия</Label>
+        <Input
+          id="lastName"
+          className="mt-1"
+          {...register("lastName")}
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isPending}>
+          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Сохранить"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Отмена
+        </Button>
+      </div>
+    </form>
   );
 }

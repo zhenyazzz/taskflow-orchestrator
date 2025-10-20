@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Edit3, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar";
 import {
@@ -11,6 +10,8 @@ import {
 import { EditProfileForm } from "@/features/users/edit-profile-form";
 import { useUpdateUser } from "@/features/boards-list/model/use-update-user";
 import { useUserProfile } from "./model/use-user-profile";
+import { InfoItem } from "@/shared/ui/kit/info-item";
+import { ArrowLeft, Edit3, Loader2 } from "lucide-react";
 
 function ProfileEditPage() {
     const { data: user, isLoading: isUserLoading } = useUserProfile();
@@ -73,13 +74,12 @@ function ProfileEditPage() {
                         />
                     ) : (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Профиль пользователя</h3>
-                            <p><strong>ID:</strong> {user.id}</p>
-                            <p><strong>Имя пользователя:</strong> {user.username}</p>
-                            <p><strong>Email:</strong> {user.email}</p>
-                            <p><strong>Имя:</strong> {user.firstName || "Не указано"}</p>
-                            <p><strong>Фамилия:</strong> {user.lastName || "Не указано"}</p>
-                            <p><strong>Роли:</strong> {user.roles.join(", ") || "Нет ролей"}</p>
+                            <InfoItem label="Имя пользователя" value={user.username} />
+                            <InfoItem label="Электронная почта" value={user.email} />
+                            <InfoItem label="Имя" value={user.firstName || "Не указано"} />
+                            <InfoItem label="Фамилия" value={user.lastName || "Не указано"} />
+                            <InfoItem label="Роли" value={user.roles.join(", ") || "Нет ролей"} />
+                            
                         </div>
                     )}
                 </div>
