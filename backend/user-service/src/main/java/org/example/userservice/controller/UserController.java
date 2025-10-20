@@ -36,7 +36,8 @@ public class UserController {
             @Parameter(description = "Sorting criteria in the format: property,(asc|desc)") @RequestParam(defaultValue = "username,asc") String sort,
             @Parameter(description = "Filter by username (case-insensitive contains)") @RequestParam(required = false) String username,
             @Parameter(description = "Filter by email (case-insensitive contains)") @RequestParam(required = false) String email,
-            @Parameter(description = "Filter by role") @RequestParam(required = false) String role) {
+            @Parameter(description = "Filter by role") @RequestParam(required = false) String role)
+    {
         
         log.info("Getting users with pagination - page: {}, size: {}, sort: {}, username: {}, email: {}, role: {}", 
                 page, size, sort, username, email, role);
@@ -49,7 +50,8 @@ public class UserController {
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Get users", description = "Returns a list of users")
-    public ResponseEntity<List<UserResponse>> getAllUsersList() {
+    public ResponseEntity<List<UserResponse>> getAllUsersList()
+    {
         log.info("Getting all users");
         List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);

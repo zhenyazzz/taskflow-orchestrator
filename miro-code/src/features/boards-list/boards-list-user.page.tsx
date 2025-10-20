@@ -10,12 +10,12 @@ import {
     UsersListLayoutContent,
     UsersListLayoutFilters,
     UsersListLayoutHeader,
-} from "./ui/user/users-list-layout";
+} from "../users/ui/users-list-layout.tsx";
 import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
-import { UsersSortSelect } from "./ui/user/users-sort-select";
-import { UsersSearchInput } from "./ui/user/users-search-input";
-import { UsersStatusFilterSelect } from "./ui/user/users-status-filter-select";
-import { UsersRoleFilterSelect } from "./ui/user/users-role-filter-select";
+import { UsersSortSelect } from "../users/ui/users-sort-select.tsx";
+import { UsersSearchInput } from "../users/ui/users-search-input.tsx";
+import { UsersStatusFilterSelect } from "../users/ui/users-status-filter-select.tsx";
+import { UsersRoleFilterSelect } from "../users/ui/users-role-filter-select.tsx";
 import { UserItem } from "./compose/user-item";
 import { UserCard } from "./compose/user-card";
 import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar";
@@ -26,7 +26,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/shared/ui/kit/dialog";
-import { CreateUserForm } from "./ui/user/create-user-form";
+import { CreateUserForm } from "../users/ui/create-user-form.tsx";
 import { Link } from "react-router-dom";
 import { ApiSchemas } from "@/shared/api/schema";
 
@@ -70,7 +70,9 @@ function UsersListPage() {
     }
 
     return (
+
         <UsersListLayout
+
             sidebar={<BoardsSidebar />}
             header={
                 <UsersListLayoutHeader
