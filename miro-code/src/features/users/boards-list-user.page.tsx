@@ -1,34 +1,36 @@
 import { useState, useEffect, RefObject } from "react";
-import { Button } from "@/shared/ui/kit/button";
+import { Button } from "@/shared/ui/kit/button.tsx";
 import { PlusIcon } from "lucide-react";
-import { useUsersList } from "./model/user/use-users-list";
-import { useUsersFilters } from "./model/task/use-users-filters";
-import { useDebouncedValue } from "@/shared/lib/react";
-import { useCreateUser } from "./model/user/use-create-user";
+import { useUsersList } from "../boards-list/model/user/use-users-list.ts";
+import { useUsersFilters } from "../boards-list/model/task/use-users-filters.ts";
+import { useDebouncedValue } from "@/shared/lib/react.ts";
+import { useCreateUser } from "../boards-list/model/user/use-create-user.ts";
 import {
     UsersListLayout,
     UsersListLayoutContent,
     UsersListLayoutFilters,
     UsersListLayoutHeader,
-} from "../users/ui/users-list-layout.tsx";
-import { ViewMode, ViewModeToggle } from "./ui/view-mode-toggle";
-import { UsersSortSelect } from "../users/ui/users-sort-select.tsx";
-import { UsersSearchInput } from "../users/ui/users-search-input.tsx";
-import { UsersStatusFilterSelect } from "../users/ui/users-status-filter-select.tsx";
-import { UsersRoleFilterSelect } from "../users/ui/users-role-filter-select.tsx";
-import { UserItem } from "./compose/user-item";
-import { UserCard } from "./compose/user-card";
-import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar";
+} from "./ui/users-list-layout.tsx";
+import { ViewMode, ViewModeToggle } from "../boards-list/ui/view-mode-toggle.tsx";
+import { UsersSortSelect } from "./ui/users-sort-select.tsx";
+import { UsersSearchInput } from "./ui/users-search-input.tsx";
+import { UsersStatusFilterSelect } from "./ui/users-status-filter-select.tsx";
+import { UsersRoleFilterSelect } from "./ui/users-role-filter-select.tsx";
+import { UserItem } from "../boards-list/compose/user-item.tsx";
+import { UserCard } from "../boards-list/compose/user-card.tsx";
+import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/shared/ui/kit/dialog";
-import { CreateUserForm } from "../users/ui/create-user-form.tsx";
+} from "@/shared/ui/kit/dialog.tsx";
+import { CreateUserForm } from "./ui/create-user-form.tsx";
 import { Link } from "react-router-dom";
 import { ApiSchemas } from "@/shared/api/schema";
+import {useDeleteUser} from "@/features/users/model/use-delete-user.ts";
+
 
 function UsersListPage() {
     const usersFilters = useUsersFilters();
@@ -37,6 +39,16 @@ function UsersListPage() {
         username: useDebouncedValue(usersFilters.search, 300),
         role: usersFilters.role as "ROLE_USER" | "ROLE_ADMIN" | null,
     });
+
+    // ✅ ХУК УДАЛЕНИЯ
+    const { deleteUser, isPending: isDeleting } = useDeleteUser();
+    const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+
+    const handleDelete = (userId: string) => {
+        console.log(userId);
+        setDeletingUserId(userId);
+        deleteUser(userId);
+    };
 
     const createUserMutation = useCreateUser();
     const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -69,10 +81,33 @@ function UsersListPage() {
         return <div>Error loading users: {usersQuery.error?.message}</div>;
     }
 
+    // ✅ ФУНКЦИИ РЕНДЕРА С ПЕРЕДАЧЕЙ УДАЛЕНИЯ
+    const renderList = () =>
+        usersQuery.users.map((user) => (
+            <Link key={user.id} to={`/users/${user.id}`}>
+                <UserItem
+                    user={user}
+                    onDelete={handleDelete}
+                    isDeleting={deletingUserId === user.id && isDeleting}
+                    className="mb-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                />
+            </Link>
+        ));
+
+    const renderGrid = () =>
+        usersQuery.users.map((user) => (
+            <Link key={user.id} to={`/users/${user.id}`}>
+                <UserCard
+                    user={user}
+                    onDelete={handleDelete}
+                    isDeleting={deletingUserId === user.id && isDeleting}
+                    className="mb-4 cursor-pointer hover:shadow-md hover:bg-gray-50 transition-all"
+                />
+            </Link>
+        ));
+
     return (
-
         <UsersListLayout
-
             sidebar={<BoardsSidebar />}
             header={
                 <UsersListLayoutHeader
@@ -141,26 +176,8 @@ function UsersListPage() {
                 cursorRef={usersQuery.cursorRef as RefObject<HTMLDivElement>}
                 hasCursor={usersQuery.hasNextPage}
                 mode={viewMode}
-                renderList={() =>
-                    usersQuery.users.map((user) => (
-                        <Link key={user.id} to={`/users/${user.id}`}>
-                            <UserItem
-                                user={user}
-                                className="mb-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                            />
-                        </Link>
-                    ))
-                }
-                renderGrid={() =>
-                    usersQuery.users.map((user) => (
-                        <Link key={user.id} to={`/users/${user.id}`}>
-                            <UserCard
-                                user={user}
-                                className="mb-4 cursor-pointer hover:shadow-md hover:bg-gray-50 transition-all"
-                            />
-                        </Link>
-                    ))
-                }
+                renderList={renderList}
+                renderGrid={renderGrid}
             />
         </UsersListLayout>
     );

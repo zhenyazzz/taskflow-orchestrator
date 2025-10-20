@@ -1,15 +1,14 @@
 import { UserResponse } from "@/shared/api/types";
 import { Button } from "@/shared/ui/kit/button.tsx";
-import { useDeleteUser } from "../model/user/use-delete-user.ts";
 
 interface UserItemProps {
     user: UserResponse;
+    onDelete: (userId: string) => void;
+    isDeleting?: boolean;
     className?: string;
 }
 
-export function UserItem({ user, className }: UserItemProps) {
-    const deleteUser = useDeleteUser();
-
+export function UserItem({ user, onDelete, isDeleting, className }: UserItemProps) {
     return (
         <div className={`flex justify-between items-center p-4 border rounded-lg ${className}`}>
             <div>
@@ -20,13 +19,14 @@ export function UserItem({ user, className }: UserItemProps) {
             </div>
             <Button
                 variant="destructive"
-                disabled={deleteUser.isPending}
+                disabled={isDeleting}
                 onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    deleteUser.deleteUser(user.id);
+                    onDelete(user.id);
                 }}
             >
-                Удалить
+                {isDeleting ? 'Удаление...' : 'Удалить'}
             </Button>
         </div>
     );

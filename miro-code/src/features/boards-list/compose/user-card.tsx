@@ -1,15 +1,14 @@
 import { UserResponse } from "@/shared/api/types";
 import { Button } from "@/shared/ui/kit/button.tsx";
-import { useDeleteUser } from "../model/user/use-delete-user.ts";
 
 interface UserCardProps {
     user: UserResponse;
+    onDelete: (userId: string) => void;
+    isDeleting?: boolean;
     className?: string;
 }
 
-export function UserCard({ user, className }: UserCardProps) {
-    const deleteUser = useDeleteUser();
-
+export function UserCard({ user, onDelete, isDeleting, className }: UserCardProps) {
     return (
         <div className={`p-4 border rounded-lg shadow-sm ${className}`}>
             <h3 className="font-semibold">{user.username}</h3>
@@ -18,14 +17,15 @@ export function UserCard({ user, className }: UserCardProps) {
             <p className="text-sm">Статус: {user.status}</p>
             <Button
                 variant="destructive"
-                disabled={deleteUser.isPending}
+                disabled={isDeleting}
                 onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    deleteUser.deleteUser(user.id);
+                    onDelete(user.id);
                 }}
                 className="mt-2 w-full"
             >
-                Удалить
+                {isDeleting ? 'Удаление...' : 'Удалить'}
             </Button>
         </div>
     );

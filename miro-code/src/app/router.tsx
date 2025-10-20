@@ -44,7 +44,7 @@ export const router = createBrowserRouter([
           {
             path: ROUTES.USER_BOARDS,
             lazy: () =>
-                import("@/features/boards-list/boards-list-user.page"),
+                import("@/features/users/boards-list-user.page.tsx"),
           },
           {
             path: ROUTES.BOARD,
