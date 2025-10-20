@@ -12,7 +12,7 @@ interface CreateUserFormProps {
 }
 
 export function CreateUserForm({ formData, setFormData, onClose }: CreateUserFormProps) {
-  const { createUser, isPending, errorMessage } = useCreateUser();
+  const { createUser, isPending, errorMessage } = useCreateUser(onClose);
 
   const handleSubmit = (e: FormEvent) => {
     console.log("📝 Form data:", JSON.stringify(formData, null, 2));

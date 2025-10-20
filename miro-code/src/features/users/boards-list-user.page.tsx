@@ -77,11 +77,6 @@ function UsersListPage() {
         }
     }, [createUserMutation.isSuccess]);
 
-    if (usersQuery.error as Error | null) {
-        return <div>Error loading users: {usersQuery.error?.message}</div>;
-    }
-
-    // ✅ ФУНКЦИИ РЕНДЕРА С ПЕРЕДАЧЕЙ УДАЛЕНИЯ
     const renderList = () =>
         usersQuery.users.map((user) => (
             <Link key={user.id} to={`/users/${user.id}`}>
@@ -128,7 +123,6 @@ function UsersListPage() {
                                 <CreateUserForm
                                     formData={formData}
                                     setFormData={setFormData}
-                                    mutation={createUserMutation}
                                     onClose={() => setIsOpen(false)}
                                 />
                             </DialogContent>
@@ -173,7 +167,7 @@ function UsersListPage() {
                 isEmpty={usersQuery.users.length === 0}
                 isPending={usersQuery.isPending}
                 isPendingNext={usersQuery.isFetchingNextPage}
-                cursorRef={usersQuery.cursorRef as RefObject<HTMLDivElement>}
+                cursorRef={usersQuery.cursorRef as unknown as RefObject<HTMLDivElement>}
                 hasCursor={usersQuery.hasNextPage}
                 mode={viewMode}
                 renderList={renderList}

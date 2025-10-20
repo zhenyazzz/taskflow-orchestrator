@@ -8,17 +8,18 @@ import { ApiSchemas } from "@/shared/api/schema/index.ts";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
 import { Label } from "@/shared/ui/kit/label";
 import { AlertCircle } from "lucide-react";
+import { useUpdateUser } from "../model/use-update-user"; // Uncommented
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/shared/model/routes";
 
 interface EditUserFormProps {
   user: ApiSchemas["UserResponse"];
   onCancel: () => void;
-  onSuccess: () => void;
-  isPending: boolean;
-  error: Error | null;
-  updateUser: (body: ApiSchemas["UpdateUserRequest"]) => void;
+  // onSuccess: () => void; // Removed, as we navigate directly
+  // Removed isPending, error, updateUser from props
 }
 
-export function EditUserForm({ user, onCancel, onSuccess, isPending, error, updateUser }: EditUserFormProps) {
+export function EditUserForm({ user, onCancel }: EditUserFormProps) {
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ApiSchemas["UpdateUserRequest"]>({
     defaultValues: {
       email: user.email,
@@ -29,9 +30,19 @@ export function EditUserForm({ user, onCancel, onSuccess, isPending, error, upda
     },
   });
 
+  const navigate = useNavigate();
+
+  const { mutate: updateUser, isPending, error } = useUpdateUser(user.id, () => {
+    navigate(ROUTES.USER_BOARDS); // Navigate directly to user list
+  });
+
   const onSubmit = (data: ApiSchemas["UpdateUserRequest"]) => {
-    updateUser(data);
-    onSuccess();
+    updateUser({
+      params: {
+        path: { id: user.id },
+      },
+      body: data,
+    });
   };
 
   useEffect(() => {
@@ -45,7 +56,7 @@ export function EditUserForm({ user, onCancel, onSuccess, isPending, error, upda
   }, [user, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form key={user.id} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="w-4 h-4" />

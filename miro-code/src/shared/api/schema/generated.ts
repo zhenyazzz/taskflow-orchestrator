@@ -573,7 +573,7 @@ export interface paths {
          * Delete my profile
          * @description Delete profile of the authenticated user
          */
-        post: {
+        delete: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -592,7 +592,6 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
             };
         };
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;

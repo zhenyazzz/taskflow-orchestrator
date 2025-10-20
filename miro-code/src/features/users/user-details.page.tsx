@@ -14,7 +14,6 @@ import { useUser } from "@/features/users/model/use-user";
 import { useDeleteUser } from "@/features/users/model/use-delete-user";
 import { EditUserForm } from "@/features/users/ui/edit-user-form";
 import { InfoItem } from "@/shared/ui/kit/info-item";
-import { useUpdateUser } from "@/features/users/model/use-update-user";
 
 function UserDetailsPage() {
   const params = useParams<PathParams[typeof ROUTES.USER_DETAILS]>();
@@ -22,23 +21,10 @@ function UserDetailsPage() {
   const userId = params.id!;
 
   const { data: user, isLoading, isError } = useUser(userId);
-  const deleteUserMutation = useDeleteUser();
-  const updateUserMutation = useUpdateUser(userId);
+  const deleteUserMutation = useDeleteUser(
+    () => navigate(ROUTES.USER_BOARDS),
+  );
   const [isEditing, setIsEditing] = useState(false);
-
-  const handleEditSuccess = () => {
-    setIsEditing(false);
-  };
-
-  const handleDeleteUser = () => {
-    if (window.confirm("Вы уверены, что хотите удалить этого пользователя?")) {
-      deleteUserMutation.mutate({ params: { path: { id: userId } } }, {
-        onSuccess: () => {
-          navigate("/users");
-        },
-      });
-    }
-  };
 
   const renderLoading = () => (
     <div className="flex justify-center items-center py-12">
@@ -104,7 +90,7 @@ function UserDetailsPage() {
                     Редактировать
                   </Button>
                   <Button
-                    onClick={handleDeleteUser}
+                    onClick={() => deleteUserMutation.deleteUser(userId)}
                     variant="outline"
                     className="transition-colors hover:bg-red-500/10 hover:text-red-600"
                     disabled={deleteUserMutation.isPending}
@@ -127,12 +113,12 @@ function UserDetailsPage() {
             renderError()
           ) : (
             <>
-              {deleteUserMutation.isError && (
+              {deleteUserMutation.errorMessage && (
                 <Alert variant="destructive" className="mb-6">
                   <AlertCircle className="w-4 h-4" />
                   <AlertTitle>Ошибка</AlertTitle>
                   <AlertDescription>
-                    Ошибка при удалении пользователя
+                    {deleteUserMutation.errorMessage || "Ошибка при удалении пользователя"}
                   </AlertDescription>
                 </Alert>
               )}
@@ -141,10 +127,6 @@ function UserDetailsPage() {
                 <EditUserForm
                   user={user}
                   onCancel={() => setIsEditing(false)}
-                  onSuccess={handleEditSuccess}
-                  isPending={updateUserMutation.isPending}
-                  error={updateUserMutation.error as Error | null}
-                  updateUser={(body) => updateUserMutation.mutate({ params: { path: { id: userId } }, body })}
                 />
               ) : (
                 <div className="space-y-6">

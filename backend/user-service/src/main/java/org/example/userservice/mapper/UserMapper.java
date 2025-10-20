@@ -47,4 +47,4 @@ public interface UserMapper {
     @Mapping(target = "password", source = "password")
     UserProfileUpdatedEvent toUserProfileUpdatedEvent(User user, String password);
 
-} 
+}

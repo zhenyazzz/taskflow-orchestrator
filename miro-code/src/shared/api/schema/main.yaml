@@ -66,7 +66,7 @@ paths:
       $ref: "./endpoints/me.yaml#/getMyProfile"
     put:
       $ref: "./endpoints/me.yaml#/updateMyProfile"
-    post:
+    delete:
       $ref: "./endpoints/me.yaml#/deleteMyProfile"
 
 

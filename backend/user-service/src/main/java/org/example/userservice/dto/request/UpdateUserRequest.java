@@ -12,8 +12,6 @@ public record UpdateUserRequest(
     String username,
 
         @Schema(description = "User password", example = "1234")
-        @NotBlank(message = "Password cannot be blank")
-        @Size(max = 100, message = "First name must be at most 100 characters")
     String password,
 
     @Schema(description = "User email", example = "john.doe@example.com")

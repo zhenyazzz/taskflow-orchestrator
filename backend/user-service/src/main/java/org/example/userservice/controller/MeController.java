@@ -41,7 +41,7 @@ public class MeController {
         return ResponseEntity.ok(userService.updateMyProfile(principal.getUUID(), request));
     }
 
-    @PostMapping
+    @DeleteMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete my profile", description = "Delete profile of the authenticated user")
     public ResponseEntity<Void> deleteMyProfile(@AuthenticationPrincipal UserDetailsImpl principal) {

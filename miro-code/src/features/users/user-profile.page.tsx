@@ -8,19 +8,18 @@ import {
     UserPageLayoutHeader,
 } from "@/features/users/ui/user-page-layout";
 import { EditProfileForm } from "@/features/users/edit-profile-form";
-import { useUpdateUser } from "@/features/boards-list/model/use-update-user";
 import { useUserProfile } from "./model/use-user-profile";
 import { InfoItem } from "@/shared/ui/kit/info-item";
 import { ArrowLeft, Edit3, Loader2 } from "lucide-react";
+import { useUpdateUser } from "@/features/users/model/use-update-user";
 
 function ProfileEditPage() {
     const { data: user, isLoading: isUserLoading } = useUserProfile();
     const [isEditing, setIsEditing] = useState(false); // Форма редактирования не открыта по умолчанию
-    const { mutate: updateUser, isPending: isUpdatePending, error: updateError } = useUpdateUser();
-
-    const handleEditSuccess = () => {
-        setIsEditing(false);
-    };
+    const { mutate: updateUser, isPending: isUpdatePending, error: updateError } = useUpdateUser(
+        user?.id || "", // userId
+        () => setIsEditing(false), // onSuccess
+    );
 
     const handleCancel = () => {
         setIsEditing(false);
@@ -67,10 +66,10 @@ function ProfileEditPage() {
                         <EditProfileForm
                             user={user}
                             onCancel={handleCancel}
-                            onSuccess={handleEditSuccess}
                             isPending={isUpdatePending}
-                            error={updateError}
-                            updateUser={updateUser}
+                            error={updateError as Error | null}
+                            updateUser={(args) => updateUser(args.body, { params: { path: { id: user?.id || "" } } })}
+                            key={user.id}
                         />
                     ) : (
                         <div className="space-y-4">
