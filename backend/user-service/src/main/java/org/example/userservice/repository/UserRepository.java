@@ -26,22 +26,24 @@ public interface UserRepository extends JpaRepository<User, UUID> {
            SELECT u.* FROM users u
            LEFT JOIN user_roles ur ON u.id = ur.user_id
            WHERE (:username IS NULL OR LOWER(CAST(u.username AS TEXT)) LIKE LOWER(CONCAT('%', :username, '%'))) AND
-                 (:email IS NULL OR LOWER(CAST(u.email AS TEXT)) LIKE LOWER(CONCAT('%', :email, '%'))) AND
-                 (:role IS NULL OR :role = ur.roles)
+                 (:role IS NULL OR :role = ur.roles) AND
+                 (:status IS NULL OR :status = u.status)
            GROUP BY u.id
+           ORDER BY :orderBy
            """, 
            countQuery = """
            SELECT count(DISTINCT u.id) FROM users u
            LEFT JOIN user_roles ur ON u.id = ur.user_id
            WHERE (:username IS NULL OR LOWER(CAST(u.username AS TEXT)) LIKE LOWER(CONCAT('%', :username, '%'))) AND
-                 (:email IS NULL OR LOWER(CAST(u.email AS TEXT)) LIKE LOWER(CONCAT('%', :email, '%'))) AND
-                 (:role IS NULL OR :role = ur.roles)
+                 (:role IS NULL OR :role = ur.roles) AND
+                 (:status IS NULL OR :status = u.status)
            """,
            nativeQuery = true)
     Page<User> findUsersWithFilters(
         @Param("username") String username,
-        @Param("email") String email, 
         @Param("role") String role,
+        @Param("status") String status,
+        @Param("orderBy") String orderBy,
         Pageable pageable);
 
     @Modifying

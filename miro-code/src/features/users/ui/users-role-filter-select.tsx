@@ -13,8 +13,8 @@ export function UsersRoleFilterSelect({ value, onValueChange }: UsersRoleFilterS
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="all">Все роли</SelectItem>
-                <SelectItem value="USER">Пользователь</SelectItem>
-                <SelectItem value="ADMIN">Администратор</SelectItem>
+                <SelectItem value="ROLE_USER">Пользователь</SelectItem>
+                <SelectItem value="ROLE_ADMIN">Администратор</SelectItem>
             </SelectContent>
         </Select>
     );

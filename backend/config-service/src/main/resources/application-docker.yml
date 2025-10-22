@@ -1,4 +1,28 @@
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/zhenyazzz/taskflow-orchestrator-config-repo.git
+          default-label: main
+          clone-on-start: true
+          force-pull: true
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret: ${JWT_SECRET:aXv7j3tR8kL9mQp2sV5y7x9A1zC4E7H0bW3cZ6u8oP1dF4rT5nJ9iK2lO0q}

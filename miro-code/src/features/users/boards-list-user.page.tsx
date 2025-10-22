@@ -38,6 +38,7 @@ function UsersListPage() {
         sort: usersFilters.sort,
         username: useDebouncedValue(usersFilters.search, 300),
         role: usersFilters.role as "ROLE_USER" | "ROLE_ADMIN" | null,
+        status: usersFilters.status as "ACTIVE" | "INACTIVE" | "PENDING" | null,
     });
 
     // ✅ ХУК УДАЛЕНИЯ

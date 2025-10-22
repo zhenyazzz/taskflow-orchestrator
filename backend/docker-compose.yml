@@ -1,16 +1,22 @@
 version: "3.9"
 services:
-  vault:
-    image: vault:1.13.3
-    container_name: vault
-    ports:
-      - "8200:8200"
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: root
-      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-    cap_add:
-      - IPC_LOCK
-
+  # vault:
+  #   image: vault:1.13.3
+  #   container_name: vault
+  #   ports:
+  #     - "8200:8200"
+  #   environment:
+  #     VAULT_DEV_ROOT_TOKEN_ID: root
+  #     VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+  #     VAULT_ADDR: http://localhost:8200
+  #   cap_add:
+  #     - IPC_LOCK
+  #   command: ["vault", "server", "-dev", "-dev-root-token-id=root"]  
+    
+# docker exec vault sh -c "export VAULT_ADDR=`"http://127.0.0.1:8200`" && vault secrets enable -path=secret kv"
+# docker exec vault sh -c "export VAULT_ADDR=`"http://127.0.0.1:8200`" && vault kv put secret/application JWT_SECRET_KEY=your-super-secret-jwt-key"
+# docker exec docker exec vault sh -c 'export VAULT_ADDR="http://127.0.0.1:8200" && vault kv put secret/application JWT_SECRET_KEY="aXv7j3tR8kL9mQp2sV5y7x9A1zC4E7H0bW3cZ6u8oP1dF4rT5nJ9iK2lO0q"'
+#     docker-compose up -d --build config-service
   postgres:
     image: postgres:15
     container_name: postgres
@@ -111,22 +117,21 @@ services:
     volumes:
       - redis_data:/data
 
-  # auth-service:
-  #   build:
-  #     context: ./auth-service
-  #     dockerfile: Dockerfile
-  #   container_name: auth-service
-  #   hostname: auth-service
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - config-service
-  #     - eureka-service
-  #     - kafka
-  #     - postgres
-  #     - vault
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    hostname: auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-service
+      - eureka-service
+      - kafka
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   # user-service:
   #   build:

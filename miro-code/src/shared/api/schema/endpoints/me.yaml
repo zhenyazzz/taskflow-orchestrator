@@ -23,7 +23,7 @@ schemas:
         type: array
         items:
           type: string
-          enum: [USER, ADMIN]
+          enum: [ROLE_USER, ROLE_ADMIN]
 
 getMyProfile:
   summary: Get my profile

@@ -51,24 +51,38 @@ public class UserService {
                 .toList();
     }
 
-    public Page<UserResponse> getUsersWithPagination(int page, int size, String sort, String username, String email, String role) {
-        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+    public Page<UserResponse> getUsersWithPagination(int page, int size, String sort, String username, String role, String status) {
+        Pageable pageable = PageRequest.of(page, size, Sort.unsorted());
         
-        Page<User> users = userRepository.findUsersWithFilters(username, email, role, pageable);
+        String orderByClause = convertSortToOrderByClause(sort);
+
+        Page<User> users = userRepository.findUsersWithFilters(username, role, status, orderByClause, pageable);
         return users.map(userMapper::toUserResponse);
     }
-    
-    private Sort parseSort(String sort) {
+
+    private String convertSortToOrderByClause(String sort) {
         try {
             String[] sortParams = sort.split(",");
             String property = sortParams[0];
-            Sort.Direction direction = sortParams.length > 1 && "desc".equalsIgnoreCase(sortParams[1]) 
-                ? Sort.Direction.DESC 
-                : Sort.Direction.ASC;
-            return Sort.by(direction, property);
+            String direction = sortParams.length > 1 && "desc".equalsIgnoreCase(sortParams[1])
+                ? "DESC"
+                : "ASC";
+            
+            if (!isValidSortProperty(property)) {
+                log.warn("Invalid sort property provided: {}. Defaulting to username.", property);
+                property = "username";
+                direction = "ASC";
+            }
+
+            return String.format("%s %s", property, direction);
         } catch (Exception e) {
-            return Sort.by(Sort.Direction.ASC, "username");
+            log.warn("Error parsing sort parameter: {}. Defaulting to username ASC.", sort, e);
+            return "username ASC";
         }
+    }
+
+    private boolean isValidSortProperty(String property) {
+        return List.of("username", "email", "firstName", "lastName", "createdAt", "updatedAt", "status").contains(property);
     }
 
     public UserResponse getUserById(UUID id) {

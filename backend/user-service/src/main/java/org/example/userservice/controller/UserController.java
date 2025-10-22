@@ -35,14 +35,14 @@ public class UserController {
             @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sorting criteria in the format: property,(asc|desc)") @RequestParam(defaultValue = "username,asc") String sort,
             @Parameter(description = "Filter by username (case-insensitive contains)") @RequestParam(required = false) String username,
-            @Parameter(description = "Filter by email (case-insensitive contains)") @RequestParam(required = false) String email,
-            @Parameter(description = "Filter by role") @RequestParam(required = false) String role)
+            @Parameter(description = "Filter by role") @RequestParam(required = false) String role,
+            @Parameter(description = "Filter by status") @RequestParam(required = false) String status)
     {
         
-        log.info("Getting users with pagination - page: {}, size: {}, sort: {}, username: {}, email: {}, role: {}", 
-                page, size, sort, username, email, role);
+        log.info("Getting users with pagination - page: {}, size: {}, sort: {}, username: {}, role: {}, status: {}", 
+                page, size, sort, username, role, status);
         
-        Page<UserResponse> users = userService.getUsersWithPagination(page, size, sort, username, email, role);
+        Page<UserResponse> users = userService.getUsersWithPagination(page, size, sort, username, role, status);
         return ResponseEntity.ok(users);
     }
 

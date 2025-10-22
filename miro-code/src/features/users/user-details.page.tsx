@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PathParams, ROUTES } from "@/shared/model/routes";
-import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, UserCog } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
 import { BoardsSidebar } from "@/features/boards-list/ui/task/boards-sidebar";
@@ -14,6 +14,7 @@ import { useUser } from "@/features/users/model/use-user";
 import { useDeleteUser } from "@/features/users/model/use-delete-user";
 import { EditUserForm } from "@/features/users/ui/edit-user-form";
 import { InfoItem } from "@/shared/ui/kit/info-item";
+import { ManageUserRolesDialog } from "@/features/users/ui/manage-user-roles-dialog";
 
 function UserDetailsPage() {
   const params = useParams<PathParams[typeof ROUTES.USER_DETAILS]>();
@@ -25,6 +26,7 @@ function UserDetailsPage() {
     () => navigate(ROUTES.USER_BOARDS),
   );
   const [isEditing, setIsEditing] = useState(false);
+  const [isManagingRoles, setIsManagingRoles] = useState(false);
 
   const renderLoading = () => (
     <div className="flex justify-center items-center py-12">
@@ -88,6 +90,14 @@ function UserDetailsPage() {
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Редактировать
+                  </Button>
+                  <Button
+                    onClick={() => setIsManagingRoles(true)}
+                    variant="outline"
+                    className="transition-colors hover:bg-blue-500/10 hover:text-blue-600"
+                  >
+                    <UserCog className="w-4 h-4 mr-2" />
+                    Изменить роли
                   </Button>
                   <Button
                     onClick={() => deleteUserMutation.deleteUser(userId)}
@@ -166,6 +176,15 @@ function UserDetailsPage() {
           )}  
         </div>
       </UserPageLayoutContent>
+      {user && (
+        <ManageUserRolesDialog
+          userId={userId}
+          username={user.username}
+          currentRoles={user.roles}
+          isOpen={isManagingRoles}
+          onClose={() => setIsManagingRoles(false)}
+        />
+      )}
     </UserPageLayout>
   );
 }

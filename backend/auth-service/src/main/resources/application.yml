@@ -52,12 +52,6 @@ spring:
     listener:
       ack-mode: record
 
-# kafka:
-#   topics:
-#     user-registered: "auth.user.registered"
-#     user-login-success: "auth.login.success"
-#     user-login-failed: "auth.login.failed"
-#     user-role-update: "auth.role.update"
 
 springdoc:
   api-docs:

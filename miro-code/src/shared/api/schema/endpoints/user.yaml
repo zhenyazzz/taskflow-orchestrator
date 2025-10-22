@@ -148,16 +148,17 @@ getAllUsers:
         default: ""
       description: Filter by username (case-insensitive contains)
     - in: query
-      name: email
-      schema:
-        type: string
-      description: Filter by email (case-insensitive contains)
-    - in: query
       name: role
       schema:
         type: string
         enum: [ROLE_USER, ROLE_ADMIN]
       description: Filter by role
+    - in: query
+      name: status
+      schema:
+        type: string
+        enum: [ACTIVE, INACTIVE, PENDING]
+      description: Filter by status
   responses:
     '200':
       description: Paginated list of users

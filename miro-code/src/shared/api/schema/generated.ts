@@ -297,10 +297,10 @@ export interface paths {
                     sort?: string;
                     /** @description Filter by username (case-insensitive contains) */
                     username?: string;
-                    /** @description Filter by email (case-insensitive contains) */
-                    email?: string;
                     /** @description Filter by role */
                     role?: "ROLE_USER" | "ROLE_ADMIN";
+                    /** @description Filter by status */
+                    status?: "ACTIVE" | "INACTIVE" | "PENDING";
                 };
                 header?: never;
                 path?: never;
@@ -569,6 +569,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
             };
         };
+        post?: never;
         /**
          * Delete my profile
          * @description Delete profile of the authenticated user
@@ -912,7 +913,7 @@ export interface components {
             email: string;
             firstName?: string;
             lastName?: string;
-            roles: ("USER" | "ADMIN")[];
+            roles: ("ROLE_USER" | "ROLE_ADMIN")[];
         };
         Board: {
             id: string;

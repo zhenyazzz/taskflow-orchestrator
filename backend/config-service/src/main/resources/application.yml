@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: config-service
+  profiles:
+    active: default
   cloud:
     config:
       server:
@@ -11,18 +13,21 @@ spring:
           uri: https://github.com/zhenyazzz/taskflow-orchestrator-config-repo.git
           default-label: main
           clone-on-start: true
-        vault:
-          host: localhost
-          port: 8200
-          scheme: http
-          token: root
-          authentication: token
+          force-pull: true
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
 management:
   endpoints:
     web:
       exposure:
-        exclude: "*"
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
