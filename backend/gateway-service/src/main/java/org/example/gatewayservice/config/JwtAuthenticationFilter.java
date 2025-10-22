@@ -1,5 +1,6 @@
 package org.example.gatewayservice.config;
 
+import org.example.gatewayservice.util.Role;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -13,7 +14,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 import org.example.gatewayservice.util.JwtUtil;
-import org.example.events.enums.Role;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
