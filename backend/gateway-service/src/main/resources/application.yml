@@ -1,3 +1,4 @@
+
 server:
   port: 8080
 
@@ -5,53 +6,72 @@ spring:
   application:
     name: api-gateway
   config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+    import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8888}
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
-          routes:
-            - id: auth-service
-              uri: lb://auth-service
-              predicates:
-                - Path=/api/auth/**
-              filters:
-                - StripPrefix=1
-              
-            - id: user-service
-              uri: lb://user-service
-              predicates:
-                - Path=/api/me/profile
-              filters:
-                - StripPrefix=1
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Маршруты для сервисов в Docker через Eureka
+        - id: auth-service-docker
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
 
-            - id: user-service-users # Новый маршрут для /api/users/**
-              uri: lb://user-service
-              predicates:
-                - Path=/api/users/**
-              filters:
-                - StripPrefix=1
-              
-            - id: task-service
-              uri: lb://task-service
-              predicates:
-                - Path=/api/tasks/**
-                - Path=/api/me/tasks/**
-                - Path=/api/comments/**
-                - Path=/api/attachments/**
-              filters:
-                - StripPrefix=1
+        - id: user-service-docker
+          uri: lb://user-service
+          predicates:
+            - Path=/api/me/profile,/api/users/**
+          filters:
+            - StripPrefix=1
 
-            - id: analytics-service
-              uri: lb://analytics-service
-              predicates:
-                - Path=/api/analytics/**
-              filters:
-                - StripPrefix=1
+        - id: task-service-docker
+          uri: lb://task-service
+          predicates:
+            - Path=/api/tasks/**,/api/me/tasks/**,/api/comments/**,/api/attachments/**
+          filters:
+            - StripPrefix=1
+
+        - id: analytics-service-docker
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - StripPrefix=1
+
+        # Маршруты для локальных сервисов
+        - id: auth-service-local
+          uri: http://host.docker.internal:8081
+          predicates:
+            - Path=/api/auth/local/**
+          filters:
+            - StripPrefix=2
+
+        - id: user-service-local
+          uri: http://host.docker.internal:8081
+          predicates:
+            - Path=/api/me/profile/local,/api/users/local/**
+          filters:
+            - StripPrefix=2
+
+        - id: task-service-local
+          uri: http://host.docker.internal:8082
+          predicates:
+            - Path=/api/tasks/local/**,/api/me/tasks/local/**,/api/comments/local/**,/api/attachments/local/**
+          filters:
+            - StripPrefix=2
+
+        - id: analytics-service-local
+          uri: http://host.docker.internal:8083
+          predicates:
+            - Path=/api/analytics/local/**
+          filters:
+            - StripPrefix=2
+
       default-filters:
         - name: Logging
           args:
@@ -61,16 +81,13 @@ spring:
             showRequestHeaders: true
             showResponseHeaders: true
 
-
-
   main:
     web-application-type: reactive
 
 jwt:
   issuer: auth-service
 
-
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-service:8761/eureka/
