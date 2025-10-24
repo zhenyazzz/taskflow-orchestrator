@@ -11,7 +11,12 @@ export const ROUTES = {
   ANALYTIC_BOARDS: "/boards/analytic",
   USER_BOARDS: "/boards/user",
   USER_DETAILS: "/users/:id",
-  USER_PROFILE: "/profile/:id"
+  USER_PROFILE: "/profile/:id",
+  TASKS: "/tasks",
+  TASK_DETAILS: "/tasks/:id",
+  FAVORITE_TASKS: "/tasks/favorite",
+  URGENT_TASKS: "/tasks/urgent",
+  ANALYTIC_TASKS: "/tasks/analytic"
 } as const;
 
 export type PathParams = {
@@ -22,6 +27,9 @@ export type PathParams = {
     id: string;
   };
   [ROUTES.USER_PROFILE]: {
+    id: string;
+  };
+  [ROUTES.TASK_DETAILS]: {
     id: string;
   };
 };
