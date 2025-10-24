@@ -16,10 +16,10 @@ spring:
     locations: classpath:/db/migration
     clean-disabled: true
     out-of-order: false
+  config:
+    import: optional:configserver:http://config-service:8888
 eureka:
   client:
-    serviceUrl:
-      defaultZone: http://eureka-server:8761/eureka/
     registerWithEureka: true
     fetchRegistry: true
   instance:
