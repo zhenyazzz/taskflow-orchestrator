@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: auth-service
+  profiles:
+    active: dev
   jpa:
     open-in-view: false
     hibernate:

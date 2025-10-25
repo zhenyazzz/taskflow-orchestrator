@@ -58,6 +58,14 @@ export const router = createBrowserRouter([
             path: ROUTES.USER_PROFILE,
             lazy: () => import("@/features/users/user-profile.page"),
           },
+          {
+            path: ROUTES.TASKS,
+            lazy: () => import("@/features/tasks/tasks-list.page"),
+          },
+          {
+            path: ROUTES.TASK_DETAILS,
+            lazy: () => import("@/features/tasks/task-details.page"),
+          },
         ],
       },
 
@@ -71,7 +79,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTES.HOME,
-        loader: () => redirect(ROUTES.BOARDS),
+        loader: () => redirect(ROUTES.TASKS),
       },
     ],
   },

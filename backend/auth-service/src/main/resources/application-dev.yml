@@ -1,4 +1,9 @@
+server:
+  port: 8081
+
 spring:
+  application:
+    name: auth-service
   config:
     import: optional:configserver:http://localhost:8888
   datasource:
@@ -7,7 +12,7 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: localhost:9092  # Изменено с 29092 на 9092
   flyway:
     enabled: true
     url: jdbc:postgresql://localhost:5432/auth_db
@@ -19,6 +24,7 @@ spring:
     locations: classpath:/db/migration
     clean-disabled: true
     out-of-order: false
+
 eureka:
   client:
     serviceUrl:

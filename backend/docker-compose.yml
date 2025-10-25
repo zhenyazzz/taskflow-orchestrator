@@ -1,21 +1,4 @@
 services:
-  # vault:
-  #   image: vault:1.13.3
-  #   container_name: vault
-  #   ports:
-  #     - "8200:8200"
-  #   environment:
-  #     VAULT_DEV_ROOT_TOKEN_ID: root
-  #     VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-  #     VAULT_ADDR: http://localhost:8200
-  #   cap_add:
-  #     - IPC_LOCK
-  #   command: ["vault", "server", "-dev", "-dev-root-token-id=root"]  
-    
-# docker exec vault sh -c "export VAULT_ADDR=`"http://127.0.0.1:8200`" && vault secrets enable -path=secret kv"
-# docker exec vault sh -c "export VAULT_ADDR=`"http://127.0.0.1:8200`" && vault kv put secret/application JWT_SECRET_KEY=your-super-secret-jwt-key"
-# docker exec docker exec vault sh -c 'export VAULT_ADDR="http://127.0.0.1:8200" && vault kv put secret/application JWT_SECRET_KEY="aXv7j3tR8kL9mQp2sV5y7x9A1zC4E7H0bW3cZ6u8oP1dF4rT5nJ9iK2lO0q"'
-#     docker-compose up -d --build config-service
   postgres:
     image: postgres:15
     container_name: postgres
@@ -27,7 +10,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    networks:
+      - app-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -37,6 +21,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -69,6 +55,15 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_PORT=8761
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  # Даем время на запуск Spring Boot
+    networks:
+      - app-network
 
   config-service:
     build:
@@ -82,6 +77,9 @@ services:
       - eureka-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    networks:
+      - app-network
 
   mongo:
     image: mongo:6.0
@@ -94,20 +92,24 @@ services:
       MONGO_INITDB_DATABASE: taskdb
     volumes:
       - mongo_data:/data/db
-  # // docker compose exec -it mongo mongosh -u root -p password --authenticationDatabase admin 
+    networks:
+      - app-network
+
   minio:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "9000:9000"  
-      - "9001:9001"   
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-      
+    networks:
+      - app-network
+
   redis:
     image: redis:7.2.5-alpine
     container_name: redis
@@ -115,7 +117,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-
+    networks:
+      - app-network
 
   api-gateway:
     build:
@@ -127,10 +130,16 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+      - CONFIG_SERVER_URL=http://config-service:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       - eureka-service
       - config-service
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
   auth-service:
     build:
@@ -148,46 +157,44 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    networks:
+      - app-network
 
-  # user-service:
-  #   build:
-  #     context: ./user-service
-  #     dockerfile: Dockerfile
-  #   container_name: user-service
-  #   hostname: user-service
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - config-service
-  #     - eureka-service
-  #     - kafka
-  #     - postgres
-  #     - vault
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
-  
-  # task-service:
-  #   build:
-  #     context: ./task-service
-  #     dockerfile: Dockerfile
-  #   container_name: task-service
-  #   hostname: task-service
-  #   ports:
-  #     - "8082:8082"
-  #   depends_on:
-  #     - config-service
-  #     - eureka-service
-  #     - kafka
-  #     - postgres
-  #     - vault
-  #     - mongo
-  #     - minio
-  #     - redis
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    hostname: user-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_started
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/  # Добавьте эту строку
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   mongo_data:
   minio_data:
   redis_data:
+
+networks:
+  app-network:
+    driver: bridge

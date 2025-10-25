@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8082
 
 spring:
   profiles:
@@ -50,11 +50,8 @@ spring:
     listener:
       ack-mode: record
 
-    topics:
-      user-created: "user-created-topic"
-      user-deleted: "user-deleted-topic"
-      user-profile-updated: "user-profile-updated-topic"
-      user-role-updated: "user-role-updated-topic"
+jwt:
+  issuer: auth-service
 
 springdoc:
   api-docs:

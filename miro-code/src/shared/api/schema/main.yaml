@@ -118,47 +118,47 @@ paths:
   #   delete:
   #     $ref: "./endpoints/comments.yaml#/deleteComment"
 
-  # /v1/tasks:
-  #   get:
-  #     $ref: "./tasks.yaml#/getTasks"
-  #   post:
-  #     $ref: "./tasks.yaml#/createTask"
+  /tasks:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTasks"
+    post:
+      $ref: "./endpoints/tasks.yaml#/createTask"
 
-  # /v1/tasks/all:
-  #   get:
-  #     $ref: "./tasks.yaml#/getAllTasks"
+  /tasks/all:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getAllTasks"
 
-  # /v1/tasks/bulk:
-  #   post:
-  #     $ref: "./tasks.yaml#/createBulkTasks"
+  /tasks/bulk:
+    post:
+      $ref: "./endpoints/tasks.yaml#/createBulkTasks"
 
-  # /v1/tasks/due-soon:
-  #   get:
-  #     $ref: "./tasks.yaml#/getDueSoonTasks"
+  /tasks/due-soon:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getDueSoonTasks"
 
-  # /v1/tasks/{id}:
-  #   get:
-  #     $ref: "./tasks.yaml#/getTaskById"
-  #   put:
-  #     $ref: "./tasks.yaml#/updateTask"
-  #   delete:
-  #     $ref: "./tasks.yaml#/deleteTask"
+  /tasks/{id}:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTaskById"
+    put:
+      $ref: "./endpoints/tasks.yaml#/updateTask"
+    delete:
+      $ref: "./endpoints/tasks.yaml#/deleteTask"
 
-  # /v1/tasks/{id}/status:
-  #   patch:
-  #     $ref: "./tasks.yaml#/updateTaskStatus"
+  /tasks/{id}/status:
+    patch:
+      $ref: "./endpoints/tasks.yaml#/updateTaskStatus"
 
-  # /v1/tasks/{id}/assignees:
-  #   patch:
-  #     $ref: "./tasks.yaml#/updateAssignees"
+  /tasks/{id}/assignees:
+    patch:
+      $ref: "./endpoints/tasks.yaml#/updateAssignees"
 
-  # /v1/tasks/{id}/history:
-  #   get:
-  #     $ref: "./tasks.yaml#/getTaskHistory"
+  /tasks/{id}/history:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTaskHistory"
 
-  # /v1/tasks/assignee/{userId}:
-  #   get:
-  #     $ref: "./tasks.yaml#/getTasksByAssignee"
+  /tasks/assignee/{userId}:
+    get:
+      $ref: "./endpoints/tasks.yaml#/getTasksByAssignee"
 
   # Временная совместимость с boards - будет удалено после трансформации
   /boards:
