@@ -17,7 +17,7 @@ schemas:
         format: int64
       url:
         type: string
-        format: url
+        format: uri
       fileType:
         type: string
       createdAt:
@@ -63,6 +63,8 @@ addAttachments:
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
 
@@ -110,11 +112,15 @@ deleteAttachment:
       description: ID of the task the attachments belong to
     - in: path
       name: attachmentIds
-      schema:
-        type: string
-        pattern: "^[0-9a-fA-F\\-,]+$"
       required: true
       description: Comma-separated list of attachment IDs to delete
+      style: simple
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          format: uuid
   responses:
     '204':
       description: Attachment(s) deleted successfully

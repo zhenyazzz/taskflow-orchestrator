@@ -65,14 +65,14 @@ public class MeController {
                 department));
     }
 
-    @GetMapping("/{id}/history")
+    @GetMapping("/history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<TaskResponse>> getMyTaskHistory(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
             @AuthenticationPrincipal UserDetailsImpl principal
     ) {
-        log.info("Retrieving history for task id={}, page={}, size={}, user={}", principal.getId(), page, size, principal.getUsername());
+        log.info("Retrieving my task history for userId={}, page={}, size={}, user={}", principal.getId(), page, size, principal.getUsername());
         return ResponseEntity.ok(taskService.getTaskHistory(principal.getId(), PageRequest.of(page, size)));
     }
 

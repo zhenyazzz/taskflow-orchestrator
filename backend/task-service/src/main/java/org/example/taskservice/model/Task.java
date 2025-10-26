@@ -3,7 +3,7 @@ package org.example.taskservice.model;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Version;
+import org.springframework.data.annotation.Version;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.example.events.enums.Department;
@@ -68,4 +68,7 @@ public class Task {
     private List<String> tags;
 
     private List<Comment> comments = new ArrayList<>();
+
+    @Version
+    private Long version;
 }

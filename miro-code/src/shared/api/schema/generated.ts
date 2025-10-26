@@ -598,22 +598,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/boards": {
+    "/me/tasks": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get all boards for current user */
+        /**
+         * Get my tasks
+         * @description Returns a paginated list of tasks assigned to the authenticated user
+         */
         get: {
             parameters: {
                 query?: {
+                    /** @description Page number (0-indexed) */
                     page?: number;
-                    limit?: number;
-                    sort?: "createdAt" | "updatedAt" | "lastOpenedAt" | "name";
-                    isFavorite?: boolean;
-                    search?: string;
+                    /** @description Number of items per page */
+                    size?: number;
+                    /** @description Filter by task status */
+                    status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
+                    /** @description Filter by department */
+                    department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
                 };
                 header?: never;
                 path?: never;
@@ -621,39 +627,334 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of boards */
+                /** @description A paginated list of tasks for the authenticated user */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["BoardsList"];
+                        "application/json": components["schemas"]["TaskPageResponse"];
                     };
                 };
                 401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
             };
         };
         put?: never;
-        /** Create a new board */
-        post: {
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/tasks/{id}/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Subscribe to a task
+         * @description Allows the authenticated user to subscribe to a task
+         */
+        patch: {
             parameters: {
                 query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the task to subscribe to */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Task subscribed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+                404: components["responses"]["NotFoundError"];
+            };
+        };
+        trace?: never;
+    };
+    "/me/tasks/{id}/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Unsubscribe from a task
+         * @description Allows the authenticated user to unsubscribe from a task
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the task to unsubscribe from */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Task unsubscribed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+                404: components["responses"]["NotFoundError"];
+            };
+        };
+        trace?: never;
+    };
+    "/me/tasks/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Complete a task
+         * @description Allows the authenticated user to mark a task as complete
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the task to complete */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Task completed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+                404: components["responses"]["NotFoundError"];
+            };
+        };
+        trace?: never;
+    };
+    "/me/tasks/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get my task history
+         * @description Returns a paginated history of tasks associated with the authenticated user
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (0-indexed) */
+                    page?: number;
+                    /** @description Number of items per page */
+                    size?: number;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Board created successfully */
+                /** @description A paginated list of task history events for the authenticated user */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskPageResponse"];
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/tasks/available-tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get available tasks for me
+         * @description Returns a paginated list of tasks available for the authenticated user to subscribe to
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (0-indexed) */
+                    page?: number;
+                    /** @description Number of items per page */
+                    size?: number;
+                    /** @description Filter by department */
+                    department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A paginated list of available tasks */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskPageResponse"];
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comments/task/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comments for a task
+         * @description Returns a paginated list of comments for a specified task
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (0-indexed) */
+                    page?: number;
+                    /** @description Number of items per page */
+                    size?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description ID of the task to retrieve comments for */
+                    taskId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A paginated list of comments */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CommentPageResponse"];
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
+                404: components["responses"]["NotFoundError"];
+            };
+        };
+        put?: never;
+        /**
+         * Add a comment to a task
+         * @description Adds a new comment to a specified task.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the task to add a comment to */
+                    taskId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateCommentRequest"];
+                };
+            };
+            responses: {
+                /** @description Comment added successfully */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Board"];
+                        "application/json": components["schemas"]["CommentResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                404: components["responses"]["NotFoundError"];
             };
         };
         delete?: never;
@@ -662,53 +963,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/boards/{boardId}": {
+    "/comments/task/{taskId}/{commentId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a board by id */
-        get: {
+        get?: never;
+        /**
+         * Update a comment
+         * @description Updates an existing comment for a specified task
+         */
+        put: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    boardId: string;
+                    /** @description ID of the task the comment belongs to */
+                    taskId: string;
+                    /** @description ID of the comment to update */
+                    commentId: string;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateCommentRequest"];
+                };
+            };
             responses: {
-                /** @description Board */
-                200: {
+                /** @description Comment updated successfully */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Board"];
+                        "application/json": components["schemas"]["CommentResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
             };
         };
-        put?: never;
         post?: never;
-        /** Delete a board */
+        /**
+         * Delete a comment
+         * @description Deletes a comment from a specified task
+         */
         delete: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    boardId: string;
+                    /** @description ID of the task the comment belongs to */
+                    taskId: string;
+                    /** @description ID of the comment to delete */
+                    commentId: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Board deleted successfully */
+                /** @description Comment deleted successfully */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -716,95 +1035,10 @@ export interface paths {
                     content?: never;
                 };
                 401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
             };
         };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/boards/{boardId}/favorite": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update a board favorite */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    boardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateBoardFavorite"];
-                };
-            };
-            responses: {
-                /** @description Board favorite updated successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Board"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/boards/{boardId}/rename": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Rename a board */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    boardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["RenameBoard"];
-                };
-            };
-            responses: {
-                /** @description Board renamed successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Board"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
-            };
-        };
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -818,17 +1052,17 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get tasks with pagination
-         * @description Returns a paginated list of tasks with filtering options
+         * Get tasks with pagination and filtering
+         * @description Returns a paginated and filtered list of tasks
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description Page number (0-based) */
+                    /** @description Page number (0-indexed) */
                     page?: number;
                     /** @description Number of items per page */
                     size?: number;
-                    /** @description Filter by status */
+                    /** @description Filter by task status */
                     status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
                     /** @description Filter by assignee ID */
                     assigneeId?: string;
@@ -843,7 +1077,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Paginated list of tasks */
+                /** @description A paginated list of tasks */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -932,6 +1166,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create tasks in bulk
+         * @description Creates multiple tasks in the system
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateTaskRequest"][];
+                };
+            };
+            responses: {
+                /** @description Tasks created successfully */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskResponse"][];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/due-soon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get tasks due soon
+         * @description Returns a paginated list of tasks due within a specified number of hours
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Number of hours until due date */
+                    hours?: number;
+                    /** @description Page number (0-indexed) */
+                    page?: number;
+                    /** @description Number of items per page */
+                    size?: number;
+                    /** @description Filter by task status */
+                    status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
+                    /** @description Filter by assignee ID */
+                    assigneeId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A paginated list of tasks due soon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskPageResponse"];
+                    };
+                };
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tasks/{id}": {
         parameters: {
             query?: never;
@@ -941,7 +1271,7 @@ export interface paths {
         };
         /**
          * Get task by ID
-         * @description Returns a single task by their ID
+         * @description Returns a single task by its ID
          */
         get: {
             parameters: {
@@ -970,7 +1300,7 @@ export interface paths {
         };
         /**
          * Update an existing task
-         * @description Updates an existing task in the system by their ID
+         * @description Updates an existing task in the system by its ID
          */
         put: {
             parameters: {
@@ -1005,7 +1335,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a task
-         * @description Deletes a task from the system by their ID
+         * @description Deletes a task from the system by its ID
          */
         delete: {
             parameters: {
@@ -1050,14 +1380,14 @@ export interface paths {
         head?: never;
         /**
          * Update task status
-         * @description Updates the status of a task
+         * @description Updates the status of an existing task by its ID
          */
         patch: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description ID of the task to update */
+                    /** @description ID of the task to update status for */
                     id: string;
                 };
                 cookie?: never;
@@ -1098,15 +1428,15 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Update task assignees
-         * @description Updates the assignees of a task
+         * Update assignees for a task
+         * @description Updates the assignees for an existing task by its ID
          */
         patch: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description ID of the task to update */
+                    /** @description ID of the task to update assignees for */
                     id: string;
                 };
                 cookie?: never;
@@ -1133,102 +1463,6 @@ export interface paths {
         };
         trace?: never;
     };
-    "/tasks/assignee/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get tasks by assignee
-         * @description Returns tasks assigned to a specific user
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (0-based) */
-                    page?: number;
-                    /** @description Number of items per page */
-                    size?: number;
-                    /** @description Filter by status */
-                    status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
-                };
-                header?: never;
-                path: {
-                    /** @description ID of the user */
-                    userId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Paginated list of tasks for the assignee */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskPageResponse"];
-                    };
-                };
-                403: components["responses"]["ForbiddenError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/tasks/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create multiple tasks
-         * @description Creates multiple tasks in bulk
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateTaskRequest"][];
-                };
-            };
-            responses: {
-                /** @description Tasks created successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskResponse"][];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                403: components["responses"]["ForbiddenError"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/tasks/{id}/history": {
         parameters: {
             query?: never;
@@ -1238,26 +1472,26 @@ export interface paths {
         };
         /**
          * Get task history
-         * @description Returns the history of changes for a specific task
+         * @description Returns a paginated history of changes for a specific task
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description Page number (0-based) */
+                    /** @description Page number (0-indexed) */
                     page?: number;
                     /** @description Number of items per page */
                     size?: number;
                 };
                 header?: never;
                 path: {
-                    /** @description ID of the task */
+                    /** @description ID of the task to retrieve history for */
                     id: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Task history */
+                /** @description A paginated list of task history events */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1278,7 +1512,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/due-soon": {
+    "/tasks/assignee/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1286,30 +1520,29 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get tasks due soon
-         * @description Returns tasks that are due within specified hours
+         * Get tasks by assignee
+         * @description Returns a paginated list of tasks assigned to a specific user
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description Hours ahead to check (default: 24) */
-                    hours?: number;
-                    /** @description Page number (0-based) */
+                    /** @description Page number (0-indexed) */
                     page?: number;
                     /** @description Number of items per page */
                     size?: number;
-                    /** @description Filter by status */
+                    /** @description Filter by task status */
                     status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
-                    /** @description Filter by assignee ID */
-                    assigneeId?: string;
                 };
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description ID of the assignee */
+                    userId: string;
+                };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Tasks due soon */
+                /** @description A paginated list of tasks for the assignee */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1319,453 +1552,12 @@ export interface paths {
                     };
                 };
                 403: components["responses"]["ForbiddenError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/tasks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get my tasks
-         * @description Returns tasks assigned to the current user
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (0-based) */
-                    page?: number;
-                    /** @description Number of items per page */
-                    size?: number;
-                    /** @description Filter by status */
-                    status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
-                    /** @description Filter by department */
-                    department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description My tasks */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskPageResponse"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/tasks/{id}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get my task history
-         * @description Returns the history of changes for my tasks
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (0-based) */
-                    page?: number;
-                    /** @description Number of items per page */
-                    size?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description My task history */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskPageResponse"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
             };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/tasks/available-tasks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get available tasks
-         * @description Returns tasks available for assignment to the current user
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (0-based) */
-                    page?: number;
-                    /** @description Number of items per page */
-                    size?: number;
-                    /** @description Filter by department */
-                    department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Available tasks */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskPageResponse"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/tasks/{id}/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Subscribe to task
-         * @description Subscribe the current user to a task
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully subscribed to task */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        trace?: never;
-    };
-    "/me/tasks/{id}/unsubscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Unsubscribe from task
-         * @description Unsubscribe the current user from a task
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successfully unsubscribed from task */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        trace?: never;
-    };
-    "/me/tasks/{id}/complete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Complete task
-         * @description Mark a task as completed by the current user
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Task completed successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TaskResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        trace?: never;
-    };
-    "/comments/task/{taskId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Add comment to task
-         * @description Adds a new comment to a task
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    taskId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateCommentRequest"];
-                };
-            };
-            responses: {
-                /** @description Comment added successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        /**
-         * Get comments for task
-         * @description Returns comments for a specific task
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (0-based) */
-                    page?: number;
-                    /** @description Number of items per page */
-                    size?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    taskId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Comments for the task */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentPageResponse"];
-                    };
-                };
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        put?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comments/task/{taskId}/{commentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update comment
-         * @description Updates an existing comment
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    taskId: string;
-                    /** @description ID of the comment */
-                    commentId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateCommentRequest"];
-                };
-            };
-            responses: {
-                /** @description Comment updated successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["CommentResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequestError"];
-                401: components["responses"]["UnauthorizedError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
-        post?: never;
-        /**
-         * Delete comment
-         * @description Deletes a comment from a task
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description ID of the task */
-                    taskId: string;
-                    /** @description ID of the comment */
-                    commentId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Comment deleted successfully */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                401: components["responses"]["UnauthorizedError"];
-                403: components["responses"]["ForbiddenError"];
-                404: components["responses"]["NotFoundError"];
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1781,15 +1573,15 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Add attachments to task
-         * @description Adds multiple attachments to a task
+         * Add attachments to a task
+         * @description Uploads one or more files as attachments to a specified task.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description ID of the task */
+                    /** @description ID of the task to add attachments to */
                     taskId: string;
                 };
                 cookie?: never;
@@ -1797,7 +1589,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "multipart/form-data": {
-                        files: components["schemas"]["MultipartFile"][];
+                        /** @description List of files to upload */
+                        files?: string[];
                     };
                 };
             };
@@ -1813,6 +1606,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
             };
         };
@@ -1830,22 +1624,22 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get attachments for task
-         * @description Returns all attachments for a specific task
+         * Get attachments for a task
+         * @description Returns a list of attachments for a specified task
          */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description ID of the task */
+                    /** @description ID of the task to retrieve attachments for */
                     taskId: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Attachments for the task */
+                /** @description A list of attachments */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1855,6 +1649,7 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
             };
         };
@@ -1878,23 +1673,23 @@ export interface paths {
         post?: never;
         /**
          * Delete attachments
-         * @description Deletes multiple attachments from a task
+         * @description Deletes one or more attachments from a task
          */
         delete: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description ID of the task */
+                    /** @description ID of the task the attachments belong to */
                     taskId: string;
-                    /** @description IDs of the attachments to delete */
+                    /** @description Comma-separated list of attachment IDs to delete */
                     attachmentIds: string[];
                 };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Attachments deleted successfully */
+                /** @description Attachment(s) deleted successfully */
                 204: {
                     headers: {
                         [name: string]: unknown;
@@ -2016,48 +1811,37 @@ export interface components {
             lastName?: string;
             roles: ("ROLE_USER" | "ROLE_ADMIN")[];
         };
-        Board: {
-            id: string;
-            name: string;
+        CommentResponse: {
+            /** Format: uuid */
+            id?: string;
+            content?: string;
+            /** Format: uuid */
+            authorId?: string;
             /** Format: date-time */
-            createdAt: string;
+            createdAt?: string;
             /** Format: date-time */
-            updatedAt: string;
-            /** Format: date-time */
-            lastOpenedAt: string;
-            isFavorite: boolean;
-        };
-        BoardsList: {
-            list: components["schemas"]["Board"][];
-            total: number;
-            totalPages: number;
-        };
-        UpdateBoardFavorite: {
-            isFavorite: boolean;
-        };
-        RenameBoard: {
-            name: string;
+            updatedAt?: string;
         };
         TaskResponse: {
             /** Format: uuid */
-            id: string;
-            title: string;
+            id?: string;
+            title?: string;
             description?: string;
             /** @enum {string} */
-            status: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
+            status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
             /** @enum {string} */
-            priority: "LOW" | "MEDIUM" | "HIGH";
-            assigneeIds: string[];
+            priority?: "LOW" | "MEDIUM" | "HIGH";
+            assigneeIds?: string[];
             /** Format: uuid */
-            creatorId: string;
+            creatorId?: string;
             /** @enum {string} */
-            department: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
+            department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
             /** Format: date-time */
-            createdAt: string;
+            createdAt?: string;
             /** Format: date-time */
             dueDate?: string;
-            tags: string[];
-            comments: components["schemas"]["CommentResponse"][];
+            tags?: string[];
+            comments?: components["schemas"]["CommentResponse"][];
         };
         TaskPageResponse: {
             content: components["schemas"]["TaskResponse"][];
@@ -2074,21 +1858,46 @@ export interface components {
             /** @description Is this the last page? */
             last?: boolean;
             /** @description Number of elements in current page */
-            numberOfElements?: boolean;
+            numberOfElements?: number;
             /** @description Is the page empty? */
             empty?: boolean;
+        };
+        CommentPageResponse: {
+            content: components["schemas"]["CommentResponse"][];
+            /** @description Total number of elements across all pages */
+            totalElements: number;
+            /** @description Total number of pages */
+            totalPages: number;
+            /** @description Number of elements per page */
+            size: number;
+            /** @description Current page number (0-based) */
+            number: number;
+            /** @description Is this the first page? */
+            first?: boolean;
+            /** @description Is this the last page? */
+            last?: boolean;
+            /** @description Number of elements in current page */
+            numberOfElements?: number;
+            /** @description Is the page empty? */
+            empty?: boolean;
+        };
+        CreateCommentRequest: {
+            content: string;
+        };
+        UpdateCommentRequest: {
+            content: string;
         };
         CreateTaskRequest: {
             title: string;
             description?: string;
             /** @enum {string} */
             priority: "LOW" | "MEDIUM" | "HIGH";
-            assigneeIds?: string[];
+            /** @enum {string} */
+            department: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
             /** Format: date-time */
             dueDate?: string;
             tags?: string[];
-            /** @enum {string} */
-            department: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
+            assigneeIds?: string[];
         };
         UpdateTaskRequest: {
             title?: string;
@@ -2112,64 +1921,20 @@ export interface components {
         UpdateAssigneesRequest: {
             assigneeIds?: string[];
         };
-        CommentResponse: {
-            /** Format: uuid */
-            id: string;
-            content: string;
-            /** Format: uuid */
-            authorId: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        CreateCommentRequest: {
-            content: string;
-        };
-        UpdateCommentRequest: {
-            content: string;
-        };
         AttachmentResponse: {
             /** Format: uuid */
-            id: string;
+            id?: string;
             /** Format: uuid */
-            taskId: string;
-            fileName: string;
-            objectName: string;
-            size: number;
-            url: string;
-            fileType: string;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CommentPageResponse: {
-            content: components["schemas"]["CommentResponse"][];
-            /** @description Total number of elements across all pages */
-            totalElements: number;
-            /** @description Total number of pages */
-            totalPages: number;
-            /** @description Number of elements per page */
-            size: number;
-            /** @description Current page number (0-based) */
-            number: number;
-            /** @description Is this the first page? */
-            first?: boolean;
-            /** @description Is this the last page? */
-            last?: boolean;
-            /** @description Number of elements in current page */
-            numberOfElements?: number;
-            /** @description Is the page empty? */
-            empty?: boolean;
-        };
-        MultipartFile: {
-            /** @description Original filename */
-            originalFilename?: string;
-            /** @description Content type */
-            contentType?: string;
-            /** @description File size in bytes */
+            taskId?: string;
+            fileName?: string;
+            objectName?: string;
+            /** Format: int64 */
             size?: number;
-            /** @description File content */
-            bytes?: string;
+            /** Format: uri */
+            url?: string;
+            fileType?: string;
+            /** Format: date-time */
+            createdAt?: string;
         };
     };
     responses: {

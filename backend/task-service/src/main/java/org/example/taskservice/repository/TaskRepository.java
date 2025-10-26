@@ -1,31 +1,29 @@
 package org.example.taskservice.repository;
 
 import org.example.events.enums.TaskStatus;
+import org.example.events.enums.Department;
 import org.example.taskservice.model.Task;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
+
 @Repository
-public interface TaskRepository extends MongoRepository<Task, String> {
+public interface TaskRepository extends MongoRepository<Task, String>, TaskRepositoryCustom {
 
-    Page<Task> findByStatusAndDepartment(TaskStatus available, String department, PageRequest of);
-    Page<Task> findByAssigneeIdsContaining(String userId, PageRequest of);
-    Page<Task> findByAssigneeIdsContainingAndStatus(String userId, String status, PageRequest of);
+    Page<Task> findByStatusAndDepartment(TaskStatus status, Department department, Pageable pageable);
+    Page<Task> findByAssigneeIdsContains(String userId, Pageable pageable);
+    Page<Task> findByAssigneeIdsContainsAndStatus(String userId, TaskStatus status, Pageable pageable);
+    Page<Task> findByAssigneeIdsContainsAndStatusIn(String userId, List<TaskStatus> statuses, Pageable pageable);
 
-    @Query("SELECT t FROM Task t WHERE " +
-            "(:status IS NULL OR t.status = :status) AND " +
-            "(:assigneeId IS NULL OR :assigneeId MEMBER OF t.assigneeIds) AND " +
-            "(:creatorId IS NULL OR t.creatorId = :creatorId) AND " +
-            "(:department IS NULL OR t.department = :department)")
-    Page<Task> findTasksByFilters(
-            @Param("status") String status,
-            @Param("assigneeId") String assigneeId,
-            @Param("creatorId") String creatorId,
-            @Param("department") String department,
-            Pageable pageable);
+    // Due soon queries
+    Page<Task> findByDueDateBetween(Instant from, Instant to, Pageable pageable);
+    Page<Task> findByDueDateBetweenAndStatus(Instant from, Instant to, TaskStatus status, Pageable pageable);
+    Page<Task> findByDueDateBetweenAndAssigneeIds(Instant from, Instant to, String assigneeId, Pageable pageable);
+    Page<Task> findByDueDateBetweenAndStatusAndAssigneeIds(Instant from, Instant to, TaskStatus status, String assigneeId, Pageable pageable);
+
+    // Custom filter search is implemented in TaskRepositoryImpl via MongoTemplate
 }

@@ -70,53 +70,41 @@ paths:
       $ref: "./endpoints/me.yaml#/deleteMyProfile"
 
 
-  # /v1/me/tasks:
-  #   get:
-  #     $ref: "./endpoints/meTasks.yaml#/getMyTasks"
+  /me/tasks:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getMyTasks"
 
-  # /v1/me/tasks/{id}/subscribe:
-  #   patch:
-  #     $ref: "./endpoints/meTasks.yaml#/subscribeToMeTask"
+  /me/tasks/{id}/subscribe:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/subscribeToMeTask"
 
-  # /v1/me/tasks/{id}/unsubscribe:
-  #   patch:
-  #     $ref: "./endpoints/meTasks.yaml#/unsubscribeFromMeTask"
+  /me/tasks/{id}/unsubscribe:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/unsubscribeFromMeTask"
 
-  # /v1/me/tasks/{id}/complete:
-  #   patch:
-  #     $ref: "./endpoints/meTasks.yaml#/completeMeTask"
+  /me/tasks/{id}/complete:
+    patch:
+      $ref: "./endpoints/meTasks.yaml#/completeMeTask"
 
-  # /v1/me/history:
-  #   get:
-  #     $ref: "./endpoints/meTasks.yaml#/getMyTaskHistory"
+  /me/tasks/history:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getMyTaskHistory"
 
-  # /v1/me/available-tasks:
-  #   get:
-  #     $ref: "./endpoints/meTasks.yaml#/getAvailableTasksForMe"
+  /me/tasks/available-tasks:
+    get:
+      $ref: "./endpoints/meTasks.yaml#/getAvailableTasksForMe"
 
-  # /v1/attachments/task/{taskId}/batch:
-  #   post:
-  #     $ref: "./endpoints/attachments.yaml#/addAttachments"
+  /comments/task/{taskId}:
+    post:
+      $ref: "./endpoints/comments.yaml#/addComment"
+    get:
+      $ref: "./endpoints/comments.yaml#/getComments"
 
-  # /v1/attachments/task/{taskId}:
-  #   get:
-  #     $ref: "./endpoints/attachments.yaml#/getAttachments"
-
-  # /v1/attachments/task/{taskId}/{attachmentIds}:
-  #   delete:
-  #     $ref: "./endpoints/attachments.yaml#/deleteAttachment"
-
-  # /v1/comments/task/{taskId}:
-  #   post:
-  #     $ref: "./endpoints/comments.yaml#/addComment"
-  #   get:
-  #     $ref: "./endpoints/comments.yaml#/getComments"
-
-  # /v1/comments/task/{taskId}/{commentId}:
-  #   put:
-  #     $ref: "./endpoints/comments.yaml#/updateComment"
-  #   delete:
-  #     $ref: "./endpoints/comments.yaml#/deleteComment"
+  /comments/task/{taskId}/{commentId}:
+    put:
+      $ref: "./endpoints/comments.yaml#/updateComment"
+    delete:
+      $ref: "./endpoints/comments.yaml#/deleteComment"
 
   /tasks:
     get:
@@ -160,25 +148,16 @@ paths:
     get:
       $ref: "./endpoints/tasks.yaml#/getTasksByAssignee"
 
-  # Временная совместимость с boards - будет удалено после трансформации
-  /boards:
-    get:
-      $ref: "./endpoints/boards.yaml#/getAllBoards"
+  /attachments/task/{taskId}/batch:
     post:
-      $ref: "./endpoints/boards.yaml#/createBoard"
+      $ref: "./endpoints/attachments.yaml#/addAttachments"
 
-  /boards/{boardId}:
+  /attachments/task/{taskId}:
     get:
-      $ref: "./endpoints/boards.yaml#/getBoardById"
+      $ref: "./endpoints/attachments.yaml#/getAttachments"
+
+  /attachments/task/{taskId}/{attachmentIds}:
     delete:
-      $ref: "./endpoints/boards.yaml#/deleteBoard"
+      $ref: "./endpoints/attachments.yaml#/deleteAttachment"
 
-  /boards/{boardId}/favorite:
-    put:
-      $ref: "./endpoints/boards.yaml#/updateBoardFavorite"
-
-  /boards/{boardId}/rename:
-    put:
-      $ref: "./endpoints/boards.yaml#/renameBoard"
-
-      
+ 

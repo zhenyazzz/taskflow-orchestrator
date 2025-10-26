@@ -14,7 +14,45 @@ schemas:
     properties:
       content:
         type: string
-
+        
+  CommentPageResponse:
+    type: object
+    required:
+      - content
+      - totalElements
+      - totalPages
+      - size
+      - number
+    properties:
+      content:
+        type: array
+        items:
+          $ref: './tasks.yaml#/schemas/CommentResponse'
+      totalElements:
+        type: integer
+        description: Total number of elements across all pages
+      totalPages:
+        type: integer
+        description: Total number of pages
+      size:
+        type: integer
+        description: Number of elements per page
+      number:
+        type: integer
+        description: Current page number (0-based)
+      first:
+        type: boolean
+        description: Is this the first page?
+      last:
+        type: boolean
+        description: Is this the last page?
+      numberOfElements:
+        type: integer
+        description: Number of elements in current page
+      empty:
+        type: boolean
+        description: Is the page empty?
+                
 addComment:
   summary: Add a comment to a task
   description: Adds a new comment to a specified task.
@@ -40,7 +78,7 @@ addComment:
       content:
         application/json:
           schema:
-            $ref: '../tasks.yaml#/schemas/CommentResponse'
+            $ref: './tasks.yaml#/schemas/CommentResponse'
     '400':
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
@@ -79,20 +117,7 @@ getComments:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '../tasks.yaml#/schemas/CommentResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: '#/schemas/CommentPageResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
     '403':
@@ -127,12 +152,12 @@ updateComment:
         schema:
           $ref: '#/schemas/UpdateCommentRequest'
   responses:
-    '200':
+    '201':
       description: Comment updated successfully
       content:
         application/json:
           schema:
-            $ref: '../tasks.yaml#/schemas/CommentResponse'
+                  $ref: './tasks.yaml#/schemas/CommentResponse'
     '400':
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
@@ -171,3 +196,5 @@ deleteComment:
       $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
+
+  

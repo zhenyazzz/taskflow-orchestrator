@@ -20,11 +20,13 @@ subscribeToMeTask:
       content:
         application/json:
           schema:
-            $ref: '../tasks.yaml#/schemas/TaskResponse'
+            $ref: './tasks.yaml#/schemas/TaskResponse'
     '400':
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
 
@@ -47,11 +49,13 @@ unsubscribeFromMeTask:
       content:
         application/json:
           schema:
-            $ref: '../tasks.yaml#/schemas/TaskResponse'
+            $ref: './tasks.yaml#/schemas/TaskResponse'
     '400':
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
 
@@ -74,7 +78,7 @@ completeMeTask:
       content:
         application/json:
           schema:
-            $ref: '../tasks.yaml#/schemas/TaskResponse'
+            $ref: './tasks.yaml#/schemas/TaskResponse'
     '400':
       $ref: '../shared/responses.yaml#/BadRequestError'
     '401':
@@ -120,20 +124,7 @@ getMyTasks:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '../tasks.yaml#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: './tasks.yaml#/schemas/TaskPageResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
     '403':
@@ -163,20 +154,7 @@ getMyTaskHistory:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '../tasks.yaml#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: './tasks.yaml#/schemas/TaskPageResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
     '403':
@@ -212,20 +190,7 @@ getAvailableTasksForMe:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '../tasks.yaml#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: './tasks.yaml#/schemas/TaskPageResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
     '403':

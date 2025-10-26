@@ -29,9 +29,9 @@ public class JwtUtil {
     private final String issuer;
 
     public JwtUtil(
-            @Value("${JWT_SECRET_KEY:aXv7j3tR8kL9mQp2sV5y7x9A1zC4E7H0bW3cZ6u8oP1dF4rT5nJ9iK2lO0q}") String jwtSecret,
-            @Value("${jwt.access-token-expiration:86400000}") int jwtExpirationMs,
-            @Value("${jwt.issuer:auth-service}") String issuer) {
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.access-token-expiration}") int jwtExpirationMs,
+            @Value("${jwt.issuer}") String issuer) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
         this.jwtParser = Jwts.parser().verifyWith(key).build();
         this.jwtExpirationMs = jwtExpirationMs;

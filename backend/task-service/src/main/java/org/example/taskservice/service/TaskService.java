@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.example.events.enums.TaskStatus;
+import org.example.events.enums.Department;
 import org.example.taskservice.dto.request.task.CreateTaskRequest;
 import org.example.taskservice.dto.request.task.UpdateAssigneesRequest;
 import org.example.taskservice.dto.request.task.UpdateStatusRequest;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.Duration;
+import java.time.Instant;
 
 @Service
 @Slf4j
@@ -80,6 +83,9 @@ public class TaskService {
     public TaskResponse subscribeToTask(String id, String userId) {
         log.info("subscribing to task: {}", id);
         Task task = findTaskById(id);
+        if (task.getAssigneeIds() == null) {
+            task.setAssigneeIds(new java.util.HashSet<>());
+        }
         task.getAssigneeIds().add(userId);
         Task updatedTask = taskRepository.save(task);
         log.debug("Task subscribed with ID: {}", updatedTask.getId());
@@ -91,7 +97,9 @@ public class TaskService {
     public TaskResponse unsubscribeFromTask(String id, String userId) {
         log.info("unsubscribing from task: {}", id);
         Task task = findTaskById(id);
-        task.getAssigneeIds().remove(userId);
+        if (task.getAssigneeIds() != null) {
+            task.getAssigneeIds().remove(userId);
+        }
         Task updatedTask = taskRepository.save(task);
         log.debug("Task unsubscribed with ID: {}", updatedTask.getId());
         kafkaProducerService.sendTaskUnsubscribedEvent(updatedTask.getId(), taskMapper.toTaskUnsubscribedEvent(updatedTask,userId));
@@ -111,38 +119,63 @@ public class TaskService {
 
     public Page<TaskResponse> getMyTasks(String id, PageRequest of, String status, String department) {
         log.info("getting my tasks: {}", id);
-        Page<Task> tasks = taskRepository.findByAssigneeIdsContaining(id, of);
+        Page<Task> tasks = taskRepository.findByAssigneeIdsContains(id, of);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
     public Page<TaskResponse> getAvailableTasks(PageRequest of, String department) {
         log.info("getting available tasks: {}", department);
-        Page<Task> tasks = taskRepository.findByStatusAndDepartment(TaskStatus.AVAILABLE, department, of);
+        Department dep = parseEnum(department, Department.class);
+        Page<Task> tasks = taskRepository.findByStatusAndDepartment(TaskStatus.AVAILABLE, dep, of);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
     public Page<TaskResponse> getTasks(Pageable pageable, String status, String assigneeId, String creatorId, String department) {
-        log.info("getting tasks: {}", pageable);Page<Task> tasks = taskRepository.findTasksByFilters(status, assigneeId, creatorId, department, pageable);
+        log.info("getting tasks: {}", pageable);
+        TaskStatus st = parseEnum(status, TaskStatus.class);
+        Department dep = parseEnum(department, Department.class);
+        Page<Task> tasks = taskRepository.findTasksByFilters(st, assigneeId, creatorId, dep, pageable);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
     public Page<TaskResponse> getDueSoonTasks(@Min(1) long hours, PageRequest of, String status, String assigneeId) {
-        return null;
+        Instant now = Instant.now();
+        Instant to = now.plus(Duration.ofHours(hours));
+
+        Page<Task> tasks;
+        if (status != null && !status.isBlank() && assigneeId != null && !assigneeId.isBlank()) {
+            tasks = taskRepository.findByDueDateBetweenAndStatusAndAssigneeIds(now, to, TaskStatus.valueOf(status), assigneeId, of);
+        } else if (status != null && !status.isBlank()) {
+            tasks = taskRepository.findByDueDateBetweenAndStatus(now, to, TaskStatus.valueOf(status), of);
+        } else if (assigneeId != null && !assigneeId.isBlank()) {
+            tasks = taskRepository.findByDueDateBetweenAndAssigneeIds(now, to, assigneeId, of);
+        } else {
+            tasks = taskRepository.findByDueDateBetween(now, to, of);
+        }
+
+        return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
     @Transactional
     public void deleteTask(String id) {
         UserDetailsImpl details = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        log.info("deleting task: {}", id);
+        log.info("soft-deleting (blocking) task: {}", id);
         Task task = findTaskById(id);
-        taskRepository.delete(task);
-        log.debug("Task deleted with ID: {}", id);
-        kafkaProducerService.sendTaskDeletedEvent(id, taskMapper.toTaskDeletedEvent(task, details.getId()));
+        task.setStatus(TaskStatus.BLOCKED);
+        Task updatedTask = taskRepository.save(task);
+        log.debug("Task soft-deleted (blocked) with ID: {}", id);
+        kafkaProducerService.sendTaskDeletedEvent(id, taskMapper.toTaskDeletedEvent(updatedTask, details.getId()));
     }
 
     public Page<TaskResponse> getTasksByAssignee(String userId, PageRequest of, String status) {
         log.info("getting tasks by assignee: {}", userId);
-        Page<Task> tasks = taskRepository.findByAssigneeIdsContainingAndStatus(userId, status, of);
+        Page<Task> tasks;
+        if (status == null || status.isBlank()) {
+            tasks = taskRepository.findByAssigneeIdsContains(userId, of);
+        } else {
+            TaskStatus st = TaskStatus.valueOf(status);
+            tasks = taskRepository.findByAssigneeIdsContainsAndStatus(userId, st, of);
+        }
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
@@ -182,8 +215,18 @@ public class TaskService {
 
     public Page<TaskResponse> getTaskHistory(String id, PageRequest of) {
         log.info("getting task history: {}", id);
-        Page<Task> tasks = taskRepository.findByAssigneeIdsContaining(id, of);
+        List<TaskStatus> statuses = List.of(TaskStatus.COMPLETED, TaskStatus.BLOCKED);
+        Page<Task> tasks = taskRepository.findByAssigneeIdsContainsAndStatusIn(id, statuses, of);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
+    }
+
+    private static <E extends Enum<E>> E parseEnum(String value, Class<E> type) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return Enum.valueOf(type, value);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
 }

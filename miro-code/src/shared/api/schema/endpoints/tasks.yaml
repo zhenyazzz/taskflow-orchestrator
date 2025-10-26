@@ -1,55 +1,4 @@
 schemas:
-  Task:
-    type: object
-    required:
-      - id
-      - title
-      - status
-      - creatorId
-      - createdAt
-      - updatedAt
-    properties:
-      id:
-        type: string
-      title:
-        type: string
-      description:
-        type: string
-      status:
-        type: string
-        enum: [AVAILABLE, ASSIGNED, IN_PROGRESS, REVIEW, COMPLETED, CANCELLED]
-      priority:
-        type: string
-        enum: [LOW, MEDIUM, HIGH, URGENT]
-      assigneeIds:
-        type: array
-        items:
-          type: string
-          format: uuid
-      creatorId:
-        type: string
-        format: uuid
-      department:
-        type: string
-        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
-      createdAt:
-        type: string
-        format: date-time
-      updatedAt:
-        type: string
-        format: date-time
-      dueDate:
-        type: string
-        format: date-time
-      tags:
-        type: array
-        items:
-          type: string
-      comments:
-        type: array
-        items:
-          $ref: '#/schemas/Comment'
-
   Comment:
     type: object
     required:
@@ -73,6 +22,8 @@ schemas:
     type: object
     required:
       - title
+      - priority
+      - department
     properties:
       title:
         type: string
@@ -80,7 +31,7 @@ schemas:
         type: string
       priority:
         type: string
-        enum: [LOW, MEDIUM, HIGH, URGENT]
+        enum: [LOW, MEDIUM, HIGH]
       department:
         type: string
         enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
@@ -91,6 +42,11 @@ schemas:
         type: array
         items:
           type: string
+      assigneeIds:
+        type: array
+        items:
+          type: string
+          format: uuid
 
   UpdateTaskRequest:
     type: object
@@ -101,10 +57,10 @@ schemas:
         type: string
       status:
         type: string
-        enum: [AVAILABLE, ASSIGNED, IN_PROGRESS, REVIEW, COMPLETED, CANCELLED]
+        enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
       priority:
         type: string
-        enum: [LOW, MEDIUM, HIGH, URGENT]
+        enum: [LOW, MEDIUM, HIGH]
       dueDate:
         type: string
         format: date-time
@@ -112,6 +68,14 @@ schemas:
         type: array
         items:
           type: string
+      assigneeIds:
+        type: array
+        items:
+          type: string
+          format: uuid
+      department:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
 
   AssignTaskRequest:
     type: object
@@ -124,32 +88,6 @@ schemas:
           type: string
           format: uuid
 
-  TasksList:
-    type: object
-    required:
-      - content
-      - totalElements
-      - totalPages
-      - size
-      - number
-    properties:
-      content:
-        type: array
-        items:
-          $ref: '#/schemas/Task'
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-      size:
-        type: integer
-      number:
-        type: integer
-      first:
-        type: boolean
-      last:
-        type: boolean
-
   UpdateAssigneesRequest:
     type: object
     properties:
@@ -157,6 +95,7 @@ schemas:
         type: array
         items:
           type: string
+          format: uuid
 
   UpdateStatusRequest:
     type: object
@@ -174,10 +113,12 @@ schemas:
     properties:
       id:
         type: string
+        format: uuid
       content:
         type: string
       authorId:
         type: string
+        format: uuid
       createdAt:
         type: string
         format: date-time
@@ -190,6 +131,7 @@ schemas:
     properties:
       id:
         type: string
+        format: uuid
       title:
         type: string
       description:
@@ -204,8 +146,10 @@ schemas:
         type: array
         items:
           type: string
+          format: uuid
       creatorId:
         type: string
+        format: uuid
       department:
         type: string
         enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
@@ -223,6 +167,44 @@ schemas:
         type: array
         items:
           $ref: '#/schemas/CommentResponse'
+
+  TaskPageResponse:
+    type: object
+    required:
+      - content
+      - totalElements
+      - totalPages
+      - size
+      - number
+    properties:
+      content:
+        type: array
+        items:
+          $ref: '#/schemas/TaskResponse'
+      totalElements:
+        type: integer
+        description: Total number of elements across all pages
+      totalPages:
+        type: integer
+        description: Total number of pages
+      size:
+        type: integer
+        description: Number of elements per page
+      number:
+        type: integer
+        description: Current page number (0-based)
+      first:
+        type: boolean
+        description: Is this the first page?
+      last:
+        type: boolean
+        description: Is this the last page?
+      numberOfElements:
+        type: integer
+        description: Number of elements in current page
+      empty:
+        type: boolean
+        description: Is the page empty?
 
 getTasks:
   summary: Get tasks with pagination and filtering
@@ -252,11 +234,13 @@ getTasks:
       name: assigneeId
       schema:
         type: string
+        format: uuid
       description: Filter by assignee ID
     - in: query
       name: creatorId
       schema:
         type: string
+        format: uuid
       description: Filter by creator ID
     - in: query
       name: department
@@ -270,20 +254,7 @@ getTasks:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: '#/schemas/TaskPageResponse'
     '403':
       $ref: '../shared/responses.yaml#/ForbiddenError'
 
@@ -476,20 +447,7 @@ getTasksByAssignee:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: '#/schemas/TaskPageResponse'
     '403':
       $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
@@ -586,20 +544,7 @@ getTaskHistory:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: '#/schemas/TaskPageResponse'
     '403':  
       $ref: '../shared/responses.yaml#/ForbiddenError'
     '404':
@@ -639,6 +584,7 @@ getDueSoonTasks:
       name: assigneeId
       schema:
         type: string
+        format: uuid
       description: Filter by assignee ID
   responses:
     '200':
@@ -646,19 +592,6 @@ getDueSoonTasks:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  $ref: '#/schemas/TaskResponse'
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
-              size:
-                type: integer
-              number:
-                type: integer
+            $ref: '#/schemas/TaskPageResponse'
     '403':
       $ref: '../shared/responses.yaml#/ForbiddenError'
