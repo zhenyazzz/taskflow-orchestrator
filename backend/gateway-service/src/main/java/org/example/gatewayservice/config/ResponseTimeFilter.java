@@ -5,6 +5,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -18,16 +19,20 @@ public class ResponseTimeFilter implements GlobalFilter, Ordered {
         long startTime = System.currentTimeMillis();
         ServerHttpRequest request = exchange.getRequest();
         
-        return chain.filter(exchange)
-                .doFinally(signalType -> {
-                    long duration = System.currentTimeMillis() - startTime;
-                    log.info("⏱️  [{}] {} - Response time: {}ms", 
-                            request.getMethod(),
-                            request.getURI().getPath(),
-                            duration);
-                    
-                    exchange.getResponse().getHeaders().add("X-Response-Time", duration + "ms");
-                });
+        ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(exchange.getResponse()) {
+            @Override
+            public Mono<Void> writeWith(org.reactivestreams.Publisher<? extends org.springframework.core.io.buffer.DataBuffer> body) {
+                long duration = System.currentTimeMillis() - startTime;
+                log.info("⏱️  [{}] {} - Response time: {}ms", 
+                        request.getMethod(),
+                        request.getURI().getPath(),
+                        duration);
+                this.getDelegate().getHeaders().add("X-Response-Time", duration + "ms");
+                return super.writeWith(body);
+            }
+        };
+
+        return chain.filter(exchange.mutate().response(decoratedResponse).build());
     }
 
     @Override

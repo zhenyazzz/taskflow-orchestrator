@@ -9,99 +9,57 @@ spring:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        # Маршруты для сервисов в Docker через Eureka
-        - id: auth-service-docker
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
 
-        - id: user-service-docker
-          uri: lb://user-service
-          predicates:
-            - Path=/api/me/profile,/api/users/**
-          filters:
-            - StripPrefix=1
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
 
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/me/profile,/api/users/**
+              filters:
+                - StripPrefix=1
 
-        # Маршруты для локальных сервисов
-#        - id: auth-service-local
-#          uri: http://host.docker.internal:8081
-#          predicates:
-#            - Path=/api/auth/local/**
-#          filters:
-#            - StripPrefix=2
-#
-#        - id: user-service-local
-#          uri: http://host.docker.internal:8081
-#          predicates:
-#            - Path=/api/me/profile/local,/api/users/local/**
-#          filters:
-#            - StripPrefix=2
+            - id: task-service-tasks
+              uri: lb://task-service
+              predicates:
+                - Path=/api/tasks/**
+              filters:
+                - StripPrefix=1
 
-#        - id: task-service-local
-#          uri: http://host.docker.internal:8083
-#          predicates:
-#            - Path=/api/local/tasks/**,/api/local/me/tasks/**,/api/local/comments/**,/api/local/attachments/**
-#          filters:
-#            - StripPrefix=2
+            - id: task-service-my-tasks
+              uri: lb://task-service
+              predicates:
+                - Path=/api/me/tasks/**
+              filters:
+                - StripPrefix=1
 
-        - id: task-service-tasks
-          uri: lb://task-service
-          predicates:
-            - Path=/api/tasks/**
-          filters:
-            - StripPrefix=1
+            - id: task-service-comments
+              uri: lb://task-service
+              predicates:
+                - Path=/api/comments/**
+              filters:
+                - StripPrefix=1
 
-        - id: task-service-my-tasks
-          uri: lb://task-service
-          predicates:
-            - Path=/api/me/tasks/**
-          filters:
-            - StripPrefix=1
-
-        - id: task-service-comments
-          uri: lb://task-service
-          predicates:
-            - Path=/api/comments/**
-          filters:
-            - StripPrefix=1
-
-        - id: task-service-attachments
-          uri: lb://task-service
-          predicates:
-            - Path=/api/attachments/**
-          filters:
-            - StripPrefix=1
+            - id: task-service-attachments
+              uri: lb://task-service
+              predicates:
+                - Path=/api/attachments/**
+              filters:
+                - StripPrefix=1
 
 
-        - id: analytics-service-docker
-          uri: lb://analytics-service
-          predicates:
-            - Path=/api/analytics/**
-          filters:
-            - StripPrefix=1
-        - id: analytics-service-local
-          uri: http://host.docker.internal:8083
-          predicates:
-            - Path=/api/analytics/local/**
-          filters:
-            - StripPrefix=2
-
-      default-filters:
-        - name: Logging
-          args:
-            level: INFO
-            showHeaders: true
-            showBody: false
-            showRequestHeaders: true
-            showResponseHeaders: true
 
   main:
     web-application-type: reactive
@@ -120,8 +78,4 @@ management:
       exposure:
         include: gateway,routes,health,info
       base-path: /actuator
-  endpoint:
-    gateway:
-      access: read_only
-    routes:
-      access: read_only
+

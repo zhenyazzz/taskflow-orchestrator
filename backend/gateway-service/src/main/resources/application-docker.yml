@@ -6,11 +6,8 @@ spring:
     name: api-gateway
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8888}
-  main:
-    web-application-type: reactive
 
-jwt:
-  issuer: auth-service
+
 
 
 eureka:
