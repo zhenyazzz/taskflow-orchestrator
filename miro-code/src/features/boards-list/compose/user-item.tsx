@@ -1,8 +1,12 @@
-import { UserResponse } from "@/shared/api/types";
+
 import { Button } from "@/shared/ui/kit/button.tsx";
+import { ApiSchemas } from "@/shared/api/schema";
+
+
+
 
 interface UserItemProps {
-    user: UserResponse;
+    user: ApiSchemas["UserResponse"];
     onDelete: (userId: string) => void;
     isDeleting?: boolean;
     className?: string;

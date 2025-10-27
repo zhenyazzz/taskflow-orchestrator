@@ -29,9 +29,10 @@ spring:
 
 springdoc:
   api-docs:
-    path: /openapi
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    enabled: true
 
 jwt:
   issuer: auth-service

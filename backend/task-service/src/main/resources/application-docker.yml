@@ -15,12 +15,22 @@ minio:
   secret-key: minio123
   bucket-name: taskflow-attachments
 
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://eureka-server:8761/eureka/
+#    registerWithEureka: true
+#    fetchRegistry: true
+#  instance:
+#    hostname: task-service
+#    preferIpAddress: false
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://eureka-service:8761/eureka/
     registerWithEureka: true
     fetchRegistry: true
   instance:
-    hostname: task-service
+    instance-id: ${spring.application.name}:docker:${spring.application.instance_id:${random.value}}
     preferIpAddress: false
+    hostname: task-service
