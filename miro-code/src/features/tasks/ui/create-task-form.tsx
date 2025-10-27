@@ -3,9 +3,11 @@ import { Input } from "@/shared/ui/kit/input";
 import { Textarea } from "@/shared/ui/kit/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/kit/select";
 import { Label } from "@/shared/ui/kit/label";
-import { CreateTaskRequest } from "@/shared/api/schema/generated";
+import type { components } from "@/shared/api/schema/generated";
+
+type CreateTaskRequest = components["schemas"]["CreateTaskRequest"];
 import { TaskPriority, Department } from "../lib/types";
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { useCreateTask } from "../model/use-create-task";
 
 interface CreateTaskFormProps {

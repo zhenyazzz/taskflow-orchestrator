@@ -1,10 +1,8 @@
-import { useState, useEffect, RefObject } from "react";
+import { useState, RefObject } from "react";
 import { Button } from "@/shared/ui/kit/button";
 import { PlusIcon } from "lucide-react";
 import { useTasksList } from "./model/use-tasks-list";
 import { useTasksFilters } from "./model/use-tasks-filters";
-import { useDebouncedValue } from "@/shared/lib/react";
-import { useCreateTask } from "./model/use-create-task";
 import {
     TasksListLayout,
     TasksListLayoutContent,
@@ -19,7 +17,9 @@ import { TasksPriorityFilterSelect } from "./ui/tasks-priority-filter-select";
 import { TasksDepartmentFilterSelect } from "./ui/tasks-department-filter-select";
 import { TaskItem } from "./ui/task-item";
 import { TaskCard } from "./ui/task-card";
-import { TasksSidebar } from "./ui/tasks-sidebar";
+import type { components } from "@/shared/api/schema/generated";
+
+type CreateTaskRequest = components["schemas"]["CreateTaskRequest"];
 import {
     Dialog,
     DialogContent,
@@ -29,20 +29,12 @@ import {
 } from "@/shared/ui/kit/dialog";
 import { CreateTaskForm } from "./ui/create-task-form";
 import { Link } from "react-router-dom";
-import { CreateTaskRequest } from "@/shared/api/schema/generated";
 import { useDeleteTask } from "./model/use-delete-task";
 import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 
 function TasksListPage() {
     const tasksFilters = useTasksFilters();
-    const tasksQuery = useTasksList({
-        sort: tasksFilters.sort,
-        status: tasksFilters.status,
-        priority: tasksFilters.priority,
-        department: tasksFilters.department,
-        assigneeId: tasksFilters.assigneeId,
-        creatorId: tasksFilters.creatorId,
-    });
+    const tasksQuery = useTasksList();
 
     // Хук удаления
     const { deleteTask, isPending: isDeleting } = useDeleteTask();
@@ -54,7 +46,6 @@ function TasksListPage() {
         deleteTask(taskId);
     };
 
-    const createTaskMutation = useCreateTask();
     const [viewMode, setViewMode] = useState<ViewMode>("list");
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState<CreateTaskRequest>({
@@ -66,20 +57,6 @@ function TasksListPage() {
         assigneeIds: [],
     });
 
-    useEffect(() => {
-        if (createTaskMutation.isSuccess) {
-            setIsOpen(false);
-            createTaskMutation.reset();
-            setFormData({
-                title: "",
-                description: "",
-                priority: "MEDIUM",
-                department: "IT",
-                tags: [],
-                assigneeIds: [],
-            });
-        }
-    }, [createTaskMutation.isSuccess]);
 
     const renderList = () =>
         tasksQuery.tasks.map((task) => (
