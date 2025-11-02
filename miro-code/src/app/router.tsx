@@ -59,6 +59,10 @@ export const router = createBrowserRouter([
             lazy: () => import("@/features/tasks/tasks-list.page"),
           },
           {
+            path: ROUTES.FAVORITE_TASKS,
+            lazy: () => import("@/features/tasks/task-list-favorite"),
+          },
+          {
             path: ROUTES.TASK_DETAILS,
             lazy: () => import("@/features/tasks/task-details.page"),
           },

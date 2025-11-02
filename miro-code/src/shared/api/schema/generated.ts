@@ -1536,6 +1536,10 @@ export interface paths {
                     size?: number;
                     /** @description Filter by task status */
                     status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
+                    /** @description Filter by creator ID */
+                    creatorId?: string;
+                    /** @description Filter by department */
+                    department?: "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER";
                 };
                 header?: never;
                 path: {
