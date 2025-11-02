@@ -136,6 +136,10 @@ paths:
     patch:
       $ref: "./endpoints/tasks.yaml#/updateTaskStatus"
 
+  /tasks/{id}/complete:
+    patch:
+      $ref: "./endpoints/tasks.yaml#/completeTask"
+
   /tasks/{id}/assignees:
     patch:
       $ref: "./endpoints/tasks.yaml#/updateAssignees"

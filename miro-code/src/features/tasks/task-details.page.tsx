@@ -11,10 +11,10 @@ import {
 } from "./ui/task-page-layout";
 import { useTask } from "./model/use-task";
 import { useDeleteTask } from "./model/use-delete-task";
+import { useCompleteTask } from "./model/use-complete-task";
 import { EditTaskForm } from "./ui/edit-task-form";
 import { InfoItem } from "@/shared/ui/kit/info-item";
 import { Badge } from "@/shared/ui/kit/badge";
-import { useUpdateTaskStatus } from "./model/use-update-task-status";
 import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 import { useTaskAttachments } from "./model/use-task-attachments";
 import { useTaskComments } from "./model/use-task-comments";
@@ -34,11 +34,10 @@ function TaskDetailsPage() {
   const deleteTaskMutation = useDeleteTask(
     () => navigate("/tasks"),
   );
-  const [isEditing, setIsEditing] = useState(false);
-
-  const statusMutation = useUpdateTaskStatus(taskId, () => {
-    // Status updated
+  const completeTaskMutation = useCompleteTask(() => {
+    // Task completed - refresh task data
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "0 B";
@@ -138,15 +137,13 @@ function TaskDetailsPage() {
                   </Button>
                   {task.status !== "COMPLETED" && (
                     <Button
-                      onClick={() => {
-                        statusMutation.updateStatus({ status: "COMPLETED" });
-                      }}
+                      onClick={() => completeTaskMutation.completeTask(taskId)}
                       variant="outline"
                       className="transition-colors hover:bg-green-500/10 hover:text-green-600"
-                      disabled={statusMutation.isPending}
+                      disabled={completeTaskMutation.isPending}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      {statusMutation.isPending ? "Завершение..." : "Завершить"}
+                      {completeTaskMutation.isPending ? "Завершение..." : "Завершить"}
                     </Button>
                   )}
                   <Button

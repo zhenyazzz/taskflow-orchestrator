@@ -101,6 +101,15 @@ public class TaskController {
         taskService.deleteTask(id);
     }
 
+    @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<TaskResponse> completeTask(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        log.info("Completing task id={}, userId={}", id, userDetails.getId());
+        return ResponseEntity.ok(taskService.completeTask(id, userDetails.getId()));
+    }
+
 
     @GetMapping("/assignee/{userId}")
     @PreAuthorize("hasRole('USER')")
@@ -108,10 +117,12 @@ public class TaskController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
-            @RequestParam(required = false) String status) {
-        log.info("Retrieving tasks for assignee userId={}, page={}, size={}, status={}",
-                userId, page, size, status);
-        return ResponseEntity.ok(taskService.getTasksByAssignee(userId, PageRequest.of(page, size), status));
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String creatorId,
+            @RequestParam(required = false) String department) {
+        log.info("Retrieving tasks for assignee userId={}, page={}, size={}, status={}, creatorId={}, department={}",
+                userId, page, size, status, creatorId, department);
+        return ResponseEntity.ok(taskService.getTasksByAssignee(userId, PageRequest.of(page, size), status, creatorId, department));
     }
 
     @PatchMapping("/{id}/assignees")

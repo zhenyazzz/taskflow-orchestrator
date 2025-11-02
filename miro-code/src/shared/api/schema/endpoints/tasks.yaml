@@ -426,6 +426,31 @@ deleteTask:
     '404':
       $ref: '../shared/responses.yaml#/NotFoundError'
 
+completeTask:
+  summary: Complete a task
+  description: Marks a task as completed by changing its status to COMPLETED
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the task to complete
+  responses:
+    '200':
+      description: Task completed successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskResponse'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+    '404':
+      $ref: '../shared/responses.yaml#/NotFoundError'
+
 getTasksByAssignee:
   summary: Get tasks by assignee
   description: Returns a paginated list of tasks assigned to a specific user
@@ -457,6 +482,18 @@ getTasksByAssignee:
         type: string
         enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
       description: Filter by task status
+    - in: query
+      name: creatorId
+      schema:
+        type: string
+        format: uuid
+      description: Filter by creator ID
+    - in: query
+      name: department
+      schema:
+        type: string
+        enum: [IT, HR, FINANCE, MARKETING, SALES, CUSTOMER_SERVICE, PRODUCTION, LOGISTICS, RESEARCH_AND_DEVELOPMENT, OTHER]
+      description: Filter by department
   responses:
     '200':
       description: A paginated list of tasks for the assignee

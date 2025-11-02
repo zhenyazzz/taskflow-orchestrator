@@ -189,15 +189,11 @@ public class TaskService {
         kafkaProducerService.sendTaskDeletedEvent(id, taskMapper.toTaskDeletedEvent(updatedTask, details.getId()));
     }
 
-    public Page<TaskResponse> getTasksByAssignee(String userId, PageRequest of, String status) {
-        log.info("getting tasks by assignee: {}", userId);
-        Page<Task> tasks;
-        if (status == null || status.isBlank()) {
-            tasks = taskRepository.findByAssigneeIdsContains(userId, of);
-        } else {
-            TaskStatus st = TaskStatus.valueOf(status);
-            tasks = taskRepository.findByAssigneeIdsContainsAndStatus(userId, st, of);
-        }
+    public Page<TaskResponse> getTasksByAssignee(String userId, Pageable pageable, String status, String creatorId, String department) {
+        log.info("getting tasks by assignee: {}, status={}, creatorId={}, department={}", userId, status, creatorId, department);
+        TaskStatus st = parseEnum(status, TaskStatus.class);
+        Department dep = parseEnum(department, Department.class);
+        Page<Task> tasks = taskRepository.findTasksByAssigneeWithFilters(userId, st, creatorId, dep, pageable);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 

@@ -27,11 +27,28 @@ public class TaskRepositoryImpl implements TaskRepositoryCustom {
     public Page<Task> findTasksByFilters(TaskStatus status, String assigneeId, String creatorId, Department department, Pageable pageable) {
         List<Criteria> filters = new ArrayList<>();
         if (status != null) filters.add(Criteria.where("status").is(status));
-        if (assigneeId != null && !assigneeId.isBlank()) filters.add(Criteria.where("assigneeIds").is(assigneeId));
+        if (assigneeId != null && !assigneeId.isBlank()) filters.add(Criteria.where("assigneeIds").in(assigneeId));
         if (creatorId != null && !creatorId.isBlank()) filters.add(Criteria.where("creatorId").is(creatorId));
         if (department != null) filters.add(Criteria.where("department").is(department));
 
         Criteria criteria = filters.isEmpty() ? new Criteria() : new Criteria().andOperator(filters.toArray(Criteria[]::new));
+        Query query = new Query(criteria).with(pageable);
+
+        List<Task> content = mongoTemplate.find(query, Task.class);
+        long total = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Task.class);
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<Task> findTasksByAssigneeWithFilters(String assigneeId, TaskStatus status, String creatorId, Department department, Pageable pageable) {
+        List<Criteria> filters = new ArrayList<>();
+        // Always filter by assigneeId
+        filters.add(Criteria.where("assigneeIds").in(assigneeId));
+        if (status != null) filters.add(Criteria.where("status").is(status));
+        if (creatorId != null && !creatorId.isBlank()) filters.add(Criteria.where("creatorId").is(creatorId));
+        if (department != null) filters.add(Criteria.where("department").is(department));
+
+        Criteria criteria = new Criteria().andOperator(filters.toArray(Criteria[]::new));
         Query query = new Query(criteria).with(pageable);
 
         List<Task> content = mongoTemplate.find(query, Task.class);

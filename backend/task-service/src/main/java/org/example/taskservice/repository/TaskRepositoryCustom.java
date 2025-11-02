@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface TaskRepositoryCustom {
     Page<Task> findTasksByFilters(TaskStatus status, String assigneeId, String creatorId, Department department, Pageable pageable);
+    Page<Task> findTasksByAssigneeWithFilters(String assigneeId, TaskStatus status, String creatorId, Department department, Pageable pageable);
 }
 
 
