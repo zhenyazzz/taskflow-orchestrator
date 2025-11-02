@@ -1092,7 +1092,7 @@ export interface paths {
         put?: never;
         /**
          * Create a new task
-         * @description Creates a new task in the system
+         * @description Creates a new task in the system with optional file attachments
          */
         post: {
             parameters: {
@@ -1103,7 +1103,11 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["CreateTaskRequest"];
+                    "multipart/form-data": {
+                        task: components["schemas"]["CreateTaskRequest"];
+                        /** @description Optional list of files to attach to the task */
+                        files?: string[];
+                    };
                 };
             };
             responses: {

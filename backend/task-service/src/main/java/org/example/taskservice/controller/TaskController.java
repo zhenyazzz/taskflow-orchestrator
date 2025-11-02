@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
@@ -58,16 +59,18 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TaskResponse> createTask(
-            @Valid @RequestBody CreateTaskRequest createTaskRequest,
+            @Valid @RequestPart("task") CreateTaskRequest createTaskRequest,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        log.info("Creating task: title={}, department={}, user={}",
-                createTaskRequest.title(), createTaskRequest.department(), userDetails.getUsername());
+        log.info("Creating task: title={}, department={}, user={}, filesCount={}",
+                createTaskRequest.title(), createTaskRequest.department(), userDetails.getUsername(),
+                files != null ? files.size() : 0);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.createTask(createTaskRequest, userDetails.getId()));
+                .body(taskService.createTask(createTaskRequest, userDetails.getId(), files));
     }
 
     @PutMapping("/{id}")

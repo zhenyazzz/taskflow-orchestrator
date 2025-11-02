@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PathParams, ROUTES } from "@/shared/model/routes";
-import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle, File, Download } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
-import { TasksSidebar } from "./ui/tasks-sidebar";
 import {
     TaskPageLayout,
     TaskPageLayoutContent,
@@ -17,6 +16,10 @@ import { InfoItem } from "@/shared/ui/kit/info-item";
 import { Badge } from "@/shared/ui/kit/badge";
 import { useUpdateTaskStatus } from "./model/use-update-task-status";
 import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
+import { useTaskAttachments } from "./model/use-task-attachments";
+import { components } from "@/shared/api/schema/generated";
+
+type AttachmentResponse = components["schemas"]["AttachmentResponse"];
 
 function TaskDetailsPage() {
   const params = useParams<PathParams[typeof ROUTES.TASK_DETAILS]>();
@@ -24,15 +27,22 @@ function TaskDetailsPage() {
   const taskId = params.id!;
 
   const { data: task, isLoading, isError } = useTask(taskId);
+  const { data: attachments, isLoading: isLoadingAttachments } = useTaskAttachments(taskId);
   const deleteTaskMutation = useDeleteTask(
     () => navigate("/tasks"),
   );
   const [isEditing, setIsEditing] = useState(false);
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const statusMutation = useUpdateTaskStatus(taskId, () => {
-    setIsUpdatingStatus(false);
+    // Status updated
   });
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "0 B";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
 
   const renderLoading = () => (
     <div className="flex justify-center items-center py-12">
@@ -126,7 +136,6 @@ function TaskDetailsPage() {
                   {task.status !== "COMPLETED" && (
                     <Button
                       onClick={() => {
-                        setIsUpdatingStatus(true);
                         statusMutation.updateStatus({ status: "COMPLETED" });
                       }}
                       variant="outline"
@@ -181,7 +190,7 @@ function TaskDetailsPage() {
                   <div className="space-y-4">
                     <InfoItem
                       label="Название"
-                      value={task.title}
+                      value={task.title || ""}
                     />
                     {task.description && (
                       <InfoItem
@@ -192,26 +201,26 @@ function TaskDetailsPage() {
                     <InfoItem
                       label="Статус"
                       value={
-                        <Badge className={statusColors[task.status]}>
-                          {statusLabels[task.status]}
+                        <Badge className={statusColors[task.status || ""]}>
+                          {statusLabels[task.status || ""]}
                         </Badge>
                       }
                     />
                     <InfoItem
                       label="Приоритет"
                       value={
-                        <Badge className={priorityColors[task.priority]}>
-                          {priorityLabels[task.priority]}
+                        <Badge className={priorityColors[task.priority || ""]}>
+                          {priorityLabels[task.priority || ""]}
                         </Badge>
                       }
                     />
                     <InfoItem
                       label="Отдел"
-                      value={task.department}
+                      value={task.department || ""}
                     />
                     <InfoItem
                       label="Дата создания"
-                      value={new Date(task.createdAt).toLocaleDateString(
+                      value={new Date(task.createdAt || "").toLocaleDateString(
                         "ru-RU",
                         { year: "numeric", month: "long", day: "numeric" }
                       )}
@@ -219,18 +228,18 @@ function TaskDetailsPage() {
                     {task.dueDate && (
                       <InfoItem
                         label="Срок выполнения"
-                        value={new Date(task.dueDate).toLocaleDateString(
+                        value={new Date(task.dueDate || "").toLocaleDateString(
                           "ru-RU",
                           { year: "numeric", month: "long", day: "numeric" }
                         )}
                       />
                     )}
-                    {task.tags.length > 0 && (
+                    {task.tags && task.tags.length > 0 && (
                       <InfoItem
                         label="Теги"
                         value={
                           <div className="flex gap-1 flex-wrap">
-                            {task.tags.map((tag, index) => (
+                            {task.tags?.map((tag, index) => (
                               <Badge key={index} variant="secondary">
                                 {tag}
                               </Badge>
@@ -239,6 +248,52 @@ function TaskDetailsPage() {
                         }
                       />
                     )}
+                    <InfoItem
+                      label="Файлы"
+                      value={
+                        isLoadingAttachments ? (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm">Загрузка файлов...</span>
+                          </div>
+                        ) : attachments && attachments.length > 0 ? (
+                          <div className="space-y-2">
+                            {attachments.map((attachment: AttachmentResponse) => (
+                              <div
+                                key={attachment.id}
+                                className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <File className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">
+                                      {attachment.fileName || "Без названия"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatFileSize(attachment.size)}
+                                      {attachment.fileType && ` • ${attachment.fileType}`}
+                                    </p>
+                                  </div>
+                                </div>
+                                {attachment.url && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="flex-shrink-0"
+                                    onClick={() => window.open(attachment.url, "_blank")}
+                                    title="Скачать файл"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Нет прикрепленных файлов</span>
+                        )
+                      }
+                    />
                   </div>
                 </div>
               )}

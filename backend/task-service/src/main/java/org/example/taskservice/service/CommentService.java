@@ -42,7 +42,7 @@ public class CommentService {
         taskRepository.save(task);
 
         log.info("Comment added. ID: {}, Task: {}", comment.getId(), taskId);
-        kafkaProducerService.sendCommentCreatedEvent(comment.getId(), commentMapper.toCommentCreatedEvent(comment));
+        kafkaProducerService.sendCommentCreatedEvent(comment.getId(), commentMapper.toCommentCreatedEvent(comment, task.getId()));
         return commentMapper.toCommentResponse(comment);
     }
 
@@ -70,7 +70,7 @@ public class CommentService {
         task.getComments().remove(comment);
         taskRepository.save(task);
         log.info("Comment {} deleted", commentId);
-        kafkaProducerService.sendCommentDeletedEvent(commentId, commentMapper.toCommentDeletedEvent(comment));
+        kafkaProducerService.sendCommentDeletedEvent(commentId, commentMapper.toCommentDeletedEvent(comment, task.getId()));
     }
 
     @Transactional
@@ -86,7 +86,7 @@ public class CommentService {
         commentMapper.updateComment(request, comment);
         taskRepository.save(task);
 
-        kafkaProducerService.sendCommentUpdatedEvent(commentId, commentMapper.toCommentUpdatedEvent(comment));
+        kafkaProducerService.sendCommentUpdatedEvent(commentId, commentMapper.toCommentUpdatedEvent(comment, task.getId()));
         return commentMapper.toCommentResponse(comment);
     }
 

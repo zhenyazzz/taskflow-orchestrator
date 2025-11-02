@@ -302,15 +302,31 @@ getTaskById:
 
 createTask:
   summary: Create a new task
-  description: Creates a new task in the system
+  description: Creates a new task in the system with optional file attachments
   security:
     - bearerAuth: []
   requestBody:
     required: true
     content:
-      application/json:
+      multipart/form-data:
         schema:
-          $ref: '#/schemas/CreateTaskRequest'
+          type: object
+          required:
+            - task
+          properties:
+            task:
+              $ref: '#/schemas/CreateTaskRequest'
+            files:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Optional list of files to attach to the task
+        encoding:
+          task:
+            contentType: application/json
+          files:
+            contentType: application/octet-stream
   responses:
     '201':
       description: Task created successfully

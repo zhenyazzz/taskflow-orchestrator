@@ -7,7 +7,6 @@ public record CommentCreatedEvent(
         String content,
         String authorId,
         Instant createdAt,
-        Instant updatedAt,
         String taskId
 ) {
 }

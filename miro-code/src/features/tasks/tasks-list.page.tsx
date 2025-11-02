@@ -34,7 +34,15 @@ import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 
 function TasksListPage() {
     const tasksFilters = useTasksFilters();
-    const tasksQuery = useTasksList();
+    const tasksQuery = useTasksList({
+        sort: tasksFilters.sort,
+        search: tasksFilters.search,
+        status: tasksFilters.status as "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED" | null,
+        priority: tasksFilters.priority as "LOW" | "MEDIUM" | "HIGH" | null,
+        department: tasksFilters.department as "IT" | "HR" | "FINANCE" | "MARKETING" | "SALES" | "CUSTOMER_SERVICE" | "PRODUCTION" | "LOGISTICS" | "RESEARCH_AND_DEVELOPMENT" | "OTHER" | null,
+        assigneeId: tasksFilters.assigneeId,
+        creatorId: tasksFilters.creatorId,
+    });
 
     // Хук удаления
     const { deleteTask, isPending: isDeleting } = useDeleteTask();
@@ -97,7 +105,7 @@ function TasksListPage() {
                                     Создать задачу
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                     <DialogTitle>Создать новую задачу</DialogTitle>
                                 </DialogHeader>

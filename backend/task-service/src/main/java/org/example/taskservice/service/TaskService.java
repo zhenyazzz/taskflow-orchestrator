@@ -27,8 +27,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.time.Duration;
 import java.time.Instant;
+import org.springframework.web.multipart.MultipartFile;
+import org.example.taskservice.service.AttachmentService;
 
 @Service
 @Slf4j
@@ -38,6 +41,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final CommentMapper commentMapper;
     private final KafkaProducerService kafkaProducerService;
+    private final AttachmentService attachmentService;
 
     public List<TaskResponse> getAllTasks() {
         log.info("getting all tasks");
@@ -59,12 +63,30 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(@Valid CreateTaskRequest createTaskRequest, String id) {
+    public TaskResponse createTask(@Valid CreateTaskRequest createTaskRequest, String id, List<MultipartFile> files) {
         log.info("creating task: {}", createTaskRequest);
         Task task = taskMapper.toTask(createTaskRequest, id);
         Task savedTask = taskRepository.save(task);
         log.debug("Task created with ID: {}", savedTask.getId());
+        
+        if (files != null && !files.isEmpty()) {
+            log.info("Adding {} files to task {}", files.size(), savedTask.getId());
+            attachmentService.addAttachments(savedTask.getId(), files);
+        }
+        
         kafkaProducerService.sendTaskCreatedEvent(savedTask.getId(), taskMapper.toTaskCreatedEvent(savedTask));
+        
+        Set<String> assigneeIds = savedTask.getAssigneeIds();
+        if (assigneeIds != null && !assigneeIds.isEmpty()) {
+            log.info("Sending TaskSubscribedEvent for {} assignees", assigneeIds.size());
+            for (String assigneeId : assigneeIds) {
+                kafkaProducerService.sendTaskSubscribedEvent(
+                    savedTask.getId(), 
+                    taskMapper.toTaskSubscribedEvent(savedTask, assigneeId)
+                );
+            }
+        }
+        
         return taskMapper.toResponse(savedTask, commentMapper);
     }
 

@@ -1,6 +1,8 @@
+import { ReactNode } from "react";
+
 interface InfoItemProps {
   label: string;
-  value: string;
+  value: string | ReactNode;
   className?: string;
 }
 

@@ -36,12 +36,26 @@ public interface CommentMapper {
 
     CommentResponse toCommentResponse(Comment comment);
 
-    CommentCreatedEvent toCommentCreatedEvent(Comment comment);
+    @Mappings({
+            @Mapping(target = "taskId", source = "taskId"),
+            @Mapping(target = "authorId", source = "comment.authorId"),
+            @Mapping(target = "content", source = "comment.content"),
+            @Mapping(target = "createdAt", source = "comment.createdAt"),
+    })
+    CommentCreatedEvent toCommentCreatedEvent(Comment comment, String taskId);
 
     @Mappings({
-            @Mapping(target = "deletedAt", expression = "java(java.time.Instant.now())")
+            @Mapping(target = "deletedAt", expression = "java(java.time.Instant.now())"),
+            @Mapping(target = "taskId", source = "taskId")
     })
-    CommentDeletedEvent toCommentDeletedEvent(Comment comment);
+    CommentDeletedEvent toCommentDeletedEvent(Comment comment, String taskId);
 
-    CommentUpdatedEvent toCommentUpdatedEvent(Comment comment);
+    @Mappings({
+            @Mapping(target = "taskId", source = "taskId"),
+            @Mapping(target = "authorId", source = "comment.authorId"),
+            @Mapping(target = "content", source = "comment.content"),
+            @Mapping(target = "createdAt", source = "comment.createdAt"),
+            @Mapping(target = "updatedAt", source = "comment.updatedAt"),
+    })
+    CommentUpdatedEvent toCommentUpdatedEvent(Comment comment, String taskId);
 }
