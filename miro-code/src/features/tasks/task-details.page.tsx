@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PathParams, ROUTES } from "@/shared/model/routes";
-import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle, File, Download } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle, File, Download, MessageSquare } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
 import {
@@ -17,9 +17,11 @@ import { Badge } from "@/shared/ui/kit/badge";
 import { useUpdateTaskStatus } from "./model/use-update-task-status";
 import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 import { useTaskAttachments } from "./model/use-task-attachments";
+import { useTaskComments } from "./model/use-task-comments";
 import { components } from "@/shared/api/schema/generated";
 
 type AttachmentResponse = components["schemas"]["AttachmentResponse"];
+type CommentResponse = components["schemas"]["CommentResponse"];
 
 function TaskDetailsPage() {
   const params = useParams<PathParams[typeof ROUTES.TASK_DETAILS]>();
@@ -28,6 +30,7 @@ function TaskDetailsPage() {
 
   const { data: task, isLoading, isError } = useTask(taskId);
   const { data: attachments, isLoading: isLoadingAttachments } = useTaskAttachments(taskId);
+  const { data: commentsData, isLoading: isLoadingComments } = useTaskComments(taskId);
   const deleteTaskMutation = useDeleteTask(
     () => navigate("/tasks"),
   );
@@ -294,6 +297,62 @@ function TaskDetailsPage() {
                         )
                       }
                     />
+                  </div>
+
+                  {/* Comments Section */}
+                  <div className="border-t pt-6 mt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold">Комментарии</h3>
+                      {commentsData?.content && commentsData.content.length > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {commentsData.totalElements}
+                        </Badge>
+                      )}
+                    </div>
+                    {isLoadingComments ? (
+                      <div className="flex items-center gap-2 text-muted-foreground py-4">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Загрузка комментариев...</span>
+                      </div>
+                    ) : commentsData?.content && commentsData.content.length > 0 ? (
+                      <div className="space-y-4">
+                        {commentsData.content.map((comment: CommentResponse) => (
+                          <div
+                            key={comment.id}
+                            className="p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                                  {comment.content}
+                                </p>
+                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                  {comment.createdAt && (
+                                    <span>
+                                      {new Date(comment.createdAt).toLocaleString("ru-RU", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </span>
+                                  )}
+                                  {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                                    <span className="text-xs">(изменено)</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground py-4">
+                        Нет комментариев
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
