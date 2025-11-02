@@ -116,7 +116,7 @@ function UserDetailsPage() {
       }
     >
       <UserPageLayoutContent>
-        <div className="max-w-2xl py-6">
+        <div className="max-w-2xl mx-auto">
           {isLoading ? (
             renderLoading()
           ) : isError || !user ? (

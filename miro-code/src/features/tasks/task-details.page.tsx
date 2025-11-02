@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PathParams, ROUTES } from "@/shared/model/routes";
-import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle, File, Download, MessageSquare } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Edit3, Trash2, CheckCircle, File, Download, MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/shared/ui/kit/button";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/kit/alert";
 import {
@@ -18,6 +18,11 @@ import { useUpdateTaskStatus } from "./model/use-update-task-status";
 import {BoardsSidebar} from "@/features/boards-list/ui/task/boards-sidebar.tsx";
 import { useTaskAttachments } from "./model/use-task-attachments";
 import { useTaskComments } from "./model/use-task-comments";
+import { CreateCommentForm } from "./ui/create-comment-form";
+import { EditCommentForm } from "./ui/edit-comment-form";
+import { useAllUsers } from "./model/use-all-users";
+import { useDeleteComment } from "./model/use-delete-comment";
+import { useSession } from "@/shared/model/session";
 import { components } from "@/shared/api/schema/generated";
 
 type AttachmentResponse = components["schemas"]["AttachmentResponse"];
@@ -31,10 +36,22 @@ function TaskDetailsPage() {
   const { data: task, isLoading, isError } = useTask(taskId);
   const { data: attachments, isLoading: isLoadingAttachments } = useTaskAttachments(taskId);
   const { data: commentsData, isLoading: isLoadingComments } = useTaskComments(taskId);
+  const { data: allUsers, isLoading: isLoadingUsers } = useAllUsers();
   const deleteTaskMutation = useDeleteTask(
     () => navigate("/tasks"),
   );
   const [isEditing, setIsEditing] = useState(false);
+  const [isCreatingComment, setIsCreatingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  
+  const { session } = useSession();
+  const isAdmin = session?.roles?.includes("ROLE_ADMIN") || false;
+  const currentUserId = session?.userId;
+  
+  const deleteCommentMutation = useDeleteComment(taskId, () => {
+    setDeletingCommentId(null);
+  });
 
   const statusMutation = useUpdateTaskStatus(taskId, () => {
     // Status updated
@@ -131,7 +148,7 @@ function TaskDetailsPage() {
                   <Button
                     onClick={() => setIsEditing(true)}
                     variant="outline"
-                    className="transition-colors hover:bg-emerald-500/10 hover:text-emerald-600"
+                    className="transition-colors hover:bg-blue-200/80 hover:text-blue-700"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Редактировать
@@ -166,7 +183,7 @@ function TaskDetailsPage() {
       }
     >
       <TaskPageLayoutContent>
-        <div className="max-w-2xl py-6">
+        <div className="max-w-2xl mx-auto">
           {isLoading ? (
             renderLoading()
           ) : isError || !task ? (
@@ -221,6 +238,32 @@ function TaskDetailsPage() {
                       label="Отдел"
                       value={task.department || ""}
                     />
+                    {task.assigneeIds && task.assigneeIds.length > 0 && (
+                      <InfoItem
+                        label="Исполнители"
+                        value={
+                          isLoadingUsers ? (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-sm">Загрузка...</span>
+                            </div>
+                          ) : (
+                            <div className="flex gap-1 flex-wrap">
+                              {task.assigneeIds.map((assigneeId) => {
+                                const user = allUsers?.find((u) => u.id === assigneeId);
+                                return (
+                                  <Badge key={assigneeId} variant="secondary">
+                                    {user
+                                      ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username
+                                      : assigneeId}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          )
+                        }
+                      />
+                    )}
                     <InfoItem
                       label="Дата создания"
                       value={new Date(task.createdAt || "").toLocaleDateString(
@@ -301,15 +344,39 @@ function TaskDetailsPage() {
 
                   {/* Comments Section */}
                   <div className="border-t pt-6 mt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold">Комментарии</h3>
-                      {commentsData?.content && commentsData.content.length > 0 && (
-                        <Badge variant="secondary" className="ml-2">
-                          {commentsData.totalElements}
-                        </Badge>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold">Комментарии</h3>
+                        {commentsData?.content && commentsData.content.length > 0 && (
+                          <Badge variant="secondary" className="ml-2">
+                            {commentsData.totalElements}
+                          </Badge>
+                        )}
+                      </div>
+                      {!isCreatingComment && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="transition-colors hover:bg-blue-200/80 hover:text-blue-700"
+                          onClick={() => setIsCreatingComment(true)}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Добавить комментарий
+                        </Button>
                       )}
                     </div>
+                    {isCreatingComment && (
+                      <div className="mb-6 p-4 border rounded-lg bg-card">
+                        <CreateCommentForm
+                          taskId={taskId}
+                          onSuccess={() => {
+                            setIsCreatingComment(false);
+                          }}
+                          onCancel={() => setIsCreatingComment(false)}
+                        />
+                      </div>
+                    )}
                     {isLoadingComments ? (
                       <div className="flex items-center gap-2 text-muted-foreground py-4">
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -317,36 +384,91 @@ function TaskDetailsPage() {
                       </div>
                     ) : commentsData?.content && commentsData.content.length > 0 ? (
                       <div className="space-y-4">
-                        {commentsData.content.map((comment: CommentResponse) => (
-                          <div
-                            key={comment.id}
-                            className="p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-foreground whitespace-pre-wrap break-words">
-                                  {comment.content}
-                                </p>
-                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                  {comment.createdAt && (
-                                    <span>
-                                      {new Date(comment.createdAt).toLocaleString("ru-RU", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>
-                                  )}
-                                  {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
-                                    <span className="text-xs">(изменено)</span>
-                                  )}
-                                </div>
-                              </div>
+                        {commentsData.content.map((comment: CommentResponse) => {
+                          const isAuthor = comment.authorId === currentUserId;
+                          const canEdit = isAuthor;
+                          const canDelete = isAuthor || isAdmin;
+                          const isEditingThis = editingCommentId === comment.id;
+                          const isDeletingThis = deletingCommentId === comment.id && deleteCommentMutation.isPending;
+
+                          return (
+                            <div
+                              key={comment.id}
+                              className="p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                            >
+                              {isEditingThis ? (
+                                <EditCommentForm
+                                  taskId={taskId}
+                                  comment={comment}
+                                  onSuccess={() => setEditingCommentId(null)}
+                                  onCancel={() => setEditingCommentId(null)}
+                                />
+                              ) : (
+                                <>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                                        {comment.content}
+                                      </p>
+                                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                        {comment.createdAt && (
+                                          <span>
+                                            {new Date(comment.createdAt).toLocaleString("ru-RU", {
+                                              year: "numeric",
+                                              month: "long",
+                                              day: "numeric",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })}
+                                          </span>
+                                        )}
+                                        {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                                          <span className="text-xs">(изменено)</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {(canEdit || canDelete) && (
+                                      <div className="flex items-center gap-1">
+                                        {canEdit && (
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setEditingCommentId(comment.id || null)}
+                                            className="h-8 w-8 p-0"
+                                            title="Редактировать"
+                                          >
+                                            <Edit3 className="w-4 h-4" />
+                                          </Button>
+                                        )}
+                                        {canDelete && (
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                              if (window.confirm("Вы уверены, что хотите удалить этот комментарий?")) {
+                                                setDeletingCommentId(comment.id || null);
+                                                deleteCommentMutation.deleteComment(comment.id || "");
+                                              }
+                                            }}
+                                            disabled={isDeletingThis}
+                                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                            title="Удалить"
+                                          >
+                                            {isDeletingThis ? (
+                                              <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                              <Trash2 className="w-4 h-4" />
+                                            )}
+                                          </Button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
+                              )}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-sm text-muted-foreground py-4">

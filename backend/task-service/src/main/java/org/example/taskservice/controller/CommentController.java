@@ -49,9 +49,9 @@ public class CommentController {
             @PathVariable String taskId,
             @PathVariable String commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
-        log.info("addComment taskId={}, request={}", taskId, request);
+        log.info("updateComment taskId={}, commentId={}, request={}", taskId, commentId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(commentService.updateComment(taskId,commentId, request));
+                .body(commentService.updateComment(taskId, commentId, request));
     }
 
     @DeleteMapping("/task/{taskId}/{commentId}")

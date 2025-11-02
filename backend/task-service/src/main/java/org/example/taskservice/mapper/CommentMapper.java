@@ -40,7 +40,7 @@ public interface CommentMapper {
             @Mapping(target = "taskId", source = "taskId"),
             @Mapping(target = "authorId", source = "comment.authorId"),
             @Mapping(target = "content", source = "comment.content"),
-            @Mapping(target = "createdAt", source = "comment.createdAt"),
+            @Mapping(target = "createdAt", source = "comment.createdAt")
     })
     CommentCreatedEvent toCommentCreatedEvent(Comment comment, String taskId);
 

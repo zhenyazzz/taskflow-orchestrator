@@ -55,7 +55,7 @@ function ProfileEditPage() {
             }
         >
             <UserPageLayoutContent>
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="max-w-4xl mx-auto">
                     {isUserLoading ? (
                         <div className="flex justify-center">
                             <Loader2 className="w-6 h-6 animate-spin" />
