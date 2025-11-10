@@ -1,14 +1,10 @@
 package org.example.authservice.mapper;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.example.authservice.dto.JwtResponse;
 import org.example.authservice.dto.RegisterRequest;
 
 import org.example.authservice.model.User;
 import org.example.authservice.util.JwtUtil;
-import org.example.events.enums.Role;
 import org.example.events.user.UserCreatedEvent;
 import org.example.events.user.UserLoginEvent;
 import org.example.events.user.UserProfileUpdatedEvent;
@@ -20,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public interface UserMapper {
 
     @Mapping(target = "password", source = "password", qualifiedByName = "encodePassword")
-    @Mapping(target = "roles", expression = "java(java.util.Set.of(Role.ROLE_USER))")
+    @Mapping(target = "roles", expression = "java(java.util.Set.of(org.example.events.enums.Role.ROLE_USER))")
     @Mapping(target = "id", ignore = true)
     User toUser(RegisterRequest registerRequest, @Context PasswordEncoder passwordEncoder);
 
@@ -28,7 +24,7 @@ public interface UserMapper {
     User toUser(UserCreatedEvent event, @Context PasswordEncoder passwordEncoder);
 
     @Mapping(target = "id")
-    @Mapping(target = "token", expression = "java(jwtUtil.generateTokenFromUser(user))")
+    @Mapping(target = "token", expression = "java(jwtUtil.generateAccessToken(user))")
     JwtResponse toJwtResponse(User user, @Context JwtUtil jwtUtil);
 
     @Mappings({

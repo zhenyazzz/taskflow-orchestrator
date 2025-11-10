@@ -15,7 +15,7 @@ export interface paths {
         put?: never;
         /**
          * Вход пользователя в систему
-         * @description Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным ресурсам
+         * @description Аутентифицирует пользователя и возвращает access токен. Refresh токен устанавливается в HttpOnly cookie автоматически.
          */
         post: {
             parameters: {
@@ -30,9 +30,11 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Вход выполнен успешно */
+                /** @description Вход выполнен успешно. Refresh токен установлен в HttpOnly cookie. */
                 200: {
                     headers: {
+                        /** @description Refresh токен в HttpOnly cookie */
+                        "Set-Cookie"?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -60,7 +62,7 @@ export interface paths {
         put?: never;
         /**
          * Регистрация нового пользователя
-         * @description Создает нового пользователя в системе с указанными учетными данными
+         * @description Создает нового пользователя в системе с указанными учетными данными. После регистрации возвращает access токен, refresh токен устанавливается в HttpOnly cookie автоматически.
          */
         post: {
             parameters: {
@@ -75,9 +77,11 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Регистрация выполнена успешно */
+                /** @description Регистрация выполнена успешно. Refresh токен установлен в HttpOnly cookie. */
                 201: {
                     headers: {
+                        /** @description Refresh токен в HttpOnly cookie */
+                        "Set-Cookie"?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -246,7 +250,7 @@ export interface paths {
         put?: never;
         /**
          * Обновление JWT токена
-         * @description Обновляет access токен, используя refresh токен из куки.
+         * @description Обновляет access токен, используя refresh токен из HttpOnly cookie. Refresh токен должен быть установлен в cookie браузером при логине/регистрации.
          */
         post: {
             parameters: {
@@ -257,9 +261,11 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Токен успешно обновлен */
+                /** @description Токен успешно обновлен. Новый refresh токен устанавливается в HttpOnly cookie автоматически. */
                 200: {
                     headers: {
+                        /** @description Новый refresh токен в HttpOnly cookie */
+                        "Set-Cookie"?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -267,6 +273,83 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["UnauthorizedError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выход пользователя
+         * @description Отзывает текущий refresh токен и удаляет cookie. Требует наличия refresh токена в cookie.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Выход выполнен успешно. Refresh токен отозван, cookie удалена. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["UnauthorizedError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выход со всех устройств
+         * @description Отзывает все refresh токены пользователя на всех устройствах. Требует валидный access токен в заголовке Authorization.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Все токены отозваны успешно. Cookie удалена. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["UnauthorizedError"];
+                403: components["responses"]["ForbiddenError"];
             };
         };
         delete?: never;
@@ -1412,6 +1495,50 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+                404: components["responses"]["NotFoundError"];
+            };
+        };
+        trace?: never;
+    };
+    "/tasks/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Complete a task
+         * @description Marks a task as completed by changing its status to COMPLETED
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the task to complete */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Task completed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskResponse"];
+                    };
+                };
                 403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
             };

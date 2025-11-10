@@ -5,15 +5,16 @@ import { publicFetchClient } from "../api/instance";
 import { components } from "../api/schema/generated";
 
 type Session = {
-  sub: string; // username
-  userId: string; // UUID
-  roles: string[]; // array of roles: EMPLOYEE, ADMIN, MANAGER
+  sub: string;
+  userId: string;
+  roles: string[];
   exp: number;
   iat: number;
-  iss: string; // issuer
+  iss: string;
 };
 
-const TOKEN_KEY = "token";
+const TOKEN_KEY = "token"; 
+
 
 let refreshTokenPromise: Promise<string | null> | null = null;
 
@@ -21,11 +22,23 @@ export const useSession = createGStore(() => {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
 
   const login = (token: string) => {
-    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(TOKEN_KEY, token); 
     setToken(token);
+    
   };
 
-  const logout = () => {
+  const logout = async () => {
+    
+    try {
+      await publicFetchClient.POST('/auth/logout' as const, {
+        body: {},
+       
+      });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    
+   
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
   };
@@ -45,20 +58,21 @@ export const useSession = createGStore(() => {
       return null;
     }
 
-    // Если токен истек, пытаемся обновить его
+    
     if (currentSession.exp < Date.now() / 1000) {
       if (!refreshTokenPromise) {
         refreshTokenPromise = publicFetchClient.POST('/auth/refresh' as const, {
           body: {},
-        }).then(({ data, error }: { data?: components['schemas']['JwtResponse'], error?: any }) => {
+        }).then(({ data, error }) => {
           refreshTokenPromise = null;
           if (error) {
             logout();
             return null;
           }
-          if (data?.accessToken) {
-            login(data.accessToken);
-            return data.accessToken;
+          
+          if (data?.token) {
+            login(data.token);  
+            return data.token;
           }
           return null;
         }).catch(() => {
@@ -70,13 +84,8 @@ export const useSession = createGStore(() => {
       return refreshTokenPromise;
     }
 
-    return token;
+    return token;  
   };
 
   return { refreshToken, login, logout, session };
 });
-
-export const useIsAdmin = () => {
-  const { session } = useSession();
-  return session?.roles.includes("ADMIN") || false;
-};

@@ -61,3 +61,11 @@ management:
     kafka:
       enabled: true
 
+jwt:
+  refresh-token-expiration: 604800000  # 7 дней в миллисекундах
+  cookie-name: refreshToken
+  cookie-secure: true  # true для production (HTTPS), false для dev
+  cookie-http-only: true
+  cookie-same-site: strict
+  cleanup-cron: "0 0 2 * * ?"  # Каждый день в 2:00 утра
+

@@ -26,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +54,6 @@ public class UserService {
 
     public Page<UserResponse> getUsersWithPagination(int page, int size, String sort, String username, String role, String status) {
         Pageable pageable = PageRequest.of(page, size, Sort.unsorted());
-        
         String orderByClause = convertSortToOrderByClause(sort);
 
         Page<User> users = userRepository.findUsersWithFilters(username, role, status, orderByClause, pageable);

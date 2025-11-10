@@ -14,12 +14,12 @@ export function TasksListLayout({
                                     children,
                                 }: TasksListLayoutProps) {
     return (
-        <div className="flex h-screen">
-            {sidebar}
-            <div className="flex-1 flex flex-col">
-                {header && <div className="p-6 border-b">{header}</div>}
-                {filters && <div className="p-4 border-b">{filters}</div>}
-                <div className="flex-1 p-6 overflow-auto">{children}</div>
+        <div className="flex h-screen w-full overflow-hidden">
+            {sidebar && <div className="flex-shrink-0">{sidebar}</div>}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {header && <div className="p-6 border-b min-w-0 overflow-x-auto">{header}</div>}
+                {filters && <div className="p-4 border-b min-w-0 overflow-x-auto">{filters}</div>}
+                <div className="flex-1 p-6 overflow-auto min-w-0">{children}</div>
             </div>
         </div>
     );
@@ -37,12 +37,12 @@ export function TasksListLayoutHeader({
                                           actions,
                                       }: TasksListLayoutHeaderProps) {
     return (
-        <div className="flex justify-between items-center">
-            <div>
-                <h1 className="text-2xl font-bold">{title}</h1>
-                <p className="text-gray-600">{description}</p>
+        <div className="flex justify-between items-center gap-4 min-w-0">
+            <div className="min-w-0 flex-1">
+                <h1 className="text-2xl font-bold truncate">{title}</h1>
+                <p className="text-gray-600 truncate">{description}</p>
             </div>
-            <div className="flex gap-2">{actions}</div>
+            <div className="flex gap-2 flex-shrink-0">{actions}</div>
         </div>
     );
 }
@@ -59,12 +59,12 @@ export function TasksListLayoutFilters({
                                            actions,
                                        }: TasksListLayoutFiltersProps) {
     return (
-        <div className="flex justify-between items-center">
-            <div className="flex gap-4">
+        <div className="flex justify-between items-center gap-4 min-w-0">
+            <div className="flex gap-4 min-w-0 flex-1 overflow-x-auto">
                 {sort}
                 {filters}
             </div>
-            {actions}
+            <div className="flex-shrink-0">{actions}</div>
         </div>
     );
 }
@@ -94,12 +94,12 @@ export function TasksListLayoutContent({
     if (isEmpty) return <div>Задачи не найдены</div>;
 
     return (
-        <div>
+        <div className="w-full max-w-full">
             <div
                 className={
                     mode === "grid"
-                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                        : "space-y-4"
+                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full"
+                        : "space-y-4 w-full"
                 }
             >
                 {mode === "list" ? renderList() : renderGrid()}

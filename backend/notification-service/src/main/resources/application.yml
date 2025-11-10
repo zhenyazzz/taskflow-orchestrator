@@ -44,6 +44,10 @@ app:
   cache:
     user-ttl: 30
     user-key-prefix: "user:"
+  grpc:
+    user-service:
+      host: localhost
+      port: 9090
   notification:
     channels:
       websocket:

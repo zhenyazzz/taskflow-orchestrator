@@ -6,7 +6,12 @@ COPY common-kafka-events/ ./common-kafka-events/
 RUN cd common-kafka-events \
     && mvn -q -DskipTests install
 
-# Build auth-service (now that dependency is available)
+# Build and install common-grpc into the local Maven repo
+COPY common-grpc/ ./common-grpc/
+RUN cd common-grpc \
+    && mvn -q -DskipTests install
+
+# Build user-service (now that dependencies are available)
 COPY user-service/ ./user-service/
 RUN cd user-service \
     && mvn -q clean package -DskipTests

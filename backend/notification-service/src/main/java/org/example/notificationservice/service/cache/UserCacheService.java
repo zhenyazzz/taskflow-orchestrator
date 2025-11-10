@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.notificationservice.dto.response.UserDto;
+import org.example.notificationservice.dto.response.UserResponse;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class UserCacheService {
 
-    private final ReactiveRedisTemplate<String, UserDto> redisTemplate;
+    private final ReactiveRedisTemplate<String, UserResponse> redisTemplate;
 
     @Value("${app.cache.user-ttl}")
     private long CACHE_TTL_MINUTES;
@@ -23,7 +23,7 @@ public class UserCacheService {
     @Value("${app.cache.user-key-prefix}")
     private String CACHE_KEY_PREFIX;
 
-    public Mono<Void> cacheUser(String userId, UserDto user) {
+    public Mono<Void> cacheUser(String userId, UserResponse user) {
         String cacheKey = generateCacheKey(userId);
         return redisTemplate.opsForValue().set(cacheKey, user)
                 .then(redisTemplate.expire(cacheKey, Duration.ofMinutes(CACHE_TTL_MINUTES)))
@@ -32,7 +32,7 @@ public class UserCacheService {
                 .then();
     }
 
-    public Mono<UserDto> getUserFromCache(String userId) {
+    public Mono<UserResponse> getUserFromCache(String userId) {
         String cacheKey = generateCacheKey(userId);
         return redisTemplate.opsForValue().get(cacheKey)
                 .doOnError(e -> log.error("Failed to get user from cache with ID {}: {}", userId, e.getMessage(), e));
@@ -54,7 +54,7 @@ public class UserCacheService {
 
     public Mono<String> getCachedEmail(String userId) {
         return getUserFromCache(userId)
-                .map(UserDto::email)
+                .map(UserResponse::email)
                 .defaultIfEmpty(null);
     }
 

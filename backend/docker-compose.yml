@@ -192,6 +192,7 @@ services:
     hostname: user-service
     ports:
       - "8082:8082"
+      - "9090:9090"  # gRPC port
     depends_on:
       eureka-service:
         condition: service_healthy

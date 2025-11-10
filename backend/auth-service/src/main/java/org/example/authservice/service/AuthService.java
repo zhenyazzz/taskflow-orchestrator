@@ -11,13 +11,17 @@ import org.example.events.user.UserProfileUpdatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
 
 
+import org.example.authservice.dto.AuthResponse;
+
 public interface AuthService {
-    JwtResponse registerUser(RegisterRequest registerRequest);
-    JwtResponse loginUser(LoginRequest loginRequest, String userAgent);
+    AuthResponse registerUser(RegisterRequest registerRequest, String deviceInfo);
+    AuthResponse loginUser(LoginRequest loginRequest, String userAgent);
     JwtResponse validateToken(String token);
     JwtResponse assignRole(AssignRoleRequest assignRoleRequest);
     JwtResponse removeRole(RemoveRoleRequest request);
-    JwtResponse refreshToken(HttpServletRequest request);
+    AuthResponse refreshToken(HttpServletRequest request);
+    void logout(HttpServletRequest request);
+    void logoutAll(HttpServletRequest request);
     void handleUserDelete(UserDeletedEvent event);
     void handleUserProfileUpdate(UserProfileUpdatedEvent event);
     void handleUserCreation(UserCreatedEvent event);

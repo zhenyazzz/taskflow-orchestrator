@@ -88,7 +88,7 @@ schemas:
 
 signIn:
   summary: Вход пользователя в систему
-  description: Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным ресурсам
+  description: Аутентифицирует пользователя и возвращает access токен. Refresh токен устанавливается в HttpOnly cookie автоматически.
   security: []
   requestBody:
     required: true
@@ -98,7 +98,12 @@ signIn:
           $ref: '#/schemas/LoginRequest'
   responses:
     '200':
-      description: Вход выполнен успешно
+      description: Вход выполнен успешно. Refresh токен установлен в HttpOnly cookie.
+      headers:
+        Set-Cookie:
+          description: Refresh токен в HttpOnly cookie
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -110,7 +115,7 @@ signIn:
 
 signUp:
   summary: Регистрация нового пользователя
-  description: Создает нового пользователя в системе с указанными учетными данными
+  description: Создает нового пользователя в системе с указанными учетными данными. После регистрации возвращает access токен, refresh токен устанавливается в HttpOnly cookie автоматически.
   security: []
   requestBody:
     required: true
@@ -120,7 +125,12 @@ signUp:
           $ref: '#/schemas/RegisterRequest'
   responses:
     '201':
-      description: Регистрация выполнена успешно
+      description: Регистрация выполнена успешно. Refresh токен установлен в HttpOnly cookie.
+      headers:
+        Set-Cookie:
+          description: Refresh токен в HttpOnly cookie
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -204,14 +214,42 @@ validateToken:
 
 refresh:
   summary: Обновление JWT токена
-  description: Обновляет access токен, используя refresh токен из куки.
+  description: Обновляет access токен, используя refresh токен из HttpOnly cookie. Refresh токен должен быть установлен в cookie браузером при логине/регистрации.
   security: []
   responses:
     '200':
-      description: Токен успешно обновлен
+      description: Токен успешно обновлен. Новый refresh токен устанавливается в HttpOnly cookie автоматически.
+      headers:
+        Set-Cookie:
+          description: Новый refresh токен в HttpOnly cookie
+          schema:
+            type: string
       content:
         application/json:
           schema:
             $ref: '#/schemas/JwtResponse'
     '401':
       $ref: '../shared/responses.yaml#/UnauthorizedError'
+
+logout:
+  summary: Выход пользователя
+  description: Отзывает текущий refresh токен и удаляет cookie. Требует наличия refresh токена в cookie.
+  security: []
+  responses:
+    '204':
+      description: Выход выполнен успешно. Refresh токен отозван, cookie удалена.
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+
+logoutAll:
+  summary: Выход со всех устройств
+  description: Отзывает все refresh токены пользователя на всех устройствах. Требует валидный access токен в заголовке Authorization.
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Все токены отозваны успешно. Cookie удалена.
+    '401':
+      $ref: '../shared/responses.yaml#/UnauthorizedError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'

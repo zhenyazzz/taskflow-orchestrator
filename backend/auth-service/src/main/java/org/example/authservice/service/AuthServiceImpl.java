@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.example.authservice.dto.AssignRoleRequest;
+import org.example.authservice.dto.AuthResponse;
 import org.example.authservice.dto.JwtResponse;
 import org.example.authservice.dto.LoginRequest;
 import org.example.authservice.dto.RegisterRequest;
@@ -56,9 +57,10 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
-    public JwtResponse registerUser(RegisterRequest registerRequest) {
+    public AuthResponse registerUser(RegisterRequest registerRequest, String deviceInfo) {
         if (userRepository.findByUsername(registerRequest.username()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
@@ -77,10 +79,14 @@ public class AuthServiceImpl implements AuthService {
                         )
         );
 
-        return userMapper.toJwtResponse(savedUser, jwtUtil);
+        // Создаем refresh токен
+        var tokenPair = refreshTokenService.createRefreshToken(savedUser, deviceInfo);
+        JwtResponse jwtResponse = userMapper.toJwtResponse(savedUser, jwtUtil);
+        
+        return new AuthResponse(jwtResponse, tokenPair.token());
     }
 
-    public JwtResponse loginUser(LoginRequest loginRequest, String userAgent) {
+    public AuthResponse loginUser(LoginRequest loginRequest, String userAgent) {
         User user = null;
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -98,7 +104,11 @@ public class AuthServiceImpl implements AuthService {
                     userMapper.toUserLoginEvent(user,userAgent)
             );
         
-            return userMapper.toJwtResponse(user, jwtUtil);
+            // Создаем refresh токен
+            var tokenPair = refreshTokenService.createRefreshToken(user, userAgent);
+            JwtResponse jwtResponse = userMapper.toJwtResponse(user, jwtUtil);
+            
+            return new AuthResponse(jwtResponse, tokenPair.token());
             
         } catch (BadCredentialsException | UserNotFoundException e) {
             kafkaProducerService.sendLoginFailEvent(
@@ -196,22 +206,65 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse refreshToken(HttpServletRequest request) {
+    @Transactional
+    public AuthResponse refreshToken(HttpServletRequest request) {
         String refreshToken = jwtUtil.getRefreshJwtFromCookies(request);
 
         if (refreshToken == null) {
             throw new InvalidTokenException("Refresh токен отсутствует");
         }
 
-        if (!jwtUtil.validateJwtToken(refreshToken)) {
-            throw new InvalidTokenException("Неверный Refresh токен");
+        // Проверяем refresh токен в БД и валидируем JWT
+        org.example.authservice.model.RefreshToken tokenEntity = refreshTokenService.verifyRefreshToken(refreshToken);
+        
+        // Инвалидируем старый токен (ротация)
+        refreshTokenService.revokeRefreshToken(refreshToken);
+        
+        // Получаем пользователя
+        User user = tokenEntity.getUser();
+        
+        // Создаем новую пару токенов
+        String deviceInfo = request.getHeader("User-Agent");
+        var tokenPair = refreshTokenService.createRefreshToken(user, deviceInfo != null ? deviceInfo : "Unknown");
+        JwtResponse jwtResponse = userMapper.toJwtResponse(user, jwtUtil);
+        
+        log.info("Токены обновлены для пользователя: {}", user.getUsername());
+        return new AuthResponse(jwtResponse, tokenPair.token());
+    }
+
+    @Override
+    @Transactional
+    public void logout(HttpServletRequest request) {
+        String refreshToken = jwtUtil.getRefreshJwtFromCookies(request);
+        
+        if (refreshToken != null) {
+            try {
+                refreshTokenService.revokeRefreshToken(refreshToken);
+                log.info("Пользователь вышел из системы");
+            } catch (Exception e) {
+                log.warn("Ошибка при отзыве токена при выходе: {}", e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void logoutAll(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new AuthorizationHeaderException("Неверный или отсутствующий заголовок Authorization");
         }
 
-        String username = jwtUtil.getUserNameFromJwtToken(refreshToken);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        String token = jwtUtil.getJwtFromHeader(authHeader);
+        if (!jwtUtil.validateJwtToken(token)) {
+            throw new InvalidTokenException("Неверный токен");
+        }
 
-        return userMapper.toJwtResponse(user, jwtUtil);
+        UUID userId = jwtUtil.getUserIdFromJwtToken(token);
+        User user = findUserById(userId);
+        
+        refreshTokenService.revokeAllUserTokens(user);
+        log.info("Все токены пользователя {} отозваны", user.getUsername());
     }
 
     public User findUserById(UUID id) {

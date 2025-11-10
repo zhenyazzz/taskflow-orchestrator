@@ -6,11 +6,13 @@ import { useSession } from "../model/session";
 
 export const fetchClient = createFetchClient<paths>({
   baseUrl: CONFIG.API_BASE_URL,
+  credentials: 'include', // Для отправки cookies (refresh token)
 });
 export const rqClient = createClient(fetchClient);
 
 export const publicFetchClient = createFetchClient<paths>({
   baseUrl: CONFIG.API_BASE_URL,
+  credentials: 'include', // Для отправки cookies (refresh token)
 });
 export const publicRqClient = createClient(publicFetchClient);
 

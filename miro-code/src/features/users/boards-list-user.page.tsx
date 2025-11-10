@@ -31,7 +31,6 @@ import { Link } from "react-router-dom";
 import { ApiSchemas } from "@/shared/api/schema";
 import {useDeleteUser} from "@/features/users/model/use-delete-user.ts";
 
-
 function UsersListPage() {
     const usersFilters = useUsersFilters();
     const usersQuery = useUsersList({
@@ -41,7 +40,7 @@ function UsersListPage() {
         status: usersFilters.status as "ACTIVE" | "INACTIVE" | "PENDING" | null,
     });
 
-    // ✅ ХУК УДАЛЕНИЯ
+    // Хук удаления
     const { deleteUser, isPending: isDeleting } = useDeleteUser();
     const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
@@ -117,7 +116,7 @@ function UsersListPage() {
                                     Создать пользователя
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                     <DialogTitle>Создать нового пользователя</DialogTitle>
                                 </DialogHeader>

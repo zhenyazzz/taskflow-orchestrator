@@ -34,3 +34,6 @@ eureka:
   instance:
     hostname: localhost
     preferIpAddress: true
+
+jwt:
+  cookie-secure: false  # false для локальной разработки без HTTPS

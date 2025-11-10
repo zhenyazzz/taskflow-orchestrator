@@ -43,6 +43,14 @@ paths:
     post:  
       $ref: './endpoints/auth.yaml#/refresh'
 
+  /auth/logout:
+    post:
+      $ref: './endpoints/auth.yaml#/logout'
+
+  /auth/logout-all:
+    post:
+      $ref: './endpoints/auth.yaml#/logoutAll'
+
   /users:
     get:
       $ref: "./endpoints/user.yaml#/getAllUsers"  

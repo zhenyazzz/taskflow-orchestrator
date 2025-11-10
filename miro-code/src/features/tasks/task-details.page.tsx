@@ -44,6 +44,17 @@ function TaskDetailsPage() {
     // Task completed - refresh task data
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [isCreatingComment, setIsCreatingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  
+  const { session } = useSession();
+  const isAdmin = session?.roles?.includes("ROLE_ADMIN") || false;
+  const currentUserId = session?.userId;
+  
+  const deleteCommentMutation = useDeleteComment(taskId, () => {
+    setDeletingCommentId(null);
+  });
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "0 B";

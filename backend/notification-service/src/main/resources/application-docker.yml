@@ -26,6 +26,10 @@ eureka:
 app:
   user-service:
     url: http://user-service:8080
+  grpc:
+    user-service:
+      host: user-service
+      port: 9090
   kafka:
     topics:
       # Task events
