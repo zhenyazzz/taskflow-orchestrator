@@ -54,6 +54,10 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return chain.filter(exchange);
+        }
+
         String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String token = jwtUtil.getJwtFromHeader(authorizationHeader);
 

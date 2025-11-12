@@ -14,6 +14,7 @@ import org.example.taskservice.dto.request.task.UpdateStatusRequest;
 import org.example.taskservice.dto.request.task.UpdateTaskRequest;
 import org.example.taskservice.dto.response.task.TaskResponse;
 import org.example.taskservice.exception.TaskNotFoundException;
+import org.example.taskservice.exception.AccessDeniedException;
 import org.example.taskservice.kafka.producer.KafkaProducerService;
 import org.example.taskservice.model.Task;
 import org.example.taskservice.model.UserDetailsImpl;
@@ -106,10 +107,16 @@ public class TaskService {
     public TaskResponse subscribeToTask(String id, String userId) {
         log.info("subscribing to task: {}", id);
         Task task = findTaskById(id);
+        if (task.getStatus() == TaskStatus.BLOCKED) {
+            throw new AccessDeniedException("Заблокированную задачу нельзя добавить в избранное");
+        }
         if (task.getAssigneeIds() == null) {
             task.setAssigneeIds(new java.util.HashSet<>());
         }
         task.getAssigneeIds().add(userId);
+        if (task.getStatus() != TaskStatus.IN_PROGRESS) {
+            task.setStatus(TaskStatus.IN_PROGRESS);
+        }
         Task updatedTask = taskRepository.save(task);
         log.debug("Task subscribed with ID: {}", updatedTask.getId());
         kafkaProducerService.sendTaskSubscribedEvent(updatedTask.getId(), taskMapper.toTaskSubscribedEvent(updatedTask,userId));
@@ -122,6 +129,11 @@ public class TaskService {
         Task task = findTaskById(id);
         if (task.getAssigneeIds() != null) {
             task.getAssigneeIds().remove(userId);
+            if (task.getAssigneeIds().isEmpty()) {
+                task.setStatus(TaskStatus.AVAILABLE);
+            }
+        } else {
+            task.setStatus(TaskStatus.AVAILABLE);
         }
         Task updatedTask = taskRepository.save(task);
         log.debug("Task unsubscribed with ID: {}", updatedTask.getId());

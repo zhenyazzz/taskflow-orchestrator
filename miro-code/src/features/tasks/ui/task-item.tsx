@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/kit/card";
 import { useSubscribeTask } from "../model/use-subscribe-task";
 import { useSession } from "@/shared/model/session";
 import { useAllUsers } from "../model/use-all-users";
-import type { TaskResponse } from "../lib/types";
+import type { TaskResponse, TaskStatus } from "../lib/types";
 import { useNavigate } from "react-router-dom";
 
 interface TaskItemProps {
@@ -79,22 +79,25 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
   const navigate = useNavigate();
   const currentUserId = session?.userId ?? null;
   const isAdmin = session?.roles?.includes("ROLE_ADMIN") ?? false;
-  const { subscribe, unsubscribe, isPending: isSubscribing, errorMessage } = useSubscribeTask(
-    undefined,
-    () => setIsSubscribed((prev) => !prev)
-  );
+  const { subscribe, unsubscribe, isPending: isSubscribing, errorMessage } = useSubscribeTask();
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(task.assigneeIds ?? []);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
     if (!currentUserId) return false;
     return Boolean(task.assigneeIds?.includes(currentUserId));
   });
+  const [displayStatus, setDisplayStatus] = useState<TaskStatus | null>(task.status ?? null);
+  const isBlocked = displayStatus === "BLOCKED";
 
   useEffect(() => {
+    setAssigneeIds(task.assigneeIds ?? []);
     if (!currentUserId) {
       setIsSubscribed(false);
+      setDisplayStatus(task.status ?? null);
       return;
     }
     setIsSubscribed(Boolean(task.assigneeIds?.includes(currentUserId)));
-  }, [task.assigneeIds, currentUserId]);
+    setDisplayStatus(task.status ?? null);
+  }, [task.assigneeIds, currentUserId, task.status]);
   const { data: users = [] } = useAllUsers();
 
   const usersById = useMemo(
@@ -103,15 +106,14 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
   );
 
   const assignees = useMemo<string[]>(() => {
-    const ids: string[] = task.assigneeIds ?? [];
-    if (ids.length === 0) return [];
-    return ids
+    if (assigneeIds.length === 0) return [];
+    return assigneeIds
       .map((assigneeId) => {
         const user = usersById.get(assigneeId);
         return user?.username || user?.email || assigneeId;
       })
       .filter((name): name is string => Boolean(name));
-  }, [task.assigneeIds, usersById]);
+  }, [assigneeIds, usersById]);
 
   const creatorName = useMemo(() => {
     if (!task.creatorId) return null;
@@ -127,15 +129,26 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
   const handleSubscribeToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!task.id || !currentUserId) return;
+    if (!task.id || !currentUserId || isBlocked) return;
 
     const nextState = !isSubscribed;
     setIsSubscribed(nextState);
 
     if (nextState) {
       subscribe(task.id);
+      setAssigneeIds((prev) =>
+        prev.includes(currentUserId) ? prev : [...prev, currentUserId],
+      );
+      setDisplayStatus("IN_PROGRESS");
     } else {
       unsubscribe(task.id);
+      setAssigneeIds((prev) => {
+        const updated = prev.filter((id) => id !== currentUserId);
+        if (updated.length === 0) {
+          setDisplayStatus("AVAILABLE");
+        }
+        return updated;
+      });
     }
   };
 
@@ -179,10 +192,12 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
               {task.title ?? "Без названия"}
             </CardTitle>
             <div className="flex flex-wrap gap-2">
-              {task.status && (
-                <Badge className={`text-xs ${STATUS_BADGES[task.status]}`}>
-                  {STATUS_LABELS[task.status]}
+              {displayStatus ? (
+                <Badge className={`text-xs ${STATUS_BADGES[displayStatus]}`}>
+                  {STATUS_LABELS[displayStatus]}
                 </Badge>
+              ) : (
+                <Badge className="text-xs bg-gray-100 text-gray-600">Не указан</Badge>
               )}
               {task.priority && (
                 <Badge className={`text-xs ${PRIORITY_BADGES[task.priority]}`}>
@@ -204,47 +219,60 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
               )}
             </div>
           </div>
-          <div className="flex gap-1 flex-shrink-0">
-            {task.id && (
-              <Button
-                variant={isSubscribed ? "default" : "outline"}
-                size="sm"
-                onClick={handleSubscribeToggle}
-                disabled={isSubscribing}
-                className={`h-8 px-3 text-xs ${isSubscribed ? "bg-yellow-100 text-yellow-600 border-yellow-300 hover:bg-yellow-200" : ""}`}
-                title={isSubscribed ? "Убрать из избранного" : "Добавить в избранное"}
-              >
-                <Star className={`h-3 w-3 mr-1.5 ${isSubscribed ? "fill-yellow-400 text-yellow-500" : ""}`} />
-                {isSubscribed ? "В избранном" : "В избранное"}
-              </Button>
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            <div className="flex gap-1">
+              {task.id && (
+                <Button
+                  variant={isSubscribed ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleSubscribeToggle}
+                  disabled={isSubscribing || isBlocked}
+                  className={`h-8 px-3 text-xs ${isSubscribed ? "bg-yellow-100 text-yellow-600 border-yellow-300 hover:bg-yellow-200" : ""}`}
+                  title={
+                    isBlocked
+                      ? "Заблокированную задачу нельзя добавить в избранное"
+                      : isSubscribed
+                        ? "Убрать из избранного"
+                        : "В избранное"
+                  }
+                >
+                  <Star className={`h-3 w-3 mr-1.5 ${isSubscribed ? "fill-yellow-400 text-yellow-500" : ""}`} />
+                  {isSubscribed ? "В избранном" : "В избранное"}
+                </Button>
+              )}
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEditClick}
+                  className="h-8 w-8 p-0"
+                  title="Редактировать"
+                >
+                  <Edit3 className="h-4 w-4" />
+                </Button>
+              )}
+              {onDelete && task.id && isAdmin && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className="h-8 w-8 p-0"
+                  title="Удалить задачу"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {isBlocked && (
+              <span className="text-xs font-semibold uppercase tracking-wide text-red-500">
+                Заблокирована
+              </span>
             )}
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEditClick}
-                className="h-8 w-8 p-0"
-                title="Редактировать"
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && task.id && isAdmin && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteClick}
-                disabled={isDeleting}
-                className="h-8 w-8 p-0"
-                title="Удалить задачу"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+            {errorMessage && (
+              <p className="text-xs text-destructive">{errorMessage}</p>
             )}
           </div>
-          {errorMessage && (
-            <p className="text-xs text-destructive mt-2">{errorMessage}</p>
-          )}
         </div>
       </CardHeader>
       <CardContent className="pt-0">
