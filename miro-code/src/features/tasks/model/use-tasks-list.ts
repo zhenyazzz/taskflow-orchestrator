@@ -28,7 +28,9 @@ export function useTasksList({
   assigneeId,
   creatorId,
 }: UseTasksListProps = {}) {
-  const search = useDebouncedValue(rawSearch, 300);
+  const normalizedSearch = rawSearch?.trim() ?? "";
+  const search = useDebouncedValue(normalizedSearch, 300);
+  const searchParam = search ? search : undefined;
 
   const currentQueryKey = [
     "get",
@@ -36,7 +38,7 @@ export function useTasksList({
     {
       size,
       sort,
-      search,
+      search: searchParam,
       status: status || undefined,
       priority: priority || undefined,
       department: department || undefined,
@@ -61,7 +63,7 @@ export function useTasksList({
             page: currentPage,
             size,
             sort,
-            search,
+            search: searchParam,
             status: status || undefined,
             priority: priority || undefined,
             department: department || undefined,

@@ -19,7 +19,7 @@ export function TasksStatusFilterSelect({ value, onValueChange }: TasksStatusFil
       value={value || "all"}
       onValueChange={(value) => onValueChange(value === "all" ? null : (value as TaskStatus))}
     >
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-60">
         <SelectValue placeholder="Статус" />
       </SelectTrigger>
       <SelectContent>

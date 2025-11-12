@@ -18,7 +18,7 @@ export function TasksPriorityFilterSelect({ value, onValueChange }: TasksPriorit
       value={value || "all"}
       onValueChange={(value) => onValueChange(value === "all" ? null : (value as TaskPriority))}
     >
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-60">
         <SelectValue placeholder="Приоритет" />
       </SelectTrigger>
       <SelectContent>

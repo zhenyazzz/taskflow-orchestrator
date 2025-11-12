@@ -19,7 +19,7 @@ const sortOptions = [
 export function TasksSortSelect({ value, onValueChange }: TasksSortSelectProps) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="w-64">
+      <SelectTrigger className="w-60">
         <SelectValue placeholder="Сортировка" />
       </SelectTrigger>
       <SelectContent>

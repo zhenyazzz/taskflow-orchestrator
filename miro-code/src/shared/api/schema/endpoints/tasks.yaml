@@ -223,13 +223,30 @@ getTasks:
       schema:
         type: integer
         minimum: 1
+        default: 20
       description: Number of items per page
+    - in: query
+      name: sort
+      schema:
+        type: string
+      description: Sorting criteria in the format: property,(asc|desc)
+    - in: query
+      name: search
+      schema:
+        type: string
+      description: Search by task title or description
     - in: query
       name: status
       schema:
         type: string
         enum: [AVAILABLE, IN_PROGRESS, COMPLETED, BLOCKED]
       description: Filter by task status
+    - in: query
+      name: priority
+      schema:
+        type: string
+        enum: [LOW, MEDIUM, HIGH]
+      description: Filter by task priority
     - in: query
       name: assigneeId
       schema:

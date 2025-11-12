@@ -35,14 +35,28 @@ public class TaskController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<TaskResponse>> getTasks(
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) int size,
+            @RequestParam(defaultValue = "20") @Min(1) int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
             @RequestParam(required = false) String assigneeId,
             @RequestParam(required = false) String creatorId,
             @RequestParam(required = false) String department) {
-        log.info("Retrieving tasks: page={}, size={}, status={}, assigneeId={}, creatorId={}, department={}",
-                page, size, status, assigneeId, creatorId, department);
-        return ResponseEntity.ok(taskService.getTasks(PageRequest.of(page, size), status, assigneeId, creatorId, department));
+        log.info("Retrieving tasks: page={}, size={}, sort={}, search={}, status={}, priority={}, assigneeId={}, creatorId={}, department={}",
+                page, size, sort, search, status, priority, assigneeId, creatorId, department);
+        return ResponseEntity.ok(
+                taskService.getTasks(
+                        page,
+                        size,
+                        sort,
+                        search,
+                        status,
+                        priority,
+                        assigneeId,
+                        creatorId,
+                        department
+                ));
     }
 
     @GetMapping("/all")

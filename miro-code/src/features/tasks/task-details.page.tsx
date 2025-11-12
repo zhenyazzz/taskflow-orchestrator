@@ -11,7 +11,6 @@ import {
 } from "./ui/task-page-layout";
 import { useTask } from "./model/use-task";
 import { useDeleteTask } from "./model/use-delete-task";
-import { useCompleteTask } from "./model/use-complete-task";
 import { EditTaskForm } from "./ui/edit-task-form";
 import { InfoItem } from "@/shared/ui/kit/info-item";
 import { Badge } from "@/shared/ui/kit/badge";
@@ -24,6 +23,7 @@ import { useAllUsers } from "./model/use-all-users";
 import { useDeleteComment } from "./model/use-delete-comment";
 import { useSession } from "@/shared/model/session";
 import { components } from "@/shared/api/schema/generated";
+import type { TaskStatus, TaskPriority } from "./lib/types";
 
 type AttachmentResponse = components["schemas"]["AttachmentResponse"];
 type CommentResponse = components["schemas"]["CommentResponse"];
@@ -40,9 +40,6 @@ function TaskDetailsPage() {
   const deleteTaskMutation = useDeleteTask(
     () => navigate("/tasks"),
   );
-  const completeTaskMutation = useCompleteTask(() => {
-    // Task completed - refresh task data
-  });
   const [isEditing, setIsEditing] = useState(false);
   const [isCreatingComment, setIsCreatingComment] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -96,31 +93,38 @@ function TaskDetailsPage() {
     );
   };
 
-  const statusLabels: Record<string, string> = {
-    AVAILABLE: "Доступные",
+  const statusLabels: Record<TaskStatus, string> = {
+    AVAILABLE: "Доступна",
     IN_PROGRESS: "В работе",
-    COMPLETED: "Завершенные",
-    BLOCKED: "Заблокированные",
+    COMPLETED: "Завершена",
+    BLOCKED: "Заблокирована",
   };
 
-  const priorityLabels: Record<string, string> = {
+  const priorityLabels: Record<TaskPriority, string> = {
     LOW: "Низкий",
     MEDIUM: "Средний",
     HIGH: "Высокий",
   };
 
-  const statusColors: Record<string, string> = {
+  const statusColors: Record<TaskStatus, string> = {
     AVAILABLE: "bg-blue-100 text-blue-800",
     IN_PROGRESS: "bg-yellow-100 text-yellow-800",
     COMPLETED: "bg-green-100 text-green-800",
     BLOCKED: "bg-red-100 text-red-800",
   };
 
-  const priorityColors: Record<string, string> = {
+  const priorityColors: Record<TaskPriority, string> = {
     LOW: "bg-gray-100 text-gray-800",
     MEDIUM: "bg-orange-100 text-orange-800",
     HIGH: "bg-red-100 text-red-800",
   };
+
+  const currentStatus = task?.status as TaskStatus | undefined;
+  const statusBadgeClass = currentStatus ? statusColors[currentStatus] : "bg-gray-100 text-gray-600";
+  const statusText = currentStatus ? statusLabels[currentStatus] : "Не указан";
+  const priorityKey = (task?.priority ?? null) as TaskPriority | null;
+  const priorityBadgeClass = priorityKey ? priorityColors[priorityKey] : "bg-gray-100 text-gray-600";
+  const priorityText = priorityKey ? priorityLabels[priorityKey] : "Не указан";
 
   return (
     <TaskPageLayout
@@ -152,17 +156,6 @@ function TaskDetailsPage() {
                     <Edit3 className="w-4 h-4 mr-2" />
                     Редактировать
                   </Button>
-                  {task.status !== "COMPLETED" && (
-                    <Button
-                      onClick={() => completeTaskMutation.completeTask(taskId)}
-                      variant="outline"
-                      className="transition-colors hover:bg-green-500/10 hover:text-green-600"
-                      disabled={completeTaskMutation.isPending}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {completeTaskMutation.isPending ? "Завершение..." : "Завершить"}
-                    </Button>
-                  )}
                   <Button
                     onClick={() => deleteTaskMutation.deleteTask(taskId)}
                     variant="outline"
@@ -218,16 +211,28 @@ function TaskDetailsPage() {
                     <InfoItem
                       label="Статус"
                       value={
-                        <Badge className={statusColors[task.status || ""]}>
-                          {statusLabels[task.status || ""]}
-                        </Badge>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge className={`text-xs ${statusBadgeClass}`}>
+                              {statusText}
+                            </Badge>
+                            {currentStatus === "COMPLETED" && (
+                              <span className="text-xs text-green-600 flex items-center gap-1">
+                                <CheckCircle className="h-3 w-3" />
+                                Завершена
+                              </span>
+                            )}
+                            
+                          </div>
+                          
+                        </div>
                       }
                     />
                     <InfoItem
                       label="Приоритет"
                       value={
-                        <Badge className={priorityColors[task.priority || ""]}>
-                          {priorityLabels[task.priority || ""]}
+                        <Badge className={`text-xs ${priorityBadgeClass}`}>
+                          {priorityText}
                         </Badge>
                       }
                     />

@@ -1,76 +1,209 @@
-import { useState } from "react";
-import { components } from "@/shared/api/schema/generated";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/shared/ui/kit/button";
 import { Badge } from "@/shared/ui/kit/badge";
 import { Trash2, Edit3, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/kit/card";
 import { useSubscribeTask } from "../model/use-subscribe-task";
 import { useSession } from "@/shared/model/session";
+import { useAllUsers } from "../model/use-all-users";
+import type { TaskResponse } from "../lib/types";
+import { useNavigate } from "react-router-dom";
 
 interface TaskItemProps {
-  task: components["schemas"]["TaskResponse"];
+  task: TaskResponse;
   onDelete?: (taskId: string) => void;
-  onEdit?: (task: components["schemas"]["TaskResponse"]) => void;
+  onEdit?: (task: TaskResponse) => void;
   isDeleting?: boolean;
   className?: string;
 }
 
-const statusLabels: Record<NonNullable<components["schemas"]["TaskResponse"]["status"]>, string> = {
-  AVAILABLE: "Доступные",
+const STATUS_LABELS: Record<NonNullable<TaskResponse["status"]>, string> = {
+  AVAILABLE: "Доступна",
   IN_PROGRESS: "В работе",
-  COMPLETED: "Завершенные",
-  BLOCKED: "Заблокированные",
+  COMPLETED: "Завершена",
+  BLOCKED: "Заблокирована",
 };
 
-const priorityLabels: Record<NonNullable<components["schemas"]["TaskResponse"]["priority"]>, string> = {
-  LOW: "Низкий",
-  MEDIUM: "Средний",
-  HIGH: "Высокий",
-};
-
-const statusColors: Record<string, string> = {
+const STATUS_BADGES: Record<NonNullable<TaskResponse["status"]>, string> = {
   AVAILABLE: "bg-blue-100 text-blue-800",
   IN_PROGRESS: "bg-yellow-100 text-yellow-800",
   COMPLETED: "bg-green-100 text-green-800",
   BLOCKED: "bg-red-100 text-red-800",
 };
 
-const priorityColors: Record<string, string> = {
+const PRIORITY_LABELS: Record<NonNullable<TaskResponse["priority"]>, string> = {
+  LOW: "Низкий приоритет",
+  MEDIUM: "Средний приоритет",
+  HIGH: "Высокий приоритет",
+};
+
+const PRIORITY_BADGES: Record<NonNullable<TaskResponse["priority"]>, string> = {
   LOW: "bg-gray-100 text-gray-800",
   MEDIUM: "bg-orange-100 text-orange-800",
   HIGH: "bg-red-100 text-red-800",
 };
 
+const DEPARTMENT_LABELS: Record<NonNullable<TaskResponse["department"]>, string> = {
+  IT: "IT",
+  HR: "HR",
+  FINANCE: "Финансы",
+  MARKETING: "Маркетинг",
+  SALES: "Продажи",
+  CUSTOMER_SERVICE: "Поддержка",
+  PRODUCTION: "Производство",
+  LOGISTICS: "Логистика",
+  RESEARCH_AND_DEVELOPMENT: "R&D",
+  OTHER: "Другое",
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const isOverdue = (value?: string) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return date.getTime() < Date.now();
+};
+
 export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: TaskItemProps) {
   const { session } = useSession();
+  const navigate = useNavigate();
+  const currentUserId = session?.userId ?? null;
   const isAdmin = session?.roles?.includes("ROLE_ADMIN") ?? false;
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const { subscribe, unsubscribe, isPending: isSubscribing } = useSubscribeTask(
+  const { subscribe, unsubscribe, isPending: isSubscribing, errorMessage } = useSubscribeTask(
     undefined,
-    () => {
-      // Откатываем состояние при ошибке
-      setIsSubscribed((prev) => !prev);
+    () => setIsSubscribed((prev) => !prev)
+  );
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
+    if (!currentUserId) return false;
+    return Boolean(task.assigneeIds?.includes(currentUserId));
+  });
+
+  useEffect(() => {
+    if (!currentUserId) {
+      setIsSubscribed(false);
+      return;
     }
+    setIsSubscribed(Boolean(task.assigneeIds?.includes(currentUserId)));
+  }, [task.assigneeIds, currentUserId]);
+  const { data: users = [] } = useAllUsers();
+
+  const usersById = useMemo(
+    () => new Map(users.map((user) => [user.id, user])),
+    [users],
   );
 
-  const handleSubscribeToggle = () => {
-    if (!task.id) return;
-    
-    const newState = !isSubscribed;
-    setIsSubscribed(newState);
-    
-    if (newState) {
+  const assignees = useMemo<string[]>(() => {
+    const ids: string[] = task.assigneeIds ?? [];
+    if (ids.length === 0) return [];
+    return ids
+      .map((assigneeId) => {
+        const user = usersById.get(assigneeId);
+        return user?.username || user?.email || assigneeId;
+      })
+      .filter((name): name is string => Boolean(name));
+  }, [task.assigneeIds, usersById]);
+
+  const creatorName = useMemo(() => {
+    if (!task.creatorId) return null;
+    const user = usersById.get(task.creatorId);
+    return user?.username || user?.email || task.creatorId;
+  }, [task.creatorId, usersById]);
+
+  const dueDate = formatDate(task.dueDate);
+  const createdAt = formatDate(task.createdAt);
+  const overdue = isOverdue(task.dueDate);
+  const tags: string[] = task.tags ?? [];
+
+  const handleSubscribeToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!task.id || !currentUserId) return;
+
+    const nextState = !isSubscribed;
+    setIsSubscribed(nextState);
+
+    if (nextState) {
       subscribe(task.id);
     } else {
       unsubscribe(task.id);
     }
   };
 
+  const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onEdit?.(task);
+  };
+
+  const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!task.id) return;
+    onDelete?.(task.id);
+  };
+
+  const handleCardClick = () => {
+    if (!task.id) return;
+    navigate(`/tasks/${task.id}`);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleCardClick();
+    }
+  };
+
   return (
-    <Card className={`${className}`}>
+    <Card
+      className={className ? className : "cursor-pointer"}
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+    >
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-lg flex-1 min-w-0">{task.title}</CardTitle>
+        <div className="flex justify-between items-start gap-3">
+          <div className="flex-1 min-w-0 space-y-2">
+            <CardTitle className="text-lg font-semibold leading-snug line-clamp-2">
+              {task.title ?? "Без названия"}
+            </CardTitle>
+            <div className="flex flex-wrap gap-2">
+              {task.status && (
+                <Badge className={`text-xs ${STATUS_BADGES[task.status]}`}>
+                  {STATUS_LABELS[task.status]}
+                </Badge>
+              )}
+              {task.priority && (
+                <Badge className={`text-xs ${PRIORITY_BADGES[task.priority]}`}>
+                  {PRIORITY_LABELS[task.priority]}
+                </Badge>
+              )}
+              {task.department && (
+                <Badge variant="outline" className="text-xs">
+                  {DEPARTMENT_LABELS[task.department]}
+                </Badge>
+              )}
+              {dueDate && (
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${overdue ? "border-red-300 text-red-600" : "border-muted text-muted-foreground"}`}
+                >
+                  {overdue ? `Просрочено: ${dueDate}` : `Срок: ${dueDate}`}
+                </Badge>
+              )}
+            </div>
+          </div>
           <div className="flex gap-1 flex-shrink-0">
             {task.id && (
               <Button
@@ -78,10 +211,10 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
                 size="sm"
                 onClick={handleSubscribeToggle}
                 disabled={isSubscribing}
-                className="h-8 px-3 text-xs"
+                className={`h-8 px-3 text-xs ${isSubscribed ? "bg-yellow-100 text-yellow-600 border-yellow-300 hover:bg-yellow-200" : ""}`}
                 title={isSubscribed ? "Убрать из избранного" : "Добавить в избранное"}
               >
-                <Star className={`h-3 w-3 mr-1.5 ${isSubscribed ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                <Star className={`h-3 w-3 mr-1.5 ${isSubscribed ? "fill-yellow-400 text-yellow-500" : ""}`} />
                 {isSubscribed ? "В избранном" : "В избранное"}
               </Button>
             )}
@@ -89,7 +222,7 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onEdit(task)}
+                onClick={handleEditClick}
                 className="h-8 w-8 p-0"
                 title="Редактировать"
               >
@@ -100,7 +233,7 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => onDelete(task.id!)}
+                onClick={handleDeleteClick}
                 disabled={isDeleting}
                 className="h-8 w-8 p-0"
                 title="Удалить задачу"
@@ -109,57 +242,57 @@ export function TaskItem({ task, onDelete, onEdit, isDeleting, className }: Task
               </Button>
             )}
           </div>
+          {errorMessage && (
+            <p className="text-xs text-destructive mt-2">{errorMessage}</p>
+          )}
         </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
           {task.description && (
-            <p className="text-sm text-gray-600 line-clamp-2">{task.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-3">{task.description}</p>
           )}
           
-          <div className="flex gap-2 flex-wrap">
-            {task.status && (
-              <Badge className={statusColors[task.status]}>
-                {statusLabels[task.status]}
-              </Badge>
-            )}
-            {task.priority && (
-              <Badge className={priorityColors[task.priority]}>
-                {priorityLabels[task.priority]}
-              </Badge>
-            )}
-            {task.department && (
-              <Badge variant="outline">
-                {task.department}
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex justify-between items-center text-sm text-gray-500">
-            {task.createdAt && (
-              <span>Создано: {new Date(task.createdAt).toLocaleDateString()}</span>
-            )}
-            {task.dueDate && (
-              <span>Срок: {new Date(task.dueDate).toLocaleDateString()}</span>
-            )}
-          </div>
-
-          {task.assigneeIds && task.assigneeIds.length > 0 && (
-            <div className="text-sm text-gray-500">
-              Исполнители: {task.assigneeIds.length}
-            </div>
-          )}
-
-          {task.tags && task.tags.length > 0 && (
-            <div className="flex gap-1 flex-wrap">
-              {task.tags.map((tag: string, index: number) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {tag}
+          {assignees.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {assignees.slice(0, 6).map((assignee) => (
+                <Badge key={assignee} variant="secondary" className="text-xs">
+                  {assignee}
                 </Badge>
               ))}
+              {assignees.length > 6 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{assignees.length - 6}
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">Исполнители не назначены</div>
+          )}
+
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            {creatorName && <span>Автор: {creatorName}</span>}
+            {createdAt && <span>Создано: {createdAt}</span>}
+          </div>
+
+          {tags.length > 0 && (
+            <div className="flex gap-1 flex-wrap">
+              {tags.slice(0, 8).map((tag, index) => (
+                <Badge key={`${tag}-${index}`} variant="outline" className="text-xs">
+                  #{tag}
+                </Badge>
+              ))}
+              {tags.length > 8 && (
+                <Badge variant="outline" className="text-xs">
+                  +{tags.length - 8}
+                </Badge>
+              )}
             </div>
           )}
         </div>
+        {errorMessage && (
+          <p className="text-xs text-destructive mt-1">{errorMessage}</p>
+        )}
       </CardContent>
     </Card>
   );

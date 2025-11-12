@@ -1145,8 +1145,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page */
                     size?: number;
+                    /** @description Sorting criteria in the format: property,(asc|desc) */
+                    sort?: string;
+                    /** @description Search by task title or description */
+                    search?: string;
                     /** @description Filter by task status */
                     status?: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED";
+                    /** @description Filter by task priority */
+                    priority?: "LOW" | "MEDIUM" | "HIGH";
                     /** @description Filter by assignee ID */
                     assigneeId?: string;
                     /** @description Filter by creator ID */

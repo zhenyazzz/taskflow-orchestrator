@@ -23,6 +23,8 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
 import org.example.taskservice.kafka.producer.KafkaProducerService;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -40,6 +42,7 @@ public class AttachmentService {
         List<AttachmentResponse> attachmentResponses = new ArrayList<>();
         log.info("Adding attachments to task: {}", taskId);
         try {
+            ensureBucketExists();
             for (MultipartFile file : files) {
                 String objectName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
                 minioClient.putObject(PutObjectArgs.builder()
@@ -57,8 +60,13 @@ public class AttachmentService {
                 attachment.setFileType(file.getContentType());
                 attachment.setCreatedAt(Instant.now());
 
-                attachmentResponses.add(attachmentMapper.toResponse(attachment));
-                kafkaProducerService.sendAttachmentAddedEvent(attachment.getId(), attachmentMapper.toAttachmentAddedEvent(attachment, getCurrentUserId()));
+                Attachment savedAttachment = attachmentRepository.save(attachment);
+
+                attachmentResponses.add(attachmentMapper.toResponse(savedAttachment));
+                kafkaProducerService.sendAttachmentAddedEvent(
+                        savedAttachment.getId(),
+                        attachmentMapper.toAttachmentAddedEvent(savedAttachment, getCurrentUserId())
+                );
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to add attachments", e);
@@ -68,6 +76,7 @@ public class AttachmentService {
 
     public String genereateUrl(String objectName) {
         try {
+            ensureBucketExists();
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
@@ -99,6 +108,7 @@ public class AttachmentService {
                 throw new RuntimeException("Attachment does not belong to this task");
             }
             try {
+                ensureBucketExists();
                 minioClient.removeObject(io.minio.RemoveObjectArgs.builder()
                         .bucket(bucketName)
                         .object(attachment.getObjectName())
@@ -120,5 +130,21 @@ public class AttachmentService {
         UserDetailsImpl details = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("Current user id: {}", details.getId());
         return details.getId();
+    }
+
+    private void ensureBucketExists() {
+        try {
+            boolean exists = minioClient.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucketName).build()
+            );
+
+            if (!exists) {
+                log.warn("MinIO bucket '{}' not found. Attempting to create…", bucketName);
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                log.info("MinIO bucket '{}' created successfully", bucketName);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to ensure MinIO bucket existence", e);
+        }
     }
 }

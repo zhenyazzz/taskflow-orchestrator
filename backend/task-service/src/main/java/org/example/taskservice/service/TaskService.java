@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.example.events.enums.TaskStatus;
+import org.example.events.enums.TaskPriority;
 import org.example.events.enums.Department;
 import org.example.taskservice.dto.request.task.CreateTaskRequest;
 import org.example.taskservice.dto.request.task.UpdateAssigneesRequest;
@@ -152,11 +153,21 @@ public class TaskService {
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
-    public Page<TaskResponse> getTasks(Pageable pageable, String status, String assigneeId, String creatorId, String department) {
-        log.info("getting tasks: {}", pageable);
+    public Page<TaskResponse> getTasks(int page,
+                                       int size,
+                                       String sort,
+                                       String search,
+                                       String status,
+                                       String priority,
+                                       String assigneeId,
+                                       String creatorId,
+                                       String department) {
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        log.info("getting tasks: page={}, size={}, sort={}, search={}", page, size, sort, search);
         TaskStatus st = parseEnum(status, TaskStatus.class);
+        TaskPriority pr = parseEnum(priority, TaskPriority.class);
         Department dep = parseEnum(department, Department.class);
-        Page<Task> tasks = taskRepository.findTasksByFilters(st, assigneeId, creatorId, dep, pageable);
+        Page<Task> tasks = taskRepository.findTasksByFilters(st, pr, assigneeId, creatorId, dep, search, pageable);
         return tasks.map(task -> taskMapper.toResponse(task, commentMapper));
     }
 
@@ -245,6 +256,32 @@ public class TaskService {
         } catch (IllegalArgumentException ex) {
             return null;
         }
+    }
+
+    private org.springframework.data.domain.Sort parseSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Order.desc("createdAt"));
+        }
+
+        String[] sortParams = sort.split(",");
+        String property = sortParams[0].trim();
+        String direction = sortParams.length > 1 ? sortParams[1].trim() : "desc";
+
+        if (!isValidSortProperty(property)) {
+            log.warn("Invalid sort property provided: {}. Falling back to createdAt.", property);
+            property = "createdAt";
+        }
+
+        org.springframework.data.domain.Sort.Direction sortDirection =
+                "asc".equalsIgnoreCase(direction)
+                        ? org.springframework.data.domain.Sort.Direction.ASC
+                        : org.springframework.data.domain.Sort.Direction.DESC;
+
+        return org.springframework.data.domain.Sort.by(new org.springframework.data.domain.Sort.Order(sortDirection, property));
+    }
+
+    private boolean isValidSortProperty(String property) {
+        return List.of("createdAt", "updatedAt", "dueDate", "priority", "status", "title").contains(property);
     }
 
 }

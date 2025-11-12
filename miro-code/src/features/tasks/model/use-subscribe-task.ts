@@ -29,16 +29,16 @@ export function useSubscribeTask(onSuccess?: () => void, onError?: (error: Error
   const subscribe = (taskId: string) => {
     subscribeMutation.mutate({
       params: {
-        path: { id: taskId }
-      }
+        path: { id: taskId },
+      },
     });
   };
 
   const unsubscribe = (taskId: string) => {
     unsubscribeMutation.mutate({
       params: {
-        path: { id: taskId }
-      }
+        path: { id: taskId },
+      },
     });
   };
 

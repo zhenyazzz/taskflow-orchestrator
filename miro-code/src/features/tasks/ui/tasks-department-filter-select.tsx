@@ -25,7 +25,7 @@ export function TasksDepartmentFilterSelect({ value, onValueChange }: TasksDepar
       value={value || "all"}
       onValueChange={(value) => onValueChange(value === "all" ? null : (value as Department))}
     >
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-60">
         <SelectValue placeholder="Отдел" />
       </SelectTrigger>
       <SelectContent>

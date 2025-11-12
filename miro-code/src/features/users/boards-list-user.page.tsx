@@ -1,8 +1,8 @@
 import { useState, useEffect, RefObject } from "react";
 import { Button } from "@/shared/ui/kit/button.tsx";
 import { PlusIcon } from "lucide-react";
-import { useUsersList } from "../boards-list/model/user/use-users-list.ts";
-import { useUsersFilters } from "../boards-list/model/task/use-users-filters.ts";
+import { useUsersList } from "./model/use-users-list.ts";
+import { useUsersFilters } from "./model/use-users-filters.ts";
 import { useDebouncedValue } from "@/shared/lib/react.ts";
 import { useCreateUser } from "../boards-list/model/user/use-create-user.ts";
 import {

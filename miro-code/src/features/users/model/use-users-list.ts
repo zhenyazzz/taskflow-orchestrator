@@ -1,6 +1,6 @@
 import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
-import { fetchClient } from "@/shared/api/instance";
-import { useDebouncedValue } from "@/shared/lib/react";
+import { fetchClient } from "@/shared/api/instance.ts";
+import { useDebouncedValue } from "@/shared/lib/react.ts";
 import { RefCallback, useCallback } from "react";
 
 interface UseUsersListProps {

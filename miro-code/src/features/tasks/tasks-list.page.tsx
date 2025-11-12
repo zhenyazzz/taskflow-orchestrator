@@ -15,6 +15,7 @@ import { TasksSearchInput } from "./ui/tasks-search-input";
 import { TasksStatusFilterSelect } from "./ui/tasks-status-filter-select";
 import { TasksPriorityFilterSelect } from "./ui/tasks-priority-filter-select";
 import { TasksDepartmentFilterSelect } from "./ui/tasks-department-filter-select";
+import { TasksUserFilterSelect } from "./ui/tasks-user-filter-select";
 import { TaskItem } from "./ui/task-item";
 import { TaskCard } from "./ui/task-card";
 import type { components } from "@/shared/api/schema/generated";
@@ -65,29 +66,36 @@ function TasksListPage() {
         assigneeIds: [],
     });
 
+    const isFiltersApplied =
+        tasksFilters.search.trim() !== "" ||
+        tasksFilters.status !== null ||
+        tasksFilters.priority !== null ||
+        tasksFilters.department !== null ||
+        tasksFilters.assigneeId !== null ||
+        tasksFilters.creatorId !== null ||
+        tasksFilters.sort !== "createdAt,desc";
+
 
     const renderList = () =>
         tasksQuery.tasks.map((task) => (
-            <Link key={task.id} to={`/tasks/${task.id}`}>
-                <TaskItem
-                    task={task}
-                    onDelete={handleDelete}
-                    isDeleting={deletingTaskId === task.id && isDeleting}
-                    className="mb-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                />
-            </Link>
-        ));
+        <TaskItem
+            key={task.id}
+            task={task}
+            onDelete={handleDelete}
+            isDeleting={deletingTaskId === task.id && isDeleting}
+            className="mb-4 cursor-pointer hover:bg-gray-100 transition-colors"
+        />
+    ));
 
     const renderGrid = () =>
         tasksQuery.tasks.map((task) => (
-            <Link key={task.id} to={`/tasks/${task.id}`}>
-                <TaskCard
-                    task={task}
-                    onDelete={handleDelete}
-                    isDeleting={deletingTaskId === task.id && isDeleting}
-                    className="mb-4 cursor-pointer hover:shadow-md hover:bg-gray-50 transition-all"
-                />
-            </Link>
+        <TaskCard
+            key={task.id}
+            task={task}
+            onDelete={handleDelete}
+            isDeleting={deletingTaskId === task.id && isDeleting}
+            className="mb-4 cursor-pointer hover:shadow-md hover:bg-gray-50 transition-all"
+        />
         ));
 
     return (
@@ -128,7 +136,7 @@ function TasksListPage() {
                         />
                     }
                     filters={
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-4">
                             <TasksSearchInput
                                 value={tasksFilters.search}
                                 onChange={tasksFilters.setSearch}
@@ -145,13 +153,34 @@ function TasksListPage() {
                                 value={tasksFilters.department}
                                 onValueChange={tasksFilters.setDepartment}
                             />
+                            <TasksUserFilterSelect
+                                value={tasksFilters.assigneeId}
+                                onValueChange={tasksFilters.setAssigneeId}
+                                placeholder="Исполнитель"
+                                noneLabel="Все исполнители"
+                            />
+                            <TasksUserFilterSelect
+                                value={tasksFilters.creatorId}
+                                onValueChange={tasksFilters.setCreatorId}
+                                placeholder="Создатель"
+                                noneLabel="Все создатели"
+                            />
                         </div>
                     }
                     actions={
-                        <ViewModeToggle
-                            value={viewMode}
-                            onChange={(value) => setViewMode(value)}
-                        />
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={tasksFilters.clearFilters}
+                                disabled={!isFiltersApplied}
+                            >
+                                Сбросить фильтры
+                            </Button>
+                            <ViewModeToggle
+                                value={viewMode}
+                                onChange={(value) => setViewMode(value)}
+                            />
+                        </div>
                     }
                 />
             }

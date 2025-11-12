@@ -11,7 +11,7 @@ export function TasksSearchInput({ value, onChange }: TasksSearchInputProps) {
       placeholder="Поиск задач..."
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-64"
+      className="w-60"
     />
   );
 }
