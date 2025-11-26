@@ -7,15 +7,12 @@ spring:
   profiles:
     active: dev
   
-  # JPA/Hibernate - общие настройки
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+  # MongoDB Настройки
+  data:
+    mongodb:
+      uri: mongodb://root:password@localhost:27017/taskdb?authSource=admin
+      auto-index-creation: true
+
   
   # Kafka - общие настройки
   kafka:
