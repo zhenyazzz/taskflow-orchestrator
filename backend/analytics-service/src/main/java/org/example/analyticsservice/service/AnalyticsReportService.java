@@ -19,6 +19,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(name = "taskMetricsRepository")
 public class AnalyticsReportService {
 
     private final TaskMetricsRepository taskMetricsRepository;

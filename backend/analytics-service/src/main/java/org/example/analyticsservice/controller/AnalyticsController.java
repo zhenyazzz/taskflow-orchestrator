@@ -14,11 +14,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/analytics")
-@RequiredArgsConstructor
 @Slf4j
 public class AnalyticsController {
 
-    private final AnalyticsReportService analyticsReportService;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private AnalyticsReportService analyticsReportService;
 
     @GetMapping("/tasks")
     public ResponseEntity<TaskAnalyticsDto> getTaskAnalytics(
