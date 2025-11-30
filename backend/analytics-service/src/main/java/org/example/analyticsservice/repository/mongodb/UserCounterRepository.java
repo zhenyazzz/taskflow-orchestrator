@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.repository.Update;
 import java.time.Instant;
 
 public interface UserCounterRepository extends MongoRepository<UserCounter, String> {
-    @Query(value = "{ '_id': 'global' }", fields = "{ 'total_users': 1 }")
-    Long getTotalUsers();
+    @Query("{ '_id': 'global' }")
+    UserCounter findByGlobalId();
 
     @Query("{ '_id': 'global' }")
     @Update("{ '$inc': { 'total_users': 1 }, '$set': { 'last_updated': ?0 } }")

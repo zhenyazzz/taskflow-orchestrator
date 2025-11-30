@@ -9,6 +9,7 @@ import org.example.analyticsservice.model.LoginMetrics;
 import org.example.analyticsservice.model.TaskMetrics;
 import org.example.analyticsservice.model.UserMetrics;
 import org.example.analyticsservice.model.mongo.DailyActiveUser;
+import org.example.analyticsservice.model.mongo.UserCounter;
 import org.example.analyticsservice.model.mongo.UserStatistics;
 import org.example.analyticsservice.repository.LoginMetricsRepository;
 import org.example.analyticsservice.repository.TaskMetricsRepository;
@@ -115,7 +116,9 @@ public class AnalyticsService {
 
         userCounterRepository.ensureExists();
         userCounterRepository.increment(Instant.now());
-        userStatisticsRepository.setTotalUsers(date, Instant.now(), userCounterRepository.getTotalUsers());
+        UserCounter counter = userCounterRepository.findByGlobalId();
+        Long totalUsers = counter != null ? counter.getTotalUsers() : 0L;
+        userStatisticsRepository.setTotalUsers(date, Instant.now(), totalUsers);
 
         log.debug("Сохранена метрика регистрации пользователя: {}", event.id());
     }
