@@ -22,7 +22,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "tasks")
+@Document(collection = "task_documents")
 public class TaskDocument {
 
     @Id

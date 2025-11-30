@@ -56,3 +56,4 @@ public interface TaskStatisticsRepository extends MongoRepository<TaskStatistics
     void updateCompletionPercentage(LocalDate date, Double percentage, Instant lastUpdated);
 }
 
+

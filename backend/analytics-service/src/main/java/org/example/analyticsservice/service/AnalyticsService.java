@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class AnalyticsService {
-
+    
     private final UserStatisticsRepository userStatisticsRepository;
     private final DailyActiveUserRepository dailyActiveUserRepository;
     private final UserCounterRepository userCounterRepository;
