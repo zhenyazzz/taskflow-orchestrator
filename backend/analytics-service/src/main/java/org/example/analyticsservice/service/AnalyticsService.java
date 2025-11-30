@@ -18,7 +18,6 @@ import org.example.analyticsservice.repository.mongodb.UserCounterRepository;
 import org.example.analyticsservice.repository.mongodb.UserStatisticsRepository;
 import org.example.events.task.*;
 import org.example.events.user.*;
-import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
