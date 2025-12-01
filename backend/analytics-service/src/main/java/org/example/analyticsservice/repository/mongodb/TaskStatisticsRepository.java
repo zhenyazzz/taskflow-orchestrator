@@ -8,12 +8,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface TaskStatisticsRepository extends MongoRepository<TaskStatistics, String> {
 
     Optional<TaskStatistics> findByDate(LocalDate date);
+
+    List<TaskStatistics> findByDateBetween(LocalDate start, LocalDate end);
+
+    Optional<TaskStatistics> findFirstByDateLessThanEqualOrderByDateDesc(LocalDate date);
 
     @Query("{ 'date': ?0 }")
     @Update("{ '$inc': { 'total_tasks': ?1 }, '$set': { 'last_updated': ?2 } }")

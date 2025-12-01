@@ -19,11 +19,19 @@ public interface UserTaskStatisticsRepository extends MongoRepository<UserTaskSt
     @Query("{ 'user_id': ?0 }")
     List<UserTaskStatistics> findByUserId(String userId);
 
+    @Query("{ 'user_id': ?0, 'date': { '$gte': ?1, '$lte': ?2 } }")
+    List<UserTaskStatistics> findByUserIdAndDateBetween(String userId, LocalDate start, LocalDate end);
+
     @Query("{ 'date': ?0 }")
     List<UserTaskStatistics> findByDate(LocalDate date);
 
+    @Query("{ 'date': { '$gte': ?0, '$lte': ?1 } }")
+    List<UserTaskStatistics> findByDateBetween(LocalDate start, LocalDate end);
+
     @Query(value = "{ 'user_id': ?0, 'date': ?1 }", exists = true)
     boolean existsByUserIdAndDate(String userId, LocalDate date);
+
+    Optional<UserTaskStatistics> findFirstByUserIdAndDateLessThanEqualOrderByDateDesc(String userId, LocalDate date);
 
     @Query("{ 'user_id': ?0, 'date': ?1 }")
     @Update("{ '$inc': { 'total_tasks': ?2 }, '$set': { 'last_updated': ?3 } }")

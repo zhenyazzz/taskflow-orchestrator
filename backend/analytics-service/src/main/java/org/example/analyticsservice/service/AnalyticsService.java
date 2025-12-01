@@ -2,6 +2,10 @@ package org.example.analyticsservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.analyticsservice.dto.DashboardDto;
+import org.example.analyticsservice.dto.LoginAnalyticsDto;
+import org.example.analyticsservice.dto.TaskSummaryDto;
+import org.example.analyticsservice.dto.UserTaskSummaryDto;
 import org.example.analyticsservice.model.mongo.*;
 import org.example.analyticsservice.repository.mongodb.*;
 import org.example.events.enums.TaskPriority;
@@ -10,9 +14,12 @@ import org.example.events.task.*;
 import org.example.events.user.*;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +34,154 @@ public class AnalyticsService {
     private final TaskStatisticsRepository taskStatisticsRepository;
     private final TaskCounterRepository taskCounterRepository;
     private final UserTaskStatisticsRepository userTaskStatisticsRepository;
+
+    // ---------- Публичные методы для REST контроллеров ----------
+
+    public TaskSummaryDto getTaskSummary(LocalDate startDate, LocalDate endDate) {
+        List<TaskStatistics> statsInRange = taskStatisticsRepository.findByDateBetween(startDate, endDate);
+        statsInRange.sort(Comparator.comparing(TaskStatistics::getDate));
+
+        TaskStatistics latest = resolveLatestTaskStats(statsInRange, endDate);
+        Map<LocalDate, Long> createdPerDay = buildDailyTaskMap(statsInRange, TaskStatistics::getCreatedTasksToday);
+        Map<LocalDate, Long> completedPerDay = buildDailyTaskMap(statsInRange, TaskStatistics::getCompletedTasksToday);
+
+        return new TaskSummaryDto(
+                startDate,
+                endDate,
+                latest != null ? safeLong(latest.getTotalTasks()) : 0L,
+                latest != null ? safeLong(latest.getCompletedTasks()) : 0L,
+                latest != null ? safeLong(latest.getInProgressTasks()) : 0L,
+                latest != null ? safeLong(latest.getPendingTasks()) : 0L,
+                latest != null ? safeLong(latest.getDeletedTasks()) : 0L,
+                latest != null ? safeDouble(latest.getCompletionPercentage()) : 0.0,
+                calculateAverageCompletionTimeHours(startDate, endDate),
+                latest != null ? copyOrEmpty(latest.getTasksByStatus()) : Collections.emptyMap(),
+                latest != null ? copyOrEmpty(latest.getTasksByPriority()) : Collections.emptyMap(),
+                latest != null ? copyOrEmpty(latest.getTasksByCategory()) : Collections.emptyMap(),
+                latest != null ? copyOrEmpty(latest.getTasksByDepartment()) : Collections.emptyMap(),
+                createdPerDay,
+                completedPerDay
+        );
+    }
+
+    public UserTaskSummaryDto getUserTaskSummary(String userId, LocalDate startDate, LocalDate endDate) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("User id is required");
+        }
+
+        List<UserTaskStatistics> statsInRange = userTaskStatisticsRepository.findByUserIdAndDateBetween(userId, startDate, endDate);
+        statsInRange.sort(Comparator.comparing(UserTaskStatistics::getDate));
+
+        UserTaskStatistics latest = resolveLatestUserStats(userId, statsInRange, endDate);
+
+        Map<String, Long> categoryDistribution = aggregateDistributions(statsInRange, UserTaskStatistics::getTasksByCategory);
+        Map<String, Long> priorityDistribution = aggregateDistributions(statsInRange, UserTaskStatistics::getTasksByPriority);
+        Map<String, Long> statusDistribution = aggregateDistributions(statsInRange, UserTaskStatistics::getTasksByStatus);
+        Map<String, Long> departmentDistribution = aggregateDistributions(statsInRange, UserTaskStatistics::getTasksByDepartment);
+
+        if (categoryDistribution.isEmpty() && latest != null) {
+            categoryDistribution = copyOrEmpty(latest.getTasksByCategory());
+        }
+        if (priorityDistribution.isEmpty() && latest != null) {
+            priorityDistribution = copyOrEmpty(latest.getTasksByPriority());
+        }
+        if (statusDistribution.isEmpty() && latest != null) {
+            statusDistribution = copyOrEmpty(latest.getTasksByStatus());
+        }
+        if (departmentDistribution.isEmpty() && latest != null) {
+            departmentDistribution = copyOrEmpty(latest.getTasksByDepartment());
+        }
+
+        return new UserTaskSummaryDto(
+                userId,
+                startDate,
+                endDate,
+                latest != null ? safeLong(latest.getTotalTasks()) : 0L,
+                latest != null ? safeLong(latest.getCompletedTasks()) : 0L,
+                latest != null ? safeLong(latest.getInProgressTasks()) : 0L,
+                latest != null ? safeLong(latest.getPendingTasks()) : 0L,
+                latest != null ? safeLong(latest.getDeletedTasks()) : 0L,
+                latest != null ? safeDouble(latest.getCompletionPercentage()) : 0.0,
+                categoryDistribution,
+                priorityDistribution,
+                statusDistribution,
+                departmentDistribution
+        );
+    }
+
+    public LoginAnalyticsDto getLoginAnalytics(LocalDate startDate, LocalDate endDate) {
+        List<UserStatistics> stats = userStatisticsRepository.findByDateBetween(startDate, endDate);
+        stats.sort(Comparator.comparing(UserStatistics::getDate));
+
+        long successful = stats.stream().mapToLong(s -> safeLong(s.getSuccessfulLogins())).sum();
+        long failed = stats.stream().mapToLong(s -> safeLong(s.getFailedLogins())).sum();
+        long total = successful + failed;
+        double successRate = total > 0 ? (successful * 100.0) / total : 0.0;
+
+        Map<LocalDate, Long> dailySuccessful = stats.stream()
+                .collect(Collectors.toMap(
+                        UserStatistics::getDate,
+                        s -> safeLong(s.getSuccessfulLogins()),
+                        (left, right) -> right,
+                        LinkedHashMap::new
+                ));
+
+        Map<LocalDate, Long> dailyFailed = stats.stream()
+                .collect(Collectors.toMap(
+                        UserStatistics::getDate,
+                        s -> safeLong(s.getFailedLogins()),
+                        (left, right) -> right,
+                        LinkedHashMap::new
+                ));
+
+        return new LoginAnalyticsDto(
+                total,
+                successful,
+                failed,
+                successRate,
+                Collections.emptyMap(),
+                dailySuccessful,
+                dailyFailed
+        );
+    }
+
+    public DashboardDto getDashboard(LocalDate startDate, LocalDate endDate) {
+        TaskSummaryDto taskSummary = getTaskSummary(startDate, endDate);
+        LoginAnalyticsDto loginAnalytics = getLoginAnalytics(startDate, endDate);
+
+        List<UserTaskStatistics> stats = userTaskStatisticsRepository.findByDateBetween(startDate, endDate);
+        Map<String, UserTaskStatistics> latestByUser = new HashMap<>();
+
+        for (UserTaskStatistics statistic : stats) {
+            latestByUser.merge(
+                    statistic.getUserId(),
+                    statistic,
+                    (existing, incoming) -> existing.getDate().isAfter(incoming.getDate()) ? existing : incoming
+            );
+        }
+
+        List<UserTaskSummaryDto> topUsers = latestByUser.values().stream()
+                .map(stat -> new UserTaskSummaryDto(
+                        stat.getUserId(),
+                        startDate,
+                        endDate,
+                        safeLong(stat.getTotalTasks()),
+                        safeLong(stat.getCompletedTasks()),
+                        safeLong(stat.getInProgressTasks()),
+                        safeLong(stat.getPendingTasks()),
+                        safeLong(stat.getDeletedTasks()),
+                        safeDouble(stat.getCompletionPercentage()),
+                        copyOrEmpty(stat.getTasksByCategory()),
+                        copyOrEmpty(stat.getTasksByPriority()),
+                        copyOrEmpty(stat.getTasksByStatus()),
+                        copyOrEmpty(stat.getTasksByDepartment())
+                ))
+                .sorted(Comparator.comparing(UserTaskSummaryDto::completionPercentage).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+
+        return new DashboardDto(taskSummary, loginAnalytics, topUsers);
+    }
 
     public void handleTaskCreated(TaskCreatedEvent event) {
         log.info("Processing task created event for task: {}", event.id());
@@ -607,5 +762,73 @@ public class AnalyticsService {
         }
 
         dailyActiveUserRepository.incrementLoginCount(date, username, 1L);
+    }
+
+    // ---------- Вспомогательные методы для аналитики ----------
+
+    private TaskStatistics resolveLatestTaskStats(List<TaskStatistics> statsInRange, LocalDate endDate) {
+        if (!statsInRange.isEmpty()) {
+            return statsInRange.get(statsInRange.size() - 1);
+        }
+        return taskStatisticsRepository.findFirstByDateLessThanEqualOrderByDateDesc(endDate).orElse(null);
+    }
+
+    private UserTaskStatistics resolveLatestUserStats(String userId, List<UserTaskStatistics> statsInRange, LocalDate endDate) {
+        if (!statsInRange.isEmpty()) {
+            return statsInRange.get(statsInRange.size() - 1);
+        }
+        return userTaskStatisticsRepository
+                .findFirstByUserIdAndDateLessThanEqualOrderByDateDesc(userId, endDate)
+                .orElse(null);
+    }
+
+    private Map<LocalDate, Long> buildDailyTaskMap(List<TaskStatistics> stats,
+                                                   Function<TaskStatistics, Long> extractor) {
+        Map<LocalDate, Long> result = new LinkedHashMap<>();
+        stats.stream()
+                .sorted(Comparator.comparing(TaskStatistics::getDate))
+                .forEach(stat -> result.put(stat.getDate(), Optional.ofNullable(extractor.apply(stat)).orElse(0L)));
+        return result;
+    }
+
+    private Map<String, Long> aggregateDistributions(List<UserTaskStatistics> stats,
+                                                     Function<UserTaskStatistics, Map<String, Long>> extractor) {
+        Map<String, Long> aggregated = new LinkedHashMap<>();
+        stats.stream()
+                .map(extractor)
+                .filter(Objects::nonNull)
+                .forEach(map -> map.forEach((key, value) -> aggregated.merge(key, value, Long::sum)));
+        return aggregated;
+    }
+
+    private Map<String, Long> copyOrEmpty(Map<String, Long> source) {
+        if (source == null || source.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new LinkedHashMap<>(source);
+    }
+
+    private long safeLong(Long value) {
+        return value != null ? value : 0L;
+    }
+
+    private double safeDouble(Double value) {
+        return value != null ? value : 0.0;
+    }
+
+    private double calculateAverageCompletionTimeHours(LocalDate startDate, LocalDate endDate) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        return taskDocumentRepository.findAllCompletedTasks().stream()
+                .filter(task -> task.getCreatedAt() != null && task.getCompletedAt() != null)
+                .filter(task -> isWithinRange(task.getCompletedAt(), startDate, endDate, zoneId))
+                .mapToDouble(task -> Duration.between(task.getCreatedAt(), task.getCompletedAt()).toMinutes() / 60.0)
+                .filter(value -> value > 0)
+                .average()
+                .orElse(0.0);
+    }
+
+    private boolean isWithinRange(Instant instant, LocalDate startDate, LocalDate endDate, ZoneId zoneId) {
+        LocalDate date = instant.atZone(zoneId).toLocalDate();
+        return !(date.isBefore(startDate) || date.isAfter(endDate));
     }
 }
