@@ -1,0 +1,274 @@
+schemas:
+  AnalyticsPeriodQuery:
+    type: object
+    properties:
+      startDate:
+        type: string
+        format: date-time
+        description: Начало периода в формате ISO 8601. По умолчанию последние 30 дней.
+      endDate:
+        type: string
+        format: date-time
+        description: Конец периода в формате ISO 8601. По умолчанию текущий момент.
+
+  TaskAnalyticsResponse:
+    type: object
+    required:
+      - totalTasks
+      - createdTasks
+      - completedTasks
+      - deletedTasks
+      - tasksByPriority
+      - tasksByStatus
+    properties:
+      totalTasks:
+        type: integer
+        description: Общее количество задач в указанном диапазоне.
+      createdTasks:
+        type: integer
+        description: Количество созданных задач.
+      completedTasks:
+        type: integer
+        description: Количество выполненных задач.
+      deletedTasks:
+        type: integer
+        description: Количество удалённых задач.
+      averageCompletionTimeHours:
+        type: number
+        format: double
+        nullable: true
+        description: Среднее время выполнения задачи в часах.
+      tasksByPriority:
+        type: object
+        description: Распределение задач по приоритетам.
+        additionalProperties:
+          type: integer
+      tasksByStatus:
+        type: object
+        description: Распределение задач по статусам.
+        additionalProperties:
+          type: integer
+      dailyCreatedTasks:
+        type: object
+        description: Количество созданных задач по дням (ключ — дата в формате YYYY-MM-DD).
+        additionalProperties:
+          type: integer
+      dailyCompletedTasks:
+        type: object
+        description: Количество завершённых задач по дням (ключ — дата в формате YYYY-MM-DD).
+        additionalProperties:
+          type: integer
+
+  UserAnalyticsResponse:
+    type: object
+    required:
+      - totalUsers
+      - registeredUsers
+      - updatedUsers
+      - usersByDepartment
+      - usersByRole
+    properties:
+      totalUsers:
+        type: integer
+        description: Общее количество пользователей.
+      registeredUsers:
+        type: integer
+        description: Количество новых регистраций.
+      updatedUsers:
+        type: integer
+        description: Количество обновивших профиль пользователей.
+      usersByDepartment:
+        type: object
+        description: Распределение пользователей по департаментам.
+        additionalProperties:
+          type: integer
+      usersByRole:
+        type: object
+        description: Распределение пользователей по ролям.
+        additionalProperties:
+          type: integer
+
+  LoginAnalyticsResponse:
+    type: object
+    required:
+      - totalLogins
+      - successfulLogins
+      - failedLogins
+      - successRate
+      - failureReasons
+      - dailySuccessfulLogins
+      - dailyFailedLogins
+    properties:
+      totalLogins:
+        type: integer
+        description: Общее количество попыток входа.
+      successfulLogins:
+        type: integer
+        description: Количество успешных входов.
+      failedLogins:
+        type: integer
+        description: Количество неуспешных входов.
+      successRate:
+        type: number
+        format: double
+        description: Доля успешных входов (0-1).
+      failureReasons:
+        type: object
+        description: Причины неудачных попыток (ключ — причина, значение — количество).
+        additionalProperties:
+          type: integer
+      dailySuccessfulLogins:
+        type: object
+        description: Успешные входы по дням (ключ — дата).
+        additionalProperties:
+          type: integer
+      dailyFailedLogins:
+        type: object
+        description: Неудачные входы по дням (ключ — дата).
+        additionalProperties:
+          type: integer
+
+  DashboardAnalyticsResponse:
+    type: object
+    required:
+      - taskAnalytics
+      - userAnalytics
+      - loginAnalytics
+      - periodStart
+      - periodEnd
+    properties:
+      taskAnalytics:
+        $ref: '#/schemas/TaskAnalyticsResponse'
+      userAnalytics:
+        $ref: '#/schemas/UserAnalyticsResponse'
+      loginAnalytics:
+        $ref: '#/schemas/LoginAnalyticsResponse'
+      periodStart:
+        type: string
+        format: date-time
+        description: Фактическое начало периода расчёта.
+      periodEnd:
+        type: string
+        format: date-time
+        description: Фактическое завершение периода расчёта.
+
+getTaskAnalytics:
+  summary: Получить аналитические метрики задач
+  description: Возвращает агрегированную статистику по задачам за указанный период.
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      description: Начало периода в формате ISO 8601.
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      description: Конец периода в формате ISO 8601.
+  responses:
+    '200':
+      description: Актуальные метрики по задачам.
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskAnalyticsResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getUserAnalytics:
+  summary: Получить аналитику пользователей
+  description: Возвращает статистику по пользователям за указанный период.
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      description: Начало периода в формате ISO 8601.
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      description: Конец периода в формате ISO 8601.
+  responses:
+    '200':
+      description: Статистика по пользователям.
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/UserAnalyticsResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getLoginAnalytics:
+  summary: Получить аналитику входов
+  description: Возвращает статистику успешных и неуспешных авторизаций.
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      description: Начало периода в формате ISO 8601.
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      description: Конец периода в формате ISO 8601.
+  responses:
+    '200':
+      description: Метрики по авторизациям.
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/LoginAnalyticsResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getAnalyticsDashboard:
+  summary: Получить сводную аналитику
+  description: Возвращает агрегированные данные по задачам, пользователям и авторизациям в одном ответе.
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      description: Начало периода в формате ISO 8601.
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      description: Конец периода в формате ISO 8601.
+  responses:
+    '200':
+      description: Сводный отчёт по аналитике.
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/DashboardAnalyticsResponse'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+    '403':
+      $ref: '../shared/responses.yaml#/ForbiddenError'
+

@@ -1847,6 +1847,190 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить аналитические метрики задач
+         * @description Возвращает агрегированную статистику по задачам за указанный период.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Начало периода в формате ISO 8601. */
+                    startDate?: string;
+                    /** @description Конец периода в формате ISO 8601. */
+                    endDate?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Актуальные метрики по задачам. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskAnalyticsResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить аналитику пользователей
+         * @description Возвращает статистику по пользователям за указанный период.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Начало периода в формате ISO 8601. */
+                    startDate?: string;
+                    /** @description Конец периода в формате ISO 8601. */
+                    endDate?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Статистика по пользователям. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserAnalyticsResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/logins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить аналитику входов
+         * @description Возвращает статистику успешных и неуспешных авторизаций.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Начало периода в формате ISO 8601. */
+                    startDate?: string;
+                    /** @description Конец периода в формате ISO 8601. */
+                    endDate?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Метрики по авторизациям. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LoginAnalyticsResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить сводную аналитику
+         * @description Возвращает агрегированные данные по задачам, пользователям и авторизациям в одном ответе.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Начало периода в формате ISO 8601. */
+                    startDate?: string;
+                    /** @description Конец периода в формате ISO 8601. */
+                    endDate?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Сводный отчёт по аналитике. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DashboardAnalyticsResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                403: components["responses"]["ForbiddenError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2076,6 +2260,93 @@ export interface components {
             fileType?: string;
             /** Format: date-time */
             createdAt?: string;
+        };
+        TaskAnalyticsResponse: {
+            /** @description Общее количество задач в указанном диапазоне. */
+            totalTasks: number;
+            /** @description Количество созданных задач. */
+            createdTasks: number;
+            /** @description Количество выполненных задач. */
+            completedTasks: number;
+            /** @description Количество удалённых задач. */
+            deletedTasks: number;
+            /**
+             * Format: double
+             * @description Среднее время выполнения задачи в часах.
+             */
+            averageCompletionTimeHours?: number | null;
+            /** @description Распределение задач по приоритетам. */
+            tasksByPriority: {
+                [key: string]: number;
+            };
+            /** @description Распределение задач по статусам. */
+            tasksByStatus: {
+                [key: string]: number;
+            };
+            /** @description Количество созданных задач по дням (ключ — дата в формате YYYY-MM-DD). */
+            dailyCreatedTasks?: {
+                [key: string]: number;
+            };
+            /** @description Количество завершённых задач по дням (ключ — дата в формате YYYY-MM-DD). */
+            dailyCompletedTasks?: {
+                [key: string]: number;
+            };
+        };
+        UserAnalyticsResponse: {
+            /** @description Общее количество пользователей. */
+            totalUsers: number;
+            /** @description Количество новых регистраций. */
+            registeredUsers: number;
+            /** @description Количество обновивших профиль пользователей. */
+            updatedUsers: number;
+            /** @description Распределение пользователей по департаментам. */
+            usersByDepartment: {
+                [key: string]: number;
+            };
+            /** @description Распределение пользователей по ролям. */
+            usersByRole: {
+                [key: string]: number;
+            };
+        };
+        LoginAnalyticsResponse: {
+            /** @description Общее количество попыток входа. */
+            totalLogins: number;
+            /** @description Количество успешных входов. */
+            successfulLogins: number;
+            /** @description Количество неуспешных входов. */
+            failedLogins: number;
+            /**
+             * Format: double
+             * @description Доля успешных входов (0-1).
+             */
+            successRate: number;
+            /** @description Причины неудачных попыток (ключ — причина, значение — количество). */
+            failureReasons: {
+                [key: string]: number;
+            };
+            /** @description Успешные входы по дням (ключ — дата). */
+            dailySuccessfulLogins: {
+                [key: string]: number;
+            };
+            /** @description Неудачные входы по дням (ключ — дата). */
+            dailyFailedLogins: {
+                [key: string]: number;
+            };
+        };
+        DashboardAnalyticsResponse: {
+            taskAnalytics: components["schemas"]["TaskAnalyticsResponse"];
+            userAnalytics: components["schemas"]["UserAnalyticsResponse"];
+            loginAnalytics: components["schemas"]["LoginAnalyticsResponse"];
+            /**
+             * Format: date-time
+             * @description Фактическое начало периода расчёта.
+             */
+            periodStart: string;
+            /**
+             * Format: date-time
+             * @description Фактическое завершение периода расчёта.
+             */
+            periodEnd: string;
         };
     };
     responses: {

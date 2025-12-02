@@ -229,7 +229,7 @@ getTasks:
       name: sort
       schema:
         type: string
-      description: Sorting criteria in the format: property,(asc|desc)
+      description: "Sorting criteria in the format: property,(asc|desc)"
     - in: query
       name: search
       schema:

@@ -172,4 +172,20 @@ paths:
     delete:
       $ref: "./endpoints/attachments.yaml#/deleteAttachment"
 
+  /analytics/tasks:
+    get:
+      $ref: "./endpoints/analytics.yaml#/getTaskAnalytics"
+
+  /analytics/users:
+    get:
+      $ref: "./endpoints/analytics.yaml#/getUserAnalytics"
+
+  /analytics/logins:
+    get:
+      $ref: "./endpoints/analytics.yaml#/getLoginAnalytics"
+
+  /analytics/dashboard:
+    get:
+      $ref: "./endpoints/analytics.yaml#/getAnalyticsDashboard"
+
  
