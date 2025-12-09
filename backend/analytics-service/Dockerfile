@@ -1,36 +1,25 @@
-# Multi-stage build для оптимизации размера образа
-FROM openjdk:21-jdk-slim as builder
+FROM maven:3.9.8-eclipse-temurin-21 AS builder
+WORKDIR /workspace
 
-WORKDIR /app
+# Build and install common-kafka-events into the local Maven repo
+COPY common-kafka-events/ ./common-kafka-events/
+RUN cd common-kafka-events \
+    && mvn -q -DskipTests install
 
-# Копируем Maven wrapper и pom.xml для кеширования зависимостей
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
+# Build analytics-service (now that dependency is available)
+COPY analytics-service/ ./analytics-service/
+RUN cd analytics-service \
+    && mvn -q clean package -DskipTests
 
-# Копируем common-kafka-events для сборки
-COPY ../common-kafka-events ../common-kafka-events
-
-# Устанавливаем зависимости
-RUN ./mvnw dependency:go-offline
-
-# Копируем исходный код
-COPY src src
-
-# Собираем приложение
-RUN ./mvnw clean package -DskipTests
-
-# Финальный образ
-FROM openjdk:21-jdk-slim
-
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # Создаем пользователя для безопасности
-RUN addgroup --system spring && adduser --system spring --ingroup spring
+RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring
 
 # Копируем JAR из builder stage
-COPY --from=builder /app/target/analytics-service-*.jar app.jar
+COPY --from=builder --chown=spring:spring /workspace/analytics-service/target/analytics-service-*.jar app.jar
 
 # Настройки JVM для контейнера
 ENV JAVA_OPTS="-Xmx512m -Xms256m"

@@ -220,6 +220,39 @@ services:
     networks:
       - app-network
 
+  analytics-service:
+    build:
+      context: .
+      dockerfile: analytics-service/Dockerfile
+    container_name: analytics-service
+    hostname: analytics-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_DATA_MONGODB_URI=mongodb://root:password@mongo:27017/taskdb?authSource=admin
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    depends_on:
+      mongo:
+        condition: service_started
+      kafka:
+        condition: service_started
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   # task-service:
   #   build:
   #     context: .
