@@ -2,66 +2,66 @@ package org.example.analyticsservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.analyticsservice.dto.*;
-import org.example.analyticsservice.service.AnalyticsReportService;
+import org.example.analyticsservice.dto.DashboardDto;
+import org.example.analyticsservice.dto.LoginAnalyticsDto;
+import org.example.analyticsservice.dto.TaskSummaryDto;
+import org.example.analyticsservice.dto.UserTaskSummaryDto;
+import org.example.analyticsservice.service.AnalyticsService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/analytics")
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class AnalyticsController {
 
-    private final AnalyticsReportService analyticsReportService;
+    private static final long DEFAULT_RANGE_DAYS = 30;
+
+    private final AnalyticsService analyticsService;
 
     @GetMapping("/tasks")
-    public ResponseEntity<TaskAnalyticsDto> getTaskAnalytics(
+    public ResponseEntity<TaskSummaryDto> getTaskAnalytics(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
-        startDate = dates.get("startDate");
-        endDate = dates.get("endDate");
 
-        log.info("Получение аналитики задач с {} по {}", startDate, endDate);
-        
-        TaskAnalyticsDto analytics = analyticsReportService.getTaskAnalytics(startDate, endDate);
-        return ResponseEntity.ok(analytics);
+        DateRange range = resolveRange(startDate, endDate);
+        TaskSummaryDto summary = analyticsService.getTaskSummary(range.start(), range.end());
+        return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<UserAnalyticsDto> getUserAnalytics(
+    public ResponseEntity<?> getUserAnalytics(
+            @RequestParam String userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
-        startDate = dates.get("startDate");
-        endDate = dates.get("endDate");
 
-        log.info("Получение аналитики пользователей с {} по {}", startDate, endDate);
-        
-        UserAnalyticsDto analytics = analyticsReportService.getUserAnalytics(startDate, endDate);
-        return ResponseEntity.ok(analytics);
+        try {
+            DateRange range = resolveRange(startDate, endDate);
+            UserTaskSummaryDto summary = analyticsService.getUserTaskSummary(userId, range.start(), range.end());
+            return ResponseEntity.ok(summary);
+        } catch (IllegalArgumentException ex) {
+            log.warn("User analytics request rejected: {}", ex.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        }
     }
 
     @GetMapping("/logins")
     public ResponseEntity<LoginAnalyticsDto> getLoginAnalytics(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
-        startDate = dates.get("startDate");
-        endDate = dates.get("endDate");
 
-        log.info("Получение аналитики логинов с {} по {}", startDate, endDate);
-        
-        LoginAnalyticsDto analytics = analyticsReportService.getLoginAnalytics(startDate, endDate);
+        DateRange range = resolveRange(startDate, endDate);
+        LoginAnalyticsDto analytics = analyticsService.getLoginAnalytics(range.start(), range.end());
         return ResponseEntity.ok(analytics);
     }
 
@@ -69,47 +69,29 @@ public class AnalyticsController {
     public ResponseEntity<DashboardDto> getDashboard(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        Map<String, LocalDateTime> dates = getDefaultStartAndEndDates(startDate, endDate);
-        startDate = dates.get("startDate");
-        endDate = dates.get("endDate");
 
-        log.info("Получение данных дашборда с {} по {}", startDate, endDate);
-        
-        TaskAnalyticsDto taskAnalytics = analyticsReportService.getTaskAnalytics(startDate, endDate);
-        UserAnalyticsDto userAnalytics = analyticsReportService.getUserAnalytics(startDate, endDate);
-        LoginAnalyticsDto loginAnalytics = analyticsReportService.getLoginAnalytics(startDate, endDate);
-
-        DashboardDto dashboard = new DashboardDto(
-                taskAnalytics,
-                userAnalytics,
-                loginAnalytics,
-                startDate,
-                endDate
-        );
-
+        DateRange range = resolveRange(startDate, endDate);
+        DashboardDto dashboard = analyticsService.getDashboard(range.start(), range.end());
         return ResponseEntity.ok(dashboard);
     }
 
-    // DTO для дашборда
-    public record DashboardDto(
-        TaskAnalyticsDto taskAnalytics,
-        UserAnalyticsDto userAnalytics,
-        LoginAnalyticsDto loginAnalytics,
-        LocalDateTime periodStart,
-        LocalDateTime periodEnd
-    ) {}
+    private DateRange resolveRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        LocalDate resolvedEnd = Optional.ofNullable(endDateTime)
+                .map(LocalDateTime::toLocalDate)
+                .orElse(LocalDate.now());
 
-    private Map<String, LocalDateTime> getDefaultStartAndEndDates(LocalDateTime startDate, LocalDateTime endDate) {
-        Map<String, LocalDateTime> dates = new HashMap<>();
-        if (startDate == null) {
-            startDate = LocalDateTime.now().minusDays(30);
+        LocalDate resolvedStart = Optional.ofNullable(startDateTime)
+                .map(LocalDateTime::toLocalDate)
+                .orElse(resolvedEnd.minusDays(DEFAULT_RANGE_DAYS));
+
+        if (resolvedStart.isAfter(resolvedEnd)) {
+            LocalDate tmp = resolvedStart;
+            resolvedStart = resolvedEnd;
+            resolvedEnd = tmp;
         }
-        if (endDate == null) {
-            endDate = LocalDateTime.now();
-        }
-        dates.put("startDate", startDate);
-        dates.put("endDate", endDate);
-        return dates;
+
+        return new DateRange(resolvedStart, resolvedEnd);
     }
+
+    private record DateRange(LocalDate start, LocalDate end) {}
 }
