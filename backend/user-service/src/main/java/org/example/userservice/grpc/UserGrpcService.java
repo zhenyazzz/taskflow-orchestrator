@@ -63,16 +63,32 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
             GetUsersByIdsRequest request,
             StreamObserver<GetUsersByIdsResponse> responseObserver
     ) {
-        Set<String> ids = new HashSet<>(request.getUserIdsList());
-    
-        List<UserDto> users = userService.findAllByIds(ids).stream().map(this::convertToGrpcResponse).toList();
-    
-        GetUsersByIdsResponse response = GetUsersByIdsResponse.newBuilder()
-                .addAllUsers(users)
-                .build();
-    
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        try {
+            log.debug("gRPC: Getting users by IDs: {}", request.getUserIdsList());
+            Set<String> ids = new HashSet<>(request.getUserIdsList());
+        
+            List<UserDto> users = userService.findAllByIds(ids).stream()
+                    .map(this::convertToGrpcResponse)
+                    .toList();
+        
+            GetUsersByIdsResponse response = GetUsersByIdsResponse.newBuilder()
+                    .addAllUsers(users)
+                    .build();
+        
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            log.debug("gRPC: Successfully retrieved {} users", users.size());
+        } catch (IllegalArgumentException e) {
+            log.error("gRPC: Invalid UUID format in list: {}", request.getUserIdsList(), e);
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                    .withDescription("Invalid user ID format in the list: " + e.getMessage())
+                    .asRuntimeException());
+        } catch (Exception e) {
+            log.error("gRPC: Error getting users by IDs: {}", request.getUserIdsList(), e);
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Internal server error: " + e.getMessage())
+                    .asRuntimeException());
+        }
     }
         
 
