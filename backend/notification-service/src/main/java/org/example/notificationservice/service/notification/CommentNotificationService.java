@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.example.notificationservice.dto.response.UserResponse;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.example.notificationservice.model.NotificationType;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class CommentNotificationService {
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), "comment-created", event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_CREATED.name(), event);
     }
 
     @Transactional
@@ -44,7 +46,7 @@ public class CommentNotificationService {
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), "comment-updated", event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_UPDATED.name(), event);
     }
 
     @Transactional
@@ -57,6 +59,6 @@ public class CommentNotificationService {
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), "comment-deleted", event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_DELETED.name(), event);
     }
 }

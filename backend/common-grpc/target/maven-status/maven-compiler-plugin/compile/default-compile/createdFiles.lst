@@ -1,0 +1,13 @@
+org\example\grpc\user\UserServiceGrpc$UserServiceFutureStub.class
+org\example\grpc\user\UserServiceGrpc$UserServiceFileDescriptorSupplier.class
+org\example\grpc\user\UserServiceGrpc$2.class
+org\example\grpc\user\UserServiceGrpc$UserServiceBaseDescriptorSupplier.class
+org\example\grpc\user\UserServiceGrpc$MethodHandlers.class
+org\example\grpc\user\UserServiceGrpc$UserServiceBlockingStub.class
+org\example\grpc\user\UserServiceGrpc$UserServiceStub.class
+org\example\grpc\user\UserServiceGrpc$1.class
+org\example\grpc\user\UserServiceGrpc$3.class
+org\example\grpc\user\UserServiceGrpc.class
+org\example\grpc\user\UserServiceGrpc$UserServiceImplBase.class
+org\example\grpc\user\UserServiceGrpc$UserServiceMethodDescriptorSupplier.class
+org\example\grpc\user\UserServiceGrpc$AsyncService.class

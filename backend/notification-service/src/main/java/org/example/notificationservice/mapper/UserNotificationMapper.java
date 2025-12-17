@@ -9,6 +9,7 @@ import org.example.events.user.UserDeletedEvent;
 import org.example.events.user.UserRoleUpdateEvent;
 import org.example.events.user.UserLoginEvent;
 import org.example.events.user.LoginFailEvent;
+import org.example.notificationservice.dto.response.UserResponse;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
@@ -54,13 +55,13 @@ public interface UserNotificationMapper {
     Notification toNotification(UserDeletedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", expression = "java(event.id().toString())")
+    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
     @Mapping(target = "type", constant = "USER_ROLE_UPDATE")
-    @Mapping(target = "metadata", expression = "java(mapUserRoleUpdateEventMetadata(event))")
+    @Mapping(target = "metadata", expression = "java(mapUserRoleUpdateEventMetadata(user, event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserRoleUpdateEvent event, String message);
+    Notification toNotification(UserResponse user, UserRoleUpdateEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
@@ -117,9 +118,9 @@ public interface UserNotificationMapper {
     }
 
     @Named("mapUserRoleUpdateEventMetadata")
-    default Map<String, String> mapUserRoleUpdateEventMetadata(UserRoleUpdateEvent event) {
+    default Map<String, String> mapUserRoleUpdateEventMetadata(UserResponse user, UserRoleUpdateEvent event) {
         return Map.of(
-                "userId", event.id().toString(),
+                "userId", user.id(),
                 "role", event.role().name(),
                 "action", event.action().name()
         );

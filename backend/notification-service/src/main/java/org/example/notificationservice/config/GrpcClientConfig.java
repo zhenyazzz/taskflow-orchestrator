@@ -6,23 +6,37 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.PreDestroy;
 
 @Slf4j
 @Configuration
 public class GrpcClientConfig {
 
-    @Value("${app.grpc.user-service.host:localhost}")
-    private String userServiceHost;
+    @Value("${grpc.user-service.host}")
+    private String host;
 
-    @Value("${app.grpc.user-service.port:9090}")
-    private int userServicePort;
+    @Value("${grpc.user-service.port}")
+    private int port;
 
-    @Bean(name = "userServiceChannel")
+    private ManagedChannel channel;
+
+    @Bean
+    @Qualifier("userServiceChannel")
     public ManagedChannel userServiceChannel() {
-        log.info("Creating gRPC channel to {}:{}", userServiceHost, userServicePort);
-        return ManagedChannelBuilder.forAddress(userServiceHost, userServicePort)
-                .usePlaintext() 
+        this.channel = ManagedChannelBuilder
+                .forAddress(host, port)
+                .usePlaintext()
                 .build();
+        return channel;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (channel != null) {
+            channel.shutdown();
+        }
     }
 }
+
 

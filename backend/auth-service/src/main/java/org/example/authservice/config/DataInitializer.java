@@ -15,10 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Первичное заполнение БД учётными записями при старте приложения.
- * Выполняется только если таблица пользователей пуста.
- */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor

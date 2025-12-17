@@ -1,7 +1,10 @@
 package org.example.notificationservice.service.cache;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,19 @@ public class UserCacheService {
             return null;
         }
     }
+
+    public Map<String, UserResponse> getUsersFromCache(Set<String> userIds) {
+        Map<String, UserResponse> result = new HashMap<>();
+    
+        for (String id : userIds) {
+            UserResponse user = getUserFromCache(id);
+            if (user != null) {
+                result.put(id, user);
+            }
+        }
+        return result;
+    }
+    
 
     public void deleteUserFromCache(String userId) {
         String cacheKey = generateCacheKey(userId);

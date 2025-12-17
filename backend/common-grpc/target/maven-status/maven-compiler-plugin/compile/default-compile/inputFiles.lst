@@ -1,6 +1,10 @@
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\grpc-java\org\example\grpc\user\UserServiceGrpc.java
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUserByIdRequest.java
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUserByIdRequestOrBuilder.java
+E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUsersByIdsRequest.java
+E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUsersByIdsRequestOrBuilder.java
+E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUsersByIdsResponse.java
+E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\GetUsersByIdsResponseOrBuilder.java
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\UserDto.java
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\UserDtoOrBuilder.java
 E:\portfolio\taskflow-orchestrator\backend\common-grpc\target\generated-sources\protobuf\java\org\example\grpc\user\UserServiceProto.java

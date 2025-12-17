@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.example.notificationservice.mapper.AttachmentNotificationMapper;
 import org.example.notificationservice.dto.response.UserResponse;
+import org.example.notificationservice.model.NotificationType;
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class AttachmentNotificationService {
             attachmentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), "attachment-added", event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_ADDED.name(), event);
     }
 
     @Transactional
@@ -45,6 +46,6 @@ public class AttachmentNotificationService {
             attachmentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), "attachment-deleted", event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_DELETED.name(), event);
     }
 }
