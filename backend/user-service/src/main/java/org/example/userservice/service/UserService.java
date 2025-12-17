@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +45,11 @@ public class UserService {
         log.info("Getting user with id: {}", id);
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+    }
+    public List<User> findAllByIds(Set<String> ids) {
+        return userRepository.findAllById(ids.stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toSet()));
     }
 
     public List<UserResponse> getAllUsers() {

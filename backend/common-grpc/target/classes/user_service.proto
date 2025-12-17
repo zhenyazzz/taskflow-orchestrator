@@ -7,20 +7,31 @@ option java_package = "org.example.grpc.user";
 option java_outer_classname = "UserServiceProto";
 
 service UserService {
-  
+
   rpc GetUserById(GetUserByIdRequest) returns (UserDto);
+
+  rpc GetUsersByIds(GetUsersByIdsRequest) returns (GetUsersByIdsResponse);
 }
 
 
 message GetUserByIdRequest {
-  string user_id = 1; 
+  string user_id = 1;
+}
+
+message GetUsersByIdsRequest {
+  repeated string user_ids = 1;
+}
+
+
+message GetUsersByIdsResponse {
+  repeated UserDto users = 1;
 }
 
 
 message UserDto {
-  string id = 1;           
-  string username = 2;     
-  string email = 3;        
-  string first_name = 4;   
-  string last_name = 5;    
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
 }

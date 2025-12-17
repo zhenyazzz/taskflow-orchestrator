@@ -146,7 +146,7 @@ public class TaskNotificationService {
     @Transactional
     public void handleTaskStatusUpdated(TaskStatusUpdatedEvent event) {
         log.info("Handling TaskStatusUpdatedEvent: {}", event);
-        UserResponse user = userServiceClient.getUserById(event.id());
+        UserResponse user = userServiceClient.getUserById(event.userId());
         String message = String.format("You updated task '%s' status to '%s'.", event.title(), event.status());
 
         notificationRepository.save(

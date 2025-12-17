@@ -8,9 +8,14 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.example.grpc.user.UserServiceGrpc;
 import org.example.grpc.user.GetUserByIdRequest;
 import org.example.grpc.user.UserDto;
-import org.example.userservice.dto.response.UserResponse;
+import org.example.grpc.user.GetUsersByIdsRequest;
+import org.example.grpc.user.GetUsersByIdsResponse;
+import org.example.userservice.model.User;
 import org.example.userservice.service.UserService;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @GrpcService
@@ -28,9 +33,9 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
             log.debug("gRPC: Getting user by ID: {}", userId);
             
             UUID uuid = UUID.fromString(userId);
-            UserResponse userResponse = userService.getUserById(uuid);
+            User user = userService.findUserById(uuid);
             
-            UserDto grpcResponse = convertToGrpcResponse(userResponse);
+            UserDto grpcResponse = convertToGrpcResponse(user);
             
             responseObserver.onNext(grpcResponse);
             responseObserver.onCompleted();
@@ -53,13 +58,31 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
         }
     }
 
-    private UserDto convertToGrpcResponse(org.example.userservice.dto.response.UserResponse userResponse) {
+    @Override
+    public void getUsersByIds(
+            GetUsersByIdsRequest request,
+            StreamObserver<GetUsersByIdsResponse> responseObserver
+    ) {
+        Set<String> ids = new HashSet<>(request.getUserIdsList());
+    
+        List<UserDto> users = userService.findAllByIds(ids).stream().map(this::convertToGrpcResponse).toList();
+    
+        GetUsersByIdsResponse response = GetUsersByIdsResponse.newBuilder()
+                .addAllUsers(users)
+                .build();
+    
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+        
+
+    private UserDto convertToGrpcResponse(User user) {
         return UserDto.newBuilder()
-                .setId(userResponse.id().toString())
-                .setUsername(userResponse.username())
-                .setEmail(userResponse.email())
-                .setFirstName(userResponse.firstName() != null ? userResponse.firstName() : "")
-                .setLastName(userResponse.lastName() != null ? userResponse.lastName() : "")
+                .setId(user.getId().toString())
+                .setUsername(user.getUsername())
+                .setEmail(user.getEmail())
+                .setFirstName(user.getFirstName() != null ? user.getFirstName() : "")
+                .setLastName(user.getLastName() != null ? user.getLastName() : "")
                 .build();
     }
 }

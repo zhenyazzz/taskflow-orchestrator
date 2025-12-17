@@ -21,6 +21,16 @@ public final class UserServiceProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_example_grpc_GetUserByIdRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_example_grpc_GetUsersByIdsRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_example_grpc_GetUsersByIdsRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_example_grpc_GetUsersByIdsResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_example_grpc_GetUsersByIdsResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_example_grpc_UserDto_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -35,13 +45,19 @@ public final class UserServiceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\022user_service.proto\022\020org.example.grpc\"%" +
-      "\n\022GetUserByIdRequest\022\017\n\007user_id\030\001 \001(\t\"]\n" +
-      "\007UserDto\022\n\n\002id\030\001 \001(\t\022\020\n\010username\030\002 \001(\t\022\r" +
-      "\n\005email\030\003 \001(\t\022\022\n\nfirst_name\030\004 \001(\t\022\021\n\tlas" +
-      "t_name\030\005 \001(\t2]\n\013UserService\022N\n\013GetUserBy" +
-      "Id\022$.org.example.grpc.GetUserByIdRequest" +
-      "\032\031.org.example.grpc.UserDtoB+\n\025org.examp" +
-      "le.grpc.userB\020UserServiceProtoP\001b\006proto3"
+      "\n\022GetUserByIdRequest\022\017\n\007user_id\030\001 \001(\t\"(\n" +
+      "\024GetUsersByIdsRequest\022\020\n\010user_ids\030\001 \003(\t\"" +
+      "A\n\025GetUsersByIdsResponse\022(\n\005users\030\001 \003(\0132" +
+      "\031.org.example.grpc.UserDto\"]\n\007UserDto\022\n\n" +
+      "\002id\030\001 \001(\t\022\020\n\010username\030\002 \001(\t\022\r\n\005email\030\003 \001" +
+      "(\t\022\022\n\nfirst_name\030\004 \001(\t\022\021\n\tlast_name\030\005 \001(" +
+      "\t2\277\001\n\013UserService\022N\n\013GetUserById\022$.org.e" +
+      "xample.grpc.GetUserByIdRequest\032\031.org.exa" +
+      "mple.grpc.UserDto\022`\n\rGetUsersByIds\022&.org" +
+      ".example.grpc.GetUsersByIdsRequest\032\'.org" +
+      ".example.grpc.GetUsersByIdsResponseB+\n\025o" +
+      "rg.example.grpc.userB\020UserServiceProtoP\001" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -53,8 +69,20 @@ public final class UserServiceProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_GetUserByIdRequest_descriptor,
         new java.lang.String[] { "UserId", });
-    internal_static_org_example_grpc_UserDto_descriptor =
+    internal_static_org_example_grpc_GetUsersByIdsRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_org_example_grpc_GetUsersByIdsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_example_grpc_GetUsersByIdsRequest_descriptor,
+        new java.lang.String[] { "UserIds", });
+    internal_static_org_example_grpc_GetUsersByIdsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_org_example_grpc_GetUsersByIdsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_example_grpc_GetUsersByIdsResponse_descriptor,
+        new java.lang.String[] { "Users", });
+    internal_static_org_example_grpc_UserDto_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_org_example_grpc_UserDto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_example_grpc_UserDto_descriptor,

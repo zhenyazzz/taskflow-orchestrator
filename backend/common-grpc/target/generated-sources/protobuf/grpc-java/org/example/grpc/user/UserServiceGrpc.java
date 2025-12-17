@@ -46,6 +46,37 @@ public final class UserServiceGrpc {
     return getGetUserByIdMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.example.grpc.user.GetUsersByIdsRequest,
+      org.example.grpc.user.GetUsersByIdsResponse> getGetUsersByIdsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUsersByIds",
+      requestType = org.example.grpc.user.GetUsersByIdsRequest.class,
+      responseType = org.example.grpc.user.GetUsersByIdsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.example.grpc.user.GetUsersByIdsRequest,
+      org.example.grpc.user.GetUsersByIdsResponse> getGetUsersByIdsMethod() {
+    io.grpc.MethodDescriptor<org.example.grpc.user.GetUsersByIdsRequest, org.example.grpc.user.GetUsersByIdsResponse> getGetUsersByIdsMethod;
+    if ((getGetUsersByIdsMethod = UserServiceGrpc.getGetUsersByIdsMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetUsersByIdsMethod = UserServiceGrpc.getGetUsersByIdsMethod) == null) {
+          UserServiceGrpc.getGetUsersByIdsMethod = getGetUsersByIdsMethod =
+              io.grpc.MethodDescriptor.<org.example.grpc.user.GetUsersByIdsRequest, org.example.grpc.user.GetUsersByIdsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUsersByIds"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.user.GetUsersByIdsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.grpc.user.GetUsersByIdsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetUsersByIds"))
+              .build();
+        }
+      }
+    }
+    return getGetUsersByIdsMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -100,6 +131,13 @@ public final class UserServiceGrpc {
         io.grpc.stub.StreamObserver<org.example.grpc.user.UserDto> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserByIdMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void getUsersByIds(org.example.grpc.user.GetUsersByIdsRequest request,
+        io.grpc.stub.StreamObserver<org.example.grpc.user.GetUsersByIdsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUsersByIdsMethod(), responseObserver);
+    }
   }
 
   /**
@@ -136,6 +174,14 @@ public final class UserServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetUserByIdMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getUsersByIds(org.example.grpc.user.GetUsersByIdsRequest request,
+        io.grpc.stub.StreamObserver<org.example.grpc.user.GetUsersByIdsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUsersByIdsMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -159,6 +205,13 @@ public final class UserServiceGrpc {
     public org.example.grpc.user.UserDto getUserById(org.example.grpc.user.GetUserByIdRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetUserByIdMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.example.grpc.user.GetUsersByIdsResponse getUsersByIds(org.example.grpc.user.GetUsersByIdsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUsersByIdsMethod(), getCallOptions(), request);
     }
   }
 
@@ -185,9 +238,18 @@ public final class UserServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetUserByIdMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.example.grpc.user.GetUsersByIdsResponse> getUsersByIds(
+        org.example.grpc.user.GetUsersByIdsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUsersByIdsMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_USER_BY_ID = 0;
+  private static final int METHODID_GET_USERS_BY_IDS = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -209,6 +271,10 @@ public final class UserServiceGrpc {
         case METHODID_GET_USER_BY_ID:
           serviceImpl.getUserById((org.example.grpc.user.GetUserByIdRequest) request,
               (io.grpc.stub.StreamObserver<org.example.grpc.user.UserDto>) responseObserver);
+          break;
+        case METHODID_GET_USERS_BY_IDS:
+          serviceImpl.getUsersByIds((org.example.grpc.user.GetUsersByIdsRequest) request,
+              (io.grpc.stub.StreamObserver<org.example.grpc.user.GetUsersByIdsResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -235,6 +301,13 @@ public final class UserServiceGrpc {
               org.example.grpc.user.GetUserByIdRequest,
               org.example.grpc.user.UserDto>(
                 service, METHODID_GET_USER_BY_ID)))
+        .addMethod(
+          getGetUsersByIdsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              org.example.grpc.user.GetUsersByIdsRequest,
+              org.example.grpc.user.GetUsersByIdsResponse>(
+                service, METHODID_GET_USERS_BY_IDS)))
         .build();
   }
 
@@ -284,6 +357,7 @@ public final class UserServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new UserServiceFileDescriptorSupplier())
               .addMethod(getGetUserByIdMethod())
+              .addMethod(getGetUsersByIdsMethod())
               .build();
         }
       }
