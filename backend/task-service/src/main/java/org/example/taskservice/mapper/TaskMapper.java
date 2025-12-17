@@ -49,14 +49,14 @@ public interface TaskMapper {
 
     @Mappings({
             @Mapping(target = "timestamp", expression = "java(java.time.Instant.now())"),
-            @Mapping(target = "userId", source = "userId")
+            @Mapping(target = "creatorId", source = "userId")
     })
     TaskDeletedEvent toTaskDeletedEvent(Task task, String userId);
 
     @Mappings({
             @Mapping(target = "completedAt", source = "task.updatedAt"),
             @Mapping(target = "timestamp", expression = "java(java.time.Instant.now())"),
-            @Mapping(target = "userId", source = "userId")
+            @Mapping(target = "creatorId", source = "userId")
     })
     TaskCompletedEvent toTaskCompletedEvent(Task task, String userId);
 

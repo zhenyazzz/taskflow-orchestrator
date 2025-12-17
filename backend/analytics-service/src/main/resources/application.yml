@@ -1,12 +1,14 @@
 spring:
   application:
     name: analytics-service
+  
+  # Config server (опционально)
   config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+    import: optional:configserver:${CONFIG_SERVER_URL:}
   
   data:
     mongodb:
-      uri: mongodb://root:password@localhost:27017/taskdb?authSource=admin
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://root:password@localhost:27017/taskdb?authSource=admin}
       auto-index-creation: true
       database: taskdb
 
@@ -21,37 +23,36 @@ spring:
 server:
   port: 8084
 
-# Kafka Topics Configuration
+# Kafka Topics Configuration (общие для всех профилей)
 app:
   kafka:
     topics:
-      taskCreated: "task.created"
-      taskUpdated: "task.updated"
-      taskSubscribed: "task.subscribed"
-      taskUnsubscribed: "task.unsubscribed"
-      taskCompleted: "task.completed"
-      taskDeleted: "task.deleted"
-      taskStatusUpdated: "task.status.updated"
-      taskAssigneesUpdated: "task.assignees.updated"
-      attachmentCreated: "attachment.created"
-      attachmentDeleted: "attachment.deleted"
-      commentCreated: "comment.created"
-      commentUpdated: "comment.updated"
-      commentDeleted: "comment.deleted"
-      userCreated: "user.created"
-      userRegistered: "user.registered"
-      userUpdated: "user.updated"
-      userDeleted: "user.deleted"
-      userProfileUpdated: "user.profile.updated"
-      userRoleUpdate: "user.role.updated"
-      userLogin: "auth.login.success"
-      userLoginSuccess: "auth.login.success"
-      userLoginFailed: "auth.login.failed"
-      userLogout: "auth.logout"
-      tokenRefreshed: "auth.token.refreshed"
-      passwordChanged: "auth.password.changed"
+      task-created: "task.created"
+      task-updated: "task.updated"
+      task-subscribed: "task.subscribed"
+      task-unsubscribed: "task.unsubscribed"
+      task-completed: "task.completed"
+      task-deleted: "task.deleted"
+      task-status-updated: "task.status.updated"
+      task-assignees-updated: "task.assignees.updated"
+      attachment-created: "attachment.created"
+      attachment-deleted: "attachment.deleted"
+      comment-created: "comment.created"
+      comment-updated: "comment.updated"
+      comment-deleted: "comment.deleted"
+      user-created: "user.created"
+      user-registered: "user.registered"
+      user-updated: "user.updated"
+      user-deleted: "user.deleted"
+      user-profile-updated: "user.profile.updated"
+      user-role-updated: "user.role.updated"
+      user-login-success: "auth.login.success"
+      user-login-failed: "auth.login.failed"
+      user-logout: "auth.logout"
+      token-refreshed: "auth.token.refreshed"
+      password-changed: "auth.password.changed"
 
-# Actuator - общие настройки
+# Actuator - базовые настройки
 management:
   endpoints:
     web:
@@ -61,22 +62,9 @@ management:
     health:
       show-details: always
 
-# Logging - общие настройки
+# Logging - базовые настройки
 logging:
   level:
     org.example.analyticsservice: INFO
-    org.springframework.kafka: WARN
-    org.springframework.web: WARN
-    org.hibernate: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    hostname: localhost
-    prefer-ip-address: true
