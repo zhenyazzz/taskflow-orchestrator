@@ -1,0 +1,145 @@
+import { Skeleton } from "@/shared/ui/kit/skeleton";
+import React from "react";
+import { ViewMode } from "@/features/boards-list/ui/view-mode-toggle";
+
+export function AnalyticsLayout({
+  header,
+  children,
+  sidebar,
+}: {
+  header: React.ReactNode;
+  children: React.ReactNode;
+  sidebar?: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-screen w-full overflow-hidden">
+      {sidebar && <div className="flex-shrink-0">{sidebar}</div>}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 overflow-auto p-6 flex flex-col gap-6">
+          {header}
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AnalyticsLayoutHeader({
+  title,
+  description,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="text-2xl font-bold">{title}</h1>
+        {description && <p className="text-gray-500">{description}</p>}
+      </div>
+
+      <div className="flex gap-2">{actions}</div>
+    </div>
+  );
+}
+
+export function AnalyticsLayoutContent({
+  children,
+  cursorRef,
+  hasCursor,
+  isEmpty,
+  isPending,
+  isPendingNext,
+  mode,
+  renderList,
+  renderGrid,
+}: {
+  children?: React.ReactNode;
+  isEmpty?: boolean;
+  isPending?: boolean;
+  isPendingNext?: boolean;
+  cursorRef?: React.Ref<HTMLDivElement>;
+  hasCursor?: boolean;
+  mode: ViewMode;
+  renderList?: () => React.ReactNode;
+  renderGrid?: () => React.ReactNode;
+}) {
+  return (
+    <div>
+      {isPending && <div className="text-center py-10">Загрузка...</div>}
+      {mode === "list" && renderList && (
+        <AnalyticsLayoutList>{renderList?.()}</AnalyticsLayoutList>
+      )}
+      {mode === "grid" && renderGrid && (
+        <AnalyticsLayoutCards>{renderGrid?.()}</AnalyticsLayoutCards>
+      )}
+      {!isPending && children}
+
+      {isEmpty && !isPending && (
+        <div className="text-center py-10">Доски не найдены</div>
+      )}
+
+      {hasCursor && (
+        <div ref={cursorRef} className="text-center py-8">
+          {isPendingNext && (
+            mode === "list" ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full" />
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function AnalyticsLayoutCards({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {children}
+    </div>
+  );
+}
+
+export function AnalyticsLayoutList({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <div className="flex flex-col gap-2">{children}</div>;
+}
+
+export function AnalyticsLayoutContentGroups({
+  groups,
+}: {
+  groups: {
+    title: string;
+    items: React.ReactNode;
+  }[];
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {groups.map((group) => (
+        <div key={group.title}>
+          <div className="text-lg font-bold mb-2">{group.title}</div>
+          {group.items}
+        </div>
+      ))}
+    </div>
+  );
+}
+
