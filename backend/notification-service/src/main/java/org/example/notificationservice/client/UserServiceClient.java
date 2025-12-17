@@ -11,6 +11,9 @@ import org.example.notificationservice.service.cache.UserCacheService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,6 +41,13 @@ public class UserServiceClient {
         }
 
         return userResponse;
+    }
+
+    public List<UserResponse> getUsersByIds(Set<String> userIds) {
+        return userIds.stream()
+                .map(this::getUserById)
+                .filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private UserResponse getFromService(String userId) {

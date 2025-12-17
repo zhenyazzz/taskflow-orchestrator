@@ -59,4 +59,33 @@ app:
       sms:
         enabled: true
 
+  kafka:
+    topics:
+      task-created: "task.created"
+      task-updated: "task.updated"
+      task-subscribed: "task.subscribed"
+      task-unsubscribed: "task.unsubscribed"
+      task-completed: "task.completed"
+      task-deleted: "task.deleted"
+      task-status-updated: "task.status.updated"
+      task-assignees-updated: "task.assignees.updated"
+      
+      attachment-added: "attachment.added"
+      attachment-deleted: "attachment.deleted"
+      
+      comment-created: "comment.created"
+      comment-updated: "comment.updated"
+      comment-deleted: "comment.deleted"
+
+      user-registered: "user.registered"
+      user-role-update: "user.role.update"
+      user-role-updated: "user.role.updated"
+      user-login-success: "auth.login.success"
+      user-login-failed: "auth.login.failed"
+      user-login: "user.login"
+      
+      user-created: "user.created"
+      user-deleted: "user.deleted"
+      user-profile-updated: "user.profile.updated"
+
 

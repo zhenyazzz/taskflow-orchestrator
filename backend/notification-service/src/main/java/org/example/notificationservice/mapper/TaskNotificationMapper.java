@@ -125,7 +125,7 @@ public interface TaskNotificationMapper {
         return Map.of(
                 "taskId", event.id(),
                 "title", event.title(),
-                "userId", event.userId()
+                "creatorId", event.creatorId()
         );
     }
 
@@ -134,7 +134,7 @@ public interface TaskNotificationMapper {
         return Map.of(
                 "taskId", event.id(),
                 "title", event.title(),
-                "userId", event.userId()
+                "creatorId", event.creatorId()
         );
     }
 

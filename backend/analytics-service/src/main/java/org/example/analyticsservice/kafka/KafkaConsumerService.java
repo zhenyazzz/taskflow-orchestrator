@@ -20,10 +20,6 @@ public class KafkaConsumerService {
     @Autowired
     private ObjectMapper objectMapper;
     
-    public KafkaConsumerService() {
-        // Конструктор без параметров для опциональной зависимости
-    }
-    
     // Task Events
     @KafkaListener(topics = "${app.kafka.topics.task-created}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeTaskCreated(String message) {
