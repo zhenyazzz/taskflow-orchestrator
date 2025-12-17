@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
-  AnalyticListLayout,
-  AnalyticListLayoutHeader,
-} from "./analyticListLayout";
+  AnalyticsLayout,
+  AnalyticsLayoutHeader,
+} from "@/features/analytics/ui/analytics-layout";
 import { BoardsSidebar } from "@/features/boards-list";
 import { rqClient } from "@/shared/api/instance";
 import { Button } from "@/shared/ui/kit/button";
@@ -186,7 +186,7 @@ const safeFormatDateKey = (dateKey: string) => {
   return isNaN(parsed.getTime()) ? dateKey : shortDateFormatter.format(parsed);
 };
 
-function BoardsListPage() {
+function AnalyticsPage() {
   const [range, setRange] = useState<DateRange>(() => createPresetRange(30));
   const [selectedPreset, setSelectedPreset] = useState<number | null>(30);
 
@@ -688,10 +688,10 @@ function BoardsListPage() {
   };
 
   return (
-    <AnalyticListLayout
+    <AnalyticsLayout
       sidebar={<BoardsSidebar />}
       header={
-        <AnalyticListLayoutHeader
+        <AnalyticsLayoutHeader
           title="Аналитика"
           description="Сводные метрики по задачам, пользователям и авторизациям"
           actions={
@@ -777,7 +777,7 @@ function BoardsListPage() {
 
         {renderContent()}
       </div>
-    </AnalyticListLayout>
+    </AnalyticsLayout>
   );
 }
 
@@ -823,4 +823,4 @@ const AnalyticsSkeleton = () => (
   </div>
 );
 
-export const Component = BoardsListPage;
+export const Component = AnalyticsPage;

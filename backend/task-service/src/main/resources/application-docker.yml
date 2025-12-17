@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://root:password@mongo:27017/taskdb
+      uri: mongodb://root:password@mongo:27017/taskdb?authSource=admin
       database: taskdb
       auto-index-creation: true
       repositories:
@@ -15,15 +15,7 @@ minio:
   secret-key: minio123
   bucket-name: taskflow-attachments
 
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://eureka-server:8761/eureka/
-#    registerWithEureka: true
-#    fetchRegistry: true
-#  instance:
-#    hostname: task-service
-#    preferIpAddress: false
+
 eureka:
   client:
     serviceUrl:

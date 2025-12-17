@@ -35,12 +35,12 @@ export const router = createBrowserRouter([
           {
             path: ROUTES.ANALYTIC_BOARDS,
             lazy: () =>
-                import("@/features/analityc/boards-list-analytic.page"),
+                import("@/features/analytics/analytics.page"),
           },
           {
             path: ROUTES.ANALYTICS,
             lazy: () =>
-                import("@/features/analityc/boards-list-analytic.page"),
+                import("@/features/analytics/analytics.page"),
           },
           {
             path: ROUTES.USER_BOARDS,
