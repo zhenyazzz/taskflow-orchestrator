@@ -3,7 +3,7 @@ package org.example.notificationservice.mapper;
 import org.example.events.comment.CommentCreatedEvent;
 import org.example.events.comment.CommentDeletedEvent;
 import org.example.events.comment.CommentUpdatedEvent;
-import org.example.notificationservice.dto.response.UserDto;
+import org.example.notificationservice.dto.response.UserResponse;
 import org.example.notificationservice.model.Notification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,29 +17,29 @@ public interface CommentNotificationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "COMMENT_CREATED")
     @Mapping(target = "metadata", expression = "java(mapCommentCreatedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, CommentCreatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, CommentCreatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "COMMENT_UPDATED")
     @Mapping(target = "metadata", expression = "java(mapCommentUpdatedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, CommentUpdatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, CommentUpdatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "COMMENT_DELETED")
     @Mapping(target = "metadata", expression = "java(mapCommentDeletedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, CommentDeletedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, CommentDeletedEvent event, String message);
 
     @Named("mapCommentCreatedEventMetadata")
     default Map<String, String> mapCommentCreatedEventMetadata(CommentCreatedEvent event) {

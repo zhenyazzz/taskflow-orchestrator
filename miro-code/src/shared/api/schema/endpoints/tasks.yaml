@@ -206,6 +206,222 @@ schemas:
         type: boolean
         description: Is the page empty?
 
+  TaskSummaryDto:
+    type: object
+    properties:
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      totalTasks:
+        type: integer
+        format: int64
+      completedTasks:
+        type: integer
+        format: int64
+      inProgressTasks:
+        type: integer
+        format: int64
+      pendingTasks:
+        type: integer
+        format: int64
+      deletedTasks:
+        type: integer
+        format: int64
+      completionPercentage:
+        type: number
+        format: double
+      averageCompletionTimeHours:
+        type: number
+        format: double
+      tasksByStatus:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByPriority:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByCategory:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByDepartment:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailyCreatedTasks:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailyCompletedTasks:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+
+  UserTaskSummaryDto:
+    type: object
+    properties:
+      userId:
+        type: string
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      totalTasks:
+        type: integer
+        format: int64
+      completedTasks:
+        type: integer
+        format: int64
+      inProgressTasks:
+        type: integer
+        format: int64
+      pendingTasks:
+        type: integer
+        format: int64
+      deletedTasks:
+        type: integer
+        format: int64
+      completionPercentage:
+        type: number
+        format: double
+      tasksByCategory:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByPriority:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByStatus:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByDepartment:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+
+  LoginAnalyticsDto:
+    type: object
+    properties:
+      totalLogins:
+        type: integer
+        format: int64
+      successfulLogins:
+        type: integer
+        format: int64
+      failedLogins:
+        type: integer
+        format: int64
+      successRate:
+        type: number
+        format: double
+      failureReasons:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailySuccessfulLogins:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailyFailedLogins:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+
+  UserAnalyticsDto:
+    type: object
+    properties:
+      totalUsers:
+        type: integer
+        format: int64
+      registeredUsers:
+        type: integer
+        format: int64
+      updatedUsers:
+        type: integer
+        format: int64
+      usersByDepartment:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      usersByRole:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+
+  TaskAnalyticsDto:
+    type: object
+    properties:
+      totalTasks:
+        type: integer
+        format: int64
+      createdTasks:
+        type: integer
+        format: int64
+      completedTasks:
+        type: integer
+        format: int64
+      deletedTasks:
+        type: integer
+        format: int64
+      averageCompletionTimeHours:
+        type: number
+        format: double
+      tasksByPriority:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      tasksByStatus:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailyCreatedTasks:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+      dailyCompletedTasks:
+        type: object
+        additionalProperties:
+          type: integer
+          format: int64
+
+  DashboardDto:
+    type: object
+    properties:
+      taskSummary:
+        $ref: '#/schemas/TaskSummaryDto'
+      loginAnalytics:
+        $ref: '#/schemas/LoginAnalyticsDto'
+      topUsers:
+        type: array
+        items:
+          $ref: '#/schemas/UserTaskSummaryDto'
+
 getTasks:
   summary: Get tasks with pagination and filtering
   description: Returns a paginated and filtered list of tasks
@@ -665,3 +881,123 @@ getDueSoonTasks:
             $ref: '#/schemas/TaskPageResponse'
     '403':
       $ref: '../shared/responses.yaml#/ForbiddenError'
+
+getTaskAnalytics:
+  summary: Get task analytics summary
+  description: Returns aggregated task statistics for the specified period
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period start (ISO date-time)
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period end (ISO date-time)
+  responses:
+    '200':
+      description: Task analytics summary
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/TaskSummaryDto'
+
+getUserAnalytics:
+  summary: Get user task analytics
+  description: Returns task statistics for a specific user in the period
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: userId
+      schema:
+        type: string
+      required: true
+      description: User ID
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period start (ISO date-time)
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period end (ISO date-time)
+  responses:
+    '200':
+      description: User task analytics summary
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/UserTaskSummaryDto'
+    '400':
+      $ref: '../shared/responses.yaml#/BadRequestError'
+
+getLoginAnalytics:
+  summary: Get login analytics
+  description: Returns aggregated login statistics for the specified period
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period start (ISO date-time)
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period end (ISO date-time)
+  responses:
+    '200':
+      description: Login analytics data
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/LoginAnalyticsDto'
+
+getDashboardAnalytics:
+  summary: Get analytics dashboard
+  description: Returns combined dashboard analytics for the specified period
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: startDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period start (ISO date-time)
+    - in: query
+      name: endDate
+      schema:
+        type: string
+        format: date-time
+      required: false
+      description: Period end (ISO date-time)
+  responses:
+    '200':
+      description: Dashboard analytics data
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/DashboardDto'

@@ -1,7 +1,13 @@
 import { ROUTES } from "@/shared/model/routes";
 import { Button } from "@/shared/ui/kit/button";
 import { Link } from "react-router-dom";
-import {CheckSquareIcon, StarIcon, ClockIcon, AlbumIcon, BabyIcon} from "lucide-react";
+import {
+  CheckSquareIcon,
+  StarIcon,
+  ClockIcon,
+  BabyIcon,
+  BarChart2,
+} from "lucide-react";
 import { cn } from "@/shared/lib/css";
 import { useSession } from "@/shared/model/session";
 
@@ -36,20 +42,20 @@ export function BoardsSidebar({ className }: BoardsSidebarProps) {
             </Link>
           </Button>
           {isAdmin && (
-              <>
-                <Button variant="ghost" className="w-full justify-start" asChild>
-                  <Link to={ROUTES.ANALYTIC_TASKS}>
-                    <AlbumIcon className="mr-2 h-4 w-4" />
-                    Аналитика
-                  </Link>
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" asChild>
-                  <Link to={ROUTES.USER_BOARDS}>
-                    <BabyIcon className="mr-2 h-4 w-4" />
-                    Пользователи
-                  </Link>
-                </Button>
-              </>
+            <>
+              <Button variant="ghost" className="w-full justify-start" asChild>
+                <Link to={ROUTES.ANALYTICS}>
+                  <BarChart2 className="mr-2 h-4 w-4" />
+                  Аналитика
+                </Link>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" asChild>
+                <Link to={ROUTES.USER_BOARDS}>
+                  <BabyIcon className="mr-2 h-4 w-4" />
+                  Пользователи
+                </Link>
+              </Button>
+            </>
           )}
         </div>
       </div>

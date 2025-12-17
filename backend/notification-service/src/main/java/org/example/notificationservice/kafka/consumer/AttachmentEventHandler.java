@@ -19,13 +19,13 @@ public class AttachmentEventHandler {
     @KafkaListener(topics = "${app.kafka.topics.attachment-added}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeAttachmentAdded(AttachmentAddedEvent event) {
         log.info("Received AttachmentAddedEvent: {}", event);
-        attachmentNotificationService.handleAttachmentAdded(event).subscribe();
+        attachmentNotificationService.handleAttachmentAdded(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.attachment-deleted}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeAttachmentDeleted(AttachmentDeletedEvent event) {
         log.info("Received AttachmentDeletedEvent: {}", event);
-        attachmentNotificationService.handleAttachmentDeleted(event).subscribe();
+        attachmentNotificationService.handleAttachmentDeleted(event);
     }
 
 }

@@ -10,9 +10,6 @@ import org.example.notificationservice.dto.response.UserResponse;
 import org.example.notificationservice.service.cache.UserCacheService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-import java.time.Duration;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,47 +24,39 @@ public class UserServiceClient {
         return UserServiceGrpc.newBlockingStub(userServiceChannel);
     }
 
-    public Mono<UserDto> getUserByIdAsync(String userId) {
+    public UserResponse getUserById(String userId) {
         log.debug("Getting user by ID: {}", userId);
         
-        return getFromCacheAsync(userId)
-            .switchIfEmpty(Mono.defer(() -> getFromServiceAsync(userId)))
-            .doOnNext(user -> log.debug("Retrieved user: {}", user.getId()))
-            .doOnError(error -> log.error("Failed to get user {}: {}", userId, error.getMessage()));
-    }
-
-    private Mono<UserDto> getFromCacheAsync(String userId) {
-        return userCacheService.getUserFromCache(userId)
-            .map(this::convertToGrpcDto)
-            .doOnNext(user -> log.debug("Retrieved user from cache: {}", user.getId()));
-    }
-
-    private Mono<UserDto> getFromServiceAsync(String userId) {
-        log.debug("Fetching user {} from gRPC service", userId);
+        UserResponse userResponse = userCacheService.getUserFromCache(userId);
         
-        return Mono.fromCallable(() -> {
-                    UserServiceGrpc.UserServiceBlockingStub stub = getStub();
-                    GetUserByIdRequest request = GetUserByIdRequest.newBuilder()
-                            .setUserId(userId)
-                            .build();
-                    
-                    return stub.getUserById(request);
-                })
-                .timeout(Duration.ofSeconds(10))
-                .flatMap(user -> cacheUser(userId, user).thenReturn(user))
-                .doOnSuccess(user -> log.debug("Fetched user via gRPC: {}", user.getId()))
-                .doOnError(error -> log.error("Failed to fetch user {} via gRPC: {}", userId, error.getMessage()))
-                .subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic());
+        if (userResponse == null) {
+            userResponse = getFromService(userId);
+        }
+
+        if (userResponse != null) {
+            userCacheService.cacheUser(userId, userResponse);
+        }
+
+        return userResponse;
     }
 
-    private Mono<Void> cacheUser(String userId, UserDto user) {
-        UserResponse userResponse = convertToUserResponse(user);
-        return userCacheService.cacheUser(userId, userResponse);
+    private UserResponse getFromService(String userId) {
+        UserServiceGrpc.UserServiceBlockingStub stub = getStub();
+        GetUserByIdRequest request = GetUserByIdRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+        try {
+            UserDto userDto = stub.getUserById(request);
+            return convertToUserResponse(userDto);
+        } catch (Exception e) {
+            log.error("Failed to get user {} from user-service", userId, e);
+            return null;
+        }
     }
 
     private UserResponse convertToUserResponse(UserDto grpcDto) {
         return new UserResponse(
-                UUID.fromString(grpcDto.getId()),
+                grpcDto.getId(),
                 grpcDto.getUsername(),
                 grpcDto.getEmail(),
                 grpcDto.getFirstName(),
@@ -75,13 +64,4 @@ public class UserServiceClient {
         );
     }
 
-    private UserDto convertToGrpcDto(UserResponse userResponse) {
-        return UserDto.newBuilder()
-                .setId(userResponse.id().toString())
-                .setUsername(userResponse.username())
-                .setEmail(userResponse.email())
-                .setFirstName(userResponse.firstName() != null ? userResponse.firstName() : "")
-                .setLastName(userResponse.lastName() != null ? userResponse.lastName() : "")
-                .build();
-    }
 }

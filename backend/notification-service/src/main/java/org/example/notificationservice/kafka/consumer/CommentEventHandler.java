@@ -17,18 +17,18 @@ public class CommentEventHandler {
     @KafkaListener(topics = "${app.kafka.topics.comment-created}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentCreated(CommentCreatedEvent event) {
         log.info("Received CommentCreatedEvent: {}", event);
-        commentNotificationService.handleCommentCreated(event).subscribe();
+        commentNotificationService.handleCommentCreated(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.comment-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentUpdated(CommentUpdatedEvent event) {
         log.info("Received CommentUpdatedEvent: {}", event);
-        commentNotificationService.handleCommentUpdated(event).subscribe();
+        commentNotificationService.handleCommentUpdated(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.comment-deleted}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentDeleted(CommentDeletedEvent event) {
         log.info("Received CommentDeletedEvent: {}", event);
-        commentNotificationService.handleCommentDeleted(event).subscribe();
+        commentNotificationService.handleCommentDeleted(event);
     }
 }

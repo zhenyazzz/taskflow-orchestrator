@@ -7,7 +7,6 @@ import java.util.Set;
 
 public record TaskDeletedEvent(
         String id,
-        String userId,
         String creatorId,
         String title,
         Set<String> assigneeIds,

@@ -24,11 +24,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/ws/notifications/**").permitAll() // WebSocket endpoint доступен всем
-                .anyRequest().authenticated() // Остальные endpoints требуют аутентификации
+                .requestMatchers("/ws/notifications/**").permitAll() 
+                .anyRequest().authenticated() 
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/ws/notifications/**") // Отключаем CSRF для WebSocket
+                .ignoringRequestMatchers("/ws/notifications/**") 
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

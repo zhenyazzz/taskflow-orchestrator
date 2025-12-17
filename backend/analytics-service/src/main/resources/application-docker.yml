@@ -1,16 +1,8 @@
 spring:
-  # Отключаем автоконфигурацию JPA и DataSource
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
-  
-  # Явно отключаем Flyway
-  flyway:
-    enabled: false
-  
-  # MongoDB - подключение к контейнеру MongoDB
+  application:
+    name: analytics-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8888}
   data:
     mongodb:
       uri: mongodb://root:password@mongo:27017/taskdb?authSource=admin
@@ -19,12 +11,15 @@ spring:
   
   # Kafka - подключение к контейнеру Kafka
   kafka:
-    bootstrap-servers: kafka:29092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
     consumer:
       group-id: analytics-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+server:
+  port: 8084
 
 # Kafka Topics Configuration
 app:
@@ -61,6 +56,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-service:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
     prefer-ip-address: false
     hostname: analytics-service

@@ -3,19 +3,15 @@ spring:
     name: analytics-service
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
-
-  profiles:
-    active: dev
   
-  # MongoDB Настройки
   data:
     mongodb:
       uri: mongodb://root:password@localhost:27017/taskdb?authSource=admin
       auto-index-creation: true
+      database: taskdb
 
-  
-  # Kafka - общие настройки
   kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: analytics-service-group
       auto-offset-reset: earliest
@@ -74,3 +70,13 @@ logging:
     org.hibernate: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: localhost
+    prefer-ip-address: true

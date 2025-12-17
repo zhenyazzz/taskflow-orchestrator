@@ -20,65 +20,65 @@ public interface UserNotificationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_CREATED")
     @Mapping(target = "metadata", expression = "java(mapUserCreatedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserCreatedEvent event, String type, String message);
+    Notification toNotification(UserCreatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_REGISTRATION")
     @Mapping(target = "metadata", expression = "java(mapUserRegistrationEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserRegistrationEvent event, String type, String message);
+    Notification toNotification(UserRegistrationEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_PROFILE_UPDATED")
     @Mapping(target = "metadata", expression = "java(mapUserProfileUpdatedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserProfileUpdatedEvent event, String type, String message);
+    Notification toNotification(UserProfileUpdatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_DELETED")
     @Mapping(target = "metadata", expression = "java(mapUserDeletedEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDeletedEvent event, String type, String message);
+    Notification toNotification(UserDeletedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_ROLE_UPDATE")
     @Mapping(target = "metadata", expression = "java(mapUserRoleUpdateEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserRoleUpdateEvent event, String type, String message);
+    Notification toNotification(UserRoleUpdateEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "USER_LOGIN")
     @Mapping(target = "metadata", expression = "java(mapUserLoginEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserLoginEvent event, String type, String message);
+    Notification toNotification(UserLoginEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", expression = "java(event.id().toString())")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "LOGIN_FAIL")
     @Mapping(target = "metadata", expression = "java(mapLoginFailEventMetadata(event))")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(LoginFailEvent event, String type, String message);
+    Notification toNotification(LoginFailEvent event, String message);
 
     @Named("mapUserCreatedEventMetadata")
     default Map<String, String> mapUserCreatedEventMetadata(UserCreatedEvent event) {

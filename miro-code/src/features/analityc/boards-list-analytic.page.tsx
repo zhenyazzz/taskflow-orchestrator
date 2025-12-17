@@ -65,7 +65,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ru-RU", {
 
 const STATUS_COLORS = ["#6366F1", "#F97316", "#10B981", "#EF4444", "#0EA5E9"];
 const PIE_COLORS = ["#34D399", "#FCD34D", "#F472B6", "#38BDF8", "#A855F7"];
-const ROLE_COLORS = ["#0EA5E9", "#14B8A6", "#F59E0B", "#EF4444", "#6366F1"];
 
 const STATUS_LABELS: Record<string, string> = {
   AVAILABLE: "Доступные",
@@ -80,17 +79,54 @@ const PRIORITY_LABELS: Record<string, string> = {
   HIGH: "Высокий",
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  ROLE_ADMIN: "Администраторы",
-  ROLE_USER: "Пользователи",
-  ROLE_MANAGER: "Менеджеры",
-};
-
 const PRESET_OPTIONS = [
   { label: "7 дней", value: 7 },
   { label: "30 дней", value: 30 },
   { label: "90 дней", value: 90 },
 ];
+
+// Локальные типы под фактический ответ бэкенда (DashboardDto)
+type TaskSummaryDto = {
+  startDate?: string;
+  endDate?: string;
+  totalTasks?: number;
+  completedTasks?: number;
+  inProgressTasks?: number;
+  pendingTasks?: number;
+  deletedTasks?: number;
+  completionPercentage?: number;
+  averageCompletionTimeHours?: number | null;
+  tasksByStatus?: Record<string, number | null | undefined>;
+  tasksByPriority?: Record<string, number | null | undefined>;
+  tasksByDepartment?: Record<string, number | null | undefined>;
+  dailyCreatedTasks?: Record<string, number | null | undefined>;
+  dailyCompletedTasks?: Record<string, number | null | undefined>;
+};
+
+type LoginAnalyticsDto = {
+  totalLogins?: number;
+  successfulLogins?: number;
+  failedLogins?: number;
+  successRate?: number;
+  failureReasons?: Record<string, number | null | undefined>;
+  dailySuccessfulLogins?: Record<string, number | null | undefined>;
+  dailyFailedLogins?: Record<string, number | null | undefined>;
+};
+
+type UserTaskSummaryDto = {
+  userId: string;
+  totalTasks?: number;
+  completedTasks?: number;
+  inProgressTasks?: number;
+  pendingTasks?: number;
+  completionPercentage?: number;
+};
+
+type DashboardDto = {
+  taskSummary?: TaskSummaryDto;
+  loginAnalytics?: LoginAnalyticsDto;
+  topUsers?: UserTaskSummaryDto[];
+};
 
 const createPresetRange = (days: number): DateRange => {
   const end = new Date();
@@ -103,6 +139,19 @@ const createPresetRange = (days: number): DateRange => {
 };
 
 const toInputValue = (date: Date) => date.toISOString().slice(0, 10);
+const safeDate = (value?: string) => {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+};
+const safeFormatLong = (value?: string) => {
+  const d = safeDate(value);
+  return d ? longDateFormatter.format(d) : "—";
+};
+const safeFormatDateTime = (value?: string) => {
+  const d = safeDate(value);
+  return d ? dateTimeFormatter.format(d) : undefined;
+};
 
 const normalizeRecord = (
   record?: Record<string, number | null | undefined>,
@@ -126,10 +175,15 @@ const mergeDailySeries = (
     .sort()
     .map((dateKey) => ({
       dateKey,
-      date: shortDateFormatter.format(new Date(dateKey)),
+      date: safeFormatDateKey(dateKey),
       primary: Number(primary?.[dateKey] ?? 0),
       secondary: Number(secondary?.[dateKey] ?? 0),
     }));
+};
+
+const safeFormatDateKey = (dateKey: string) => {
+  const parsed = new Date(dateKey);
+  return isNaN(parsed.getTime()) ? dateKey : shortDateFormatter.format(parsed);
 };
 
 function BoardsListPage() {
@@ -138,14 +192,14 @@ function BoardsListPage() {
 
   const queryRange = useMemo(
     () => ({
-      startDate: range.start.toISOString(),
-      endDate: range.end.toISOString(),
+      startDate: safeDate(range.start.toISOString())?.toISOString() ?? range.start.toISOString(),
+      endDate: safeDate(range.end.toISOString())?.toISOString() ?? range.end.toISOString(),
     }),
     [range],
   );
 
   const {
-    data: dashboard,
+    data: dashboardResponse,
     isLoading,
     isFetching,
     error,
@@ -164,28 +218,44 @@ function BoardsListPage() {
     },
   );
 
-  const taskAnalytics = dashboard?.taskAnalytics;
-  const userAnalytics = dashboard?.userAnalytics;
-  const loginAnalytics = dashboard?.loginAnalytics;
+  const dashboard = dashboardResponse as unknown as DashboardDto | (Record<string, unknown> & {
+    taskAnalytics?: TaskSummaryDto;
+    userAnalytics?: Record<string, number | null | undefined> & {
+      totalUsers?: number;
+      registeredUsers?: number;
+      updatedUsers?: number;
+      usersByDepartment?: Record<string, number | null | undefined>;
+      usersByRole?: Record<string, number | null | undefined>;
+    };
+    periodStart?: string;
+    periodEnd?: string;
+  }) | undefined;
+
+  // Поддерживаем оба формата: новый (taskSummary) и старый (taskAnalytics)
+  const taskSummary = (dashboard as DashboardDto | undefined)?.taskSummary ?? (dashboard as any)?.taskAnalytics;
+  const loginAnalytics = (dashboard as DashboardDto | undefined)?.loginAnalytics ?? (dashboard as any)?.loginAnalytics;
+  const userAnalytics = (dashboard as any)?.userAnalytics;
+  const topUsers =
+    (dashboard as DashboardDto | undefined)?.topUsers ?? (dashboard as any)?.topUsers ?? [];
 
   const completionRate = useMemo(() => {
-    if (!taskAnalytics?.totalTasks || taskAnalytics.totalTasks === 0) {
+    if (!taskSummary?.totalTasks || taskSummary.totalTasks === 0) {
       return 0;
     }
-    return (taskAnalytics.completedTasks ?? 0) / taskAnalytics.totalTasks;
-  }, [taskAnalytics]);
+    return (taskSummary.completedTasks ?? 0) / taskSummary.totalTasks;
+  }, [taskSummary]);
 
   const taskTrendData = useMemo(
     () =>
       mergeDailySeries(
-        taskAnalytics?.dailyCreatedTasks ?? {},
-        taskAnalytics?.dailyCompletedTasks ?? {},
+        taskSummary?.dailyCreatedTasks ?? {},
+        taskSummary?.dailyCompletedTasks ?? {},
       ).map((point) => ({
         ...point,
         created: point.primary,
         completed: point.secondary,
       })),
-    [taskAnalytics],
+    [taskSummary],
   );
 
   const loginTrendData = useMemo(
@@ -202,24 +272,28 @@ function BoardsListPage() {
   );
 
   const tasksByStatusData = useMemo(
-    () => normalizeRecord(taskAnalytics?.tasksByStatus, STATUS_LABELS),
-    [taskAnalytics],
+    () => normalizeRecord(taskSummary?.tasksByStatus, STATUS_LABELS),
+    [taskSummary],
   );
 
   const tasksByPriorityData = useMemo(
-    () => normalizeRecord(taskAnalytics?.tasksByPriority, PRIORITY_LABELS),
-    [taskAnalytics],
+    () => normalizeRecord(taskSummary?.tasksByPriority, PRIORITY_LABELS),
+    [taskSummary],
+  );
+  const tasksByDepartmentData = useMemo(
+    () => normalizeRecord(taskSummary?.tasksByDepartment),
+    [taskSummary],
   );
 
-  const usersByDepartmentData = useMemo(
+  // Если вдруг пришёл старый формат userAnalytics с распределениями — используем его как резервный источник для департаментов
+  const usersByDepartmentFallback = useMemo(
     () => normalizeRecord(userAnalytics?.usersByDepartment),
     [userAnalytics],
   );
 
-  const usersByRoleData = useMemo(
-    () => normalizeRecord(userAnalytics?.usersByRole, ROLE_LABELS),
-    [userAnalytics],
-  );
+  const tasksByDepartmentDisplay = tasksByDepartmentData.length
+    ? tasksByDepartmentData
+    : usersByDepartmentFallback;
 
   const failureReasons = useMemo(
     () =>
@@ -261,13 +335,17 @@ function BoardsListPage() {
     });
   };
 
-  const periodSummary = dashboard
-    ? `${longDateFormatter.format(new Date(dashboard.periodStart))} — ${longDateFormatter.format(new Date(dashboard.periodEnd))}`
-    : `${longDateFormatter.format(range.start)} — ${longDateFormatter.format(range.end)}`;
+  const periodSummary = taskSummary
+    ? `${safeFormatLong(taskSummary.startDate)} — ${safeFormatLong(taskSummary.endDate)}`
+    : (dashboard as any)?.periodStart
+      ? `${safeFormatLong((dashboard as any).periodStart)} — ${safeFormatLong((dashboard as any).periodEnd)}`
+      : `${longDateFormatter.format(range.start)} — ${longDateFormatter.format(range.end)}`;
 
-  const lastUpdated = dashboard
-    ? dateTimeFormatter.format(new Date(dashboard.periodEnd))
-    : undefined;
+  const lastUpdated = taskSummary?.endDate
+    ? safeFormatDateTime(taskSummary.endDate)
+    : (dashboard as any)?.periodEnd
+      ? safeFormatDateTime((dashboard as any).periodEnd)
+      : undefined;
 
   const renderContent = () => {
     if (isLoading) {
@@ -276,9 +354,8 @@ function BoardsListPage() {
 
     if (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Не удалось загрузить аналитические данные.";
+        (error as { message?: string })?.message ??
+        "Не удалось загрузить аналитические данные.";
       return (
         <Alert variant="destructive">
           <AlertTitle>Ошибка загрузки</AlertTitle>
@@ -303,22 +380,30 @@ function BoardsListPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <SummaryCard
             title="Всего задач"
-            value={numberFormatter.format(taskAnalytics?.totalTasks ?? 0)}
-            description={`Создано: ${numberFormatter.format(taskAnalytics?.createdTasks ?? 0)} • Завершено: ${numberFormatter.format(taskAnalytics?.completedTasks ?? 0)}`}
+            value={numberFormatter.format(taskSummary?.totalTasks ?? 0)}
+            description={`Завершено: ${numberFormatter.format(taskSummary?.completedTasks ?? 0)} • В работе: ${numberFormatter.format(taskSummary?.inProgressTasks ?? 0)}`}
           />
           <SummaryCard
             title="Среднее время выполнения"
             value={
-              taskAnalytics?.averageCompletionTimeHours
-                ? `${taskAnalytics.averageCompletionTimeHours.toFixed(1)} ч`
+              taskSummary?.averageCompletionTimeHours
+                ? `${taskSummary.averageCompletionTimeHours.toFixed(1)} ч`
                 : "—"
             }
             description="По завершённым задачам"
           />
           <SummaryCard
-            title="Пользователи"
-            value={numberFormatter.format(userAnalytics?.totalUsers ?? 0)}
-            description={`Новых: ${numberFormatter.format(userAnalytics?.registeredUsers ?? 0)} • Обновили профиль: ${numberFormatter.format(userAnalytics?.updatedUsers ?? 0)}`}
+            title="Лучший пользователь"
+            value={
+              topUsers.length
+                ? percentFormatter.format(topUsers[0]?.completionPercentage ?? 0)
+                : "—"
+            }
+            description={
+              topUsers.length
+                ? `ID: ${topUsers[0]?.userId} • Завершено: ${numberFormatter.format(topUsers[0]?.completedTasks ?? 0)}`
+                : "Данных пока нет"
+            }
           />
           <SummaryCard
             title="Активность логинов"
@@ -362,8 +447,8 @@ function BoardsListPage() {
                 {percentFormatter.format(completionRate)}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Завершено {numberFormatter.format(taskAnalytics?.completedTasks ?? 0)} из{" "}
-                {numberFormatter.format(taskAnalytics?.totalTasks ?? 0)} задач.
+                Завершено {numberFormatter.format(taskSummary?.completedTasks ?? 0)} из{" "}
+                {numberFormatter.format(taskSummary?.totalTasks ?? 0)} задач.
               </p>
             </CardContent>
           </Card>
@@ -513,17 +598,17 @@ function BoardsListPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Пользователи по департаментам</CardTitle>
+              <CardTitle>Задачи по департаментам</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
-              {usersByDepartmentData.length ? (
+              {tasksByDepartmentDisplay.length ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={usersByDepartmentData}>
+                  <BarChart data={tasksByDepartmentDisplay}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" interval={0} tick={{ fontSize: 12 }} />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
-                    <Bar dataKey="value" name="Пользователи" fill="#3B82F6" />
+                    <Bar dataKey="value" name="Задачи" fill="#3B82F6" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -534,29 +619,34 @@ function BoardsListPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Распределение ролей</CardTitle>
+              <CardTitle>Топ пользователей</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
-              {usersByRoleData.length ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={usersByRoleData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius="50%"
+              {topUsers.length ? (
+                <ul className="space-y-3 overflow-auto h-full pr-2">
+                  {topUsers.map((user: UserTaskSummaryDto) => (
+                    <li
+                      key={user.userId}
+                      className="flex items-center justify-between rounded-lg border px-4 py-2"
                     >
-                      {usersByRoleData.map((entry, index) => (
-                        <Cell
-                          key={entry.name}
-                          fill={ROLE_COLORS[index % ROLE_COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <div className="flex flex-col">
+                        <span className="font-medium">ID: {user.userId}</span>
+                        <span className="text-sm text-muted-foreground">
+                          Завершено: {numberFormatter.format(user.completedTasks ?? 0)} из{" "}
+                          {numberFormatter.format(user.totalTasks ?? 0)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold">
+                          {percentFormatter.format(user.completionPercentage ?? 0)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          В работе: {numberFormatter.format(user.inProgressTasks ?? 0)}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               ) : (
                 <EmptyChartPlaceholder />
               )}
@@ -697,7 +787,7 @@ const SummaryCard = ({
   description,
 }: {
   title: string;
-  value: string;
+  value: string | number;
   description?: string;
 }) => (
   <Card>

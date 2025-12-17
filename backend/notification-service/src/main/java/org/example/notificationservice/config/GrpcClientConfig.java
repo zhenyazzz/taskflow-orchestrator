@@ -21,7 +21,7 @@ public class GrpcClientConfig {
     public ManagedChannel userServiceChannel() {
         log.info("Creating gRPC channel to {}:{}", userServiceHost, userServicePort);
         return ManagedChannelBuilder.forAddress(userServiceHost, userServicePort)
-                .usePlaintext() // В production используй TLS
+                .usePlaintext() 
                 .build();
     }
 }

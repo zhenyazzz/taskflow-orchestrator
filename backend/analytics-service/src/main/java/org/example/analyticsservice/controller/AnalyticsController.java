@@ -35,6 +35,7 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
         DateRange range = resolveRange(startDate, endDate);
+        log.info("Запрос задач: {} — {}", range.start(), range.end());
         TaskSummaryDto summary = analyticsService.getTaskSummary(range.start(), range.end());
         return ResponseEntity.ok(summary);
     }
@@ -47,6 +48,7 @@ public class AnalyticsController {
 
         try {
             DateRange range = resolveRange(startDate, endDate);
+            log.info("Запрос аналитики пользователя {}: {} — {}", userId, range.start(), range.end());
             UserTaskSummaryDto summary = analyticsService.getUserTaskSummary(userId, range.start(), range.end());
             return ResponseEntity.ok(summary);
         } catch (IllegalArgumentException ex) {
@@ -61,6 +63,7 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
         DateRange range = resolveRange(startDate, endDate);
+        log.info("Запрос логинов: {} — {}", range.start(), range.end());
         LoginAnalyticsDto analytics = analyticsService.getLoginAnalytics(range.start(), range.end());
         return ResponseEntity.ok(analytics);
     }
@@ -71,6 +74,7 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
         DateRange range = resolveRange(startDate, endDate);
+        log.info("Запрос дашборда: {} — {}", range.start(), range.end());
         DashboardDto dashboard = analyticsService.getDashboard(range.start(), range.end());
         return ResponseEntity.ok(dashboard);
     }

@@ -38,6 +38,11 @@ export const router = createBrowserRouter([
                 import("@/features/analityc/boards-list-analytic.page"),
           },
           {
+            path: ROUTES.ANALYTICS,
+            lazy: () =>
+                import("@/features/analityc/boards-list-analytic.page"),
+          },
+          {
             path: ROUTES.USER_BOARDS,
             lazy: () =>
                 import("@/features/users/boards-list-user.page.tsx"),

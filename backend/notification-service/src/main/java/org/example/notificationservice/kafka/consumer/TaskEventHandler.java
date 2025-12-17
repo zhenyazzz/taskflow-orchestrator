@@ -17,48 +17,48 @@ public class TaskEventHandler {
     @KafkaListener(topics = "${app.kafka.topics.task-created}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskCreated(TaskCreatedEvent event) {
         log.info("Received TaskCreatedEvent: {}", event);
-        taskNotificationService.handleTaskCreated(event).subscribe();
+        taskNotificationService.handleTaskCreated(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskUpdated(TaskUpdatedEvent event) {
         log.info("Received TaskUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskUpdated(event).subscribe();
+        taskNotificationService.handleTaskUpdated(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-subscribed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskSubscribed(TaskSubscribedEvent event) {
         log.info("Received TaskSubscribedEvent: {}", event);
-        taskNotificationService.handleTaskSubscribed(event).subscribe();
+        taskNotificationService.handleTaskSubscribed(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-unsubscribed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskUnsubscribed(TaskUnsubscribedEvent event) {
         log.info("Received TaskUnsubscribedEvent: {}", event);
-        taskNotificationService.handleTaskUnsubscribed(event).subscribe();
+        taskNotificationService.handleTaskUnsubscribed(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-completed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskCompleted(TaskCompletedEvent event) {
         log.info("Received TaskCompletedEvent: {}", event);
-        taskNotificationService.handleTaskCompleted(event).subscribe();
+        taskNotificationService.handleTaskCompleted(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-deleted}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskDeleted(TaskDeletedEvent event) {
         log.info("Received TaskDeletedEvent: {}", event);
-        taskNotificationService.handleTaskDeleted(event).subscribe();
+        taskNotificationService.handleTaskDeleted(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-status-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskStatusUpdated(TaskStatusUpdatedEvent event) {
         log.info("Received TaskStatusUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskStatusUpdated(event).subscribe();
+        taskNotificationService.handleTaskStatusUpdated(event);
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-assignees-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskAssigneesUpdated(TaskAssigneesUpdatedEvent event) {
         log.info("Received TaskAssigneesUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskAssigneesUpdated(event).subscribe();
+        taskNotificationService.handleTaskAssigneesUpdated(event);
     }
 }

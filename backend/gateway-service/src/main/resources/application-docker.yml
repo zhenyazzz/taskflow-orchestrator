@@ -6,6 +6,66 @@ spring:
     name: api-gateway
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8888}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/me/profile,/api/users/**
+              filters:
+                - StripPrefix=1
+
+            - id: task-service-tasks
+              uri: lb://task-service
+              predicates:
+                - Path=/api/tasks/**
+              filters:
+                - StripPrefix=1
+
+            - id: task-service-my-tasks
+              uri: lb://task-service
+              predicates:
+                - Path=/api/me/tasks/**
+              filters:
+                - StripPrefix=1
+
+            - id: task-service-comments
+              uri: lb://task-service
+              predicates:
+                - Path=/api/comments/**
+              filters:
+                - StripPrefix=1
+
+            - id: task-service-attachments
+              uri: lb://task-service
+              predicates:
+                - Path=/api/attachments/**
+              filters:
+                - StripPrefix=1
+
+            - id: analytics-service
+              uri: http://analytics-service:8084
+              predicates:
+                - Path=/api/analytics/**
+              filters:
+                - StripPrefix=1
+
+jwt:
+  issuer: auth-service
 
 
 
@@ -14,3 +74,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-service:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: api-gateway
+    prefer-ip-address: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway,routes,health,info
+      base-path: /actuator

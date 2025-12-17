@@ -1,64 +1,83 @@
 package org.example.notificationservice.service.cache;
 
 import java.time.Duration;
-
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.notificationservice.dto.response.UserResponse;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserCacheService {
 
-    private final ReactiveRedisTemplate<String, UserResponse> redisTemplate;
+    private final RedisTemplate<String, UserResponse> redisTemplate;
 
     @Value("${app.cache.user-ttl}")
-    private long CACHE_TTL_MINUTES;
+    private long cacheTtlMinutes;
 
     @Value("${app.cache.user-key-prefix}")
-    private String CACHE_KEY_PREFIX;
+    private String cacheKeyPrefix;
 
-    public Mono<Void> cacheUser(String userId, UserResponse user) {
+    public void cacheUser(String userId, UserResponse user) {
         String cacheKey = generateCacheKey(userId);
-        return redisTemplate.opsForValue().set(cacheKey, user)
-                .then(redisTemplate.expire(cacheKey, Duration.ofMinutes(CACHE_TTL_MINUTES)))
-                .doOnSuccess(success -> log.info("User with ID {} cached successfully", userId))
-                .doOnError(e -> log.error("Failed to cache user with ID {}: {}", userId, e.getMessage(), e))
-                .then();
+        try {
+            redisTemplate.opsForValue().set(
+                    cacheKey,
+                    user,
+                    Duration.ofMinutes(cacheTtlMinutes)
+            );
+            log.info("User with ID {} cached successfully", userId);
+        } catch (Exception e) {
+            log.error("Failed to cache user with ID {}: {}", userId, e.getMessage(), e);
+        }
     }
 
-    public Mono<UserResponse> getUserFromCache(String userId) {
+    public UserResponse getUserFromCache(String userId) {
         String cacheKey = generateCacheKey(userId);
-        return redisTemplate.opsForValue().get(cacheKey)
-                .doOnError(e -> log.error("Failed to get user from cache with ID {}: {}", userId, e.getMessage(), e));
+        try {
+            return redisTemplate.opsForValue().get(cacheKey);
+        } catch (Exception e) {
+            log.error("Failed to get user from cache with ID {}: {}", userId, e.getMessage(), e);
+            return null;
+        }
     }
 
-    private Mono<Long> deleteUserFromCache(String userId) {
+    public void deleteUserFromCache(String userId) {
         String cacheKey = generateCacheKey(userId);
-        return redisTemplate.delete(cacheKey)
-                .doOnSuccess(success -> log.info("User with ID {} deleted from cache", userId))
-                .doOnError(e -> log.error("Failed to delete user from cache with ID {}: {}", userId, e.getMessage(), e));
+        try {
+            redisTemplate.delete(cacheKey);
+            log.info("User with ID {} deleted from cache", userId);
+        } catch (Exception e) {
+            log.error("Failed to delete user from cache with ID {}: {}", userId, e.getMessage(), e);
+        }
     }
 
-    public Mono<Boolean> refreshUserCache(String userId) {
+    public boolean refreshUserCache(String userId) {
         String cacheKey = generateCacheKey(userId);
-        return redisTemplate.expire(cacheKey, Duration.ofMinutes(CACHE_TTL_MINUTES))
-                .doOnSuccess(success -> log.info("User with ID {} refreshed in cache", userId))
-                .doOnError(e -> log.error("Failed to refresh user cache with ID {}: {}", userId, e.getMessage(), e));
+        try {
+            Boolean result = redisTemplate.expire(
+                    cacheKey,
+                    Duration.ofMinutes(cacheTtlMinutes)
+            );
+            log.info("User with ID {} refreshed in cache", userId);
+            return Boolean.TRUE.equals(result);
+        } catch (Exception e) {
+            log.error("Failed to refresh user cache with ID {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
     }
 
-    public Mono<String> getCachedEmail(String userId) {
-        return getUserFromCache(userId)
-                .map(UserResponse::email)
-                .defaultIfEmpty(null);
+    public Optional<String> getCachedEmail(String userId) {
+        UserResponse user = getUserFromCache(userId);
+        return Optional.ofNullable(user).map(UserResponse::email);
     }
 
     private String generateCacheKey(String userId) {
-        return CACHE_KEY_PREFIX + userId;
+        return cacheKeyPrefix + userId;
     }
 }
+

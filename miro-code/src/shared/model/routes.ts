@@ -9,6 +9,7 @@ export const ROUTES = {
   FAVORITE_BOARDS: "/boards/favorite",
   RECENT_BOARDS: "/boards/recent",
   ANALYTIC_BOARDS: "/boards/analytic",
+  ANALYTICS: "/analytics",
   USER_BOARDS: "/boards/user",
   USER_DETAILS: "/users/:id",
   USER_PROFILE: "/profile/:id",

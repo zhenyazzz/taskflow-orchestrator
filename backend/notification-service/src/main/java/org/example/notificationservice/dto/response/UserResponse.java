@@ -1,9 +1,7 @@
 package org.example.notificationservice.dto.response;
 
-import java.util.UUID;
-
 public record UserResponse(
-    UUID id,
+    String id,
     String username,
     String email,
     String firstName,

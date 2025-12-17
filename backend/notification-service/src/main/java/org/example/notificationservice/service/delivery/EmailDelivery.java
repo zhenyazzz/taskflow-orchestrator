@@ -2,7 +2,6 @@ package org.example.notificationservice.service.delivery;
 
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.TemplateEngine;
@@ -22,28 +21,26 @@ public class EmailDelivery {
         this.templateEngine = templateEngine;
     }
 
-    public Mono<Void> sendEmail(String email, String subject, String body) {
-        return Mono.fromRunnable(() -> {
-            try {
-                Context context = new Context();
-                context.setVariable("subject", subject);
-                context.setVariable("body", body);
+    public void sendEmail(String email, String subject, String body) {
+        try {
+            Context context = new Context();
+            context.setVariable("subject", subject);
+            context.setVariable("body", body);
 
-                String htmlContent = templateEngine.process("email-template", context);
+            String htmlContent = templateEngine.process("email-template", context);
 
-                MimeMessage message = javaMailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-                helper.setTo(email);
-                helper.setSubject(subject);
-                helper.setText(htmlContent, true);
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
 
-                javaMailSender.send(message);
-                log.info("Sending HTML email to {} with subject '{}'", email, subject);
-            } catch (MessagingException e) {
-                log.error("Error sending email to {}: {}", email, e.getMessage());
-            }
-        });
+            javaMailSender.send(message);
+            log.info("Sending HTML email to {} with subject '{}'", email, subject);
+        } catch (MessagingException e) {
+            log.error("Error sending email to {}: {}", email, e.getMessage());
+        }
     }
 }
 

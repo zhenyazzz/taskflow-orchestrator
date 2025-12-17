@@ -1,7 +1,7 @@
 package org.example.notificationservice.mapper;
 
 import org.example.events.task.*;
-import org.example.notificationservice.dto.response.UserDto;
+import org.example.notificationservice.dto.response.UserResponse;
 import org.example.notificationservice.model.Notification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,74 +15,74 @@ public interface TaskNotificationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_CREATED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskCreatedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskCreatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskCreatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_UPDATED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskUpdatedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskUpdatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskUpdatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_SUBSCRIBED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskSubscribedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskSubscribedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskSubscribedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_UNSUBSCRIBED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskUnsubscribedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskUnsubscribedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskUnsubscribedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_COMPLETED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskCompletedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskCompletedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskCompletedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_DELETED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskDeletedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(UserDto user, TaskDeletedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskDeletedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", source = "userId")
+    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_STATUS_UPDATED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskStatusUpdatedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(String userId, TaskStatusUpdatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskStatusUpdatedEvent event, String message);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", source = "userId")
+    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "message", source = "message")
-    @Mapping(target = "type", source = "type")
+    @Mapping(target = "type", constant = "TASK_ASSIGNEE_UPDATED")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "metadata", expression = "java(mapTaskAssigneesUpdatedEventMetadata(event))")
     @Mapping(target = "createdAt", ignore = true)
-    Notification toNotification(String userId, TaskAssigneesUpdatedEvent event, String type, String message);
+    Notification toNotification(UserResponse user, TaskAssigneesUpdatedEvent event, String message);
 
     @Named("mapTaskCreatedEventMetadata")
     default Map<String, String> mapTaskCreatedEventMetadata(TaskCreatedEvent event) {
