@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.example.notificationservice.mapper.AttachmentNotificationMapper;
 import org.example.notificationservice.dto.response.UserResponse;
 import org.example.notificationservice.model.NotificationType;
+import org.example.notificationservice.model.Notification;
+import org.example.notificationservice.mapper.NotificationMapper;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class AttachmentNotificationService {
     private final UserServiceClient userServiceClient;
     private final NotificationRepository notificationRepository;
     private final AttachmentNotificationMapper attachmentNotificationMapper;
+    private final NotificationMapper notificationMapper;
 
     @Transactional
     public void handleAttachmentAdded(AttachmentAddedEvent event) {
@@ -29,11 +33,11 @@ public class AttachmentNotificationService {
         String message = String.format("New attachment '%s' added to task '%s' by %s.",
                 event.fileName(), event.taskId(), user.firstName());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             attachmentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_ADDED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_ADDED.name(), notificationMapper.toDto(notification));
     }
 
     @Transactional
@@ -42,10 +46,10 @@ public class AttachmentNotificationService {
         String message = String.format("Attachment '%s' deleted from task '%s' by %s.",
                 event.fileName(), event.taskId(), user.firstName());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             attachmentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_DELETED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.ATTACHMENT_DELETED.name(), notificationMapper.toDto(notification));
     }
 }

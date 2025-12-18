@@ -23,12 +23,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/ws/notifications/**").permitAll() 
+                .requestMatchers("/notifications/ws/**").permitAll() 
                 .anyRequest().authenticated() 
-            )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/ws/notifications/**") 
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

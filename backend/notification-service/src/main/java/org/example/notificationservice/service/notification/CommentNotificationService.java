@@ -10,8 +10,9 @@ import org.example.notificationservice.service.delivery.WebSocketDelivery;
 import org.springframework.stereotype.Service;
 import org.example.notificationservice.dto.response.UserResponse;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.example.notificationservice.model.Notification;
 import org.example.notificationservice.model.NotificationType;
+import org.example.notificationservice.mapper.NotificationMapper;
 
 @Service
 @Slf4j
@@ -22,6 +23,7 @@ public class CommentNotificationService {
     private final UserServiceClient userServiceClient;
     private final NotificationRepository notificationRepository;
     private final CommentNotificationMapper commentNotificationMapper;
+    private final NotificationMapper notificationMapper;
 
     @Transactional
     public void handleCommentCreated(CommentCreatedEvent event) {
@@ -29,11 +31,11 @@ public class CommentNotificationService {
         String message = String.format("New comment added to task '%s' by %s: %s",
                 event.taskId(), user.firstName(), event.content());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_CREATED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_CREATED.name(), notificationMapper.toDto(notification));
     }
 
     @Transactional
@@ -42,11 +44,11 @@ public class CommentNotificationService {
         String message = String.format("Comment '%s' for task '%s' updated by %s: %s",
                 event.id(), event.taskId(), user.firstName(), event.content());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_UPDATED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_UPDATED.name(), notificationMapper.toDto(notification));
     }
 
     @Transactional
@@ -55,10 +57,10 @@ public class CommentNotificationService {
         String message = String.format("Comment '%s' for task '%s' deleted by %s.",
                 event.id(), event.taskId(), user.firstName());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             commentNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_DELETED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.COMMENT_DELETED.name(), notificationMapper.toDto(notification));
     }
 }

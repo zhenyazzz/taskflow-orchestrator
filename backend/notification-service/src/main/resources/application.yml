@@ -28,17 +28,13 @@ spring:
       ack-mode: record
 
   mail:
-    host: your_smtp_host
-    port: 587
-    username: your_email
-    password: your_password
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: 53d40ab3046d3b
+    password: 3102f9ffcd8cd2
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
-      mail.smtp.connectiontimeout: 5000
-      mail.smtp.timeout: 5000
-      mail.smtp.writetimeout: 5000
 
 app:
   cache:
@@ -58,6 +54,8 @@ app:
         enabled: true
       sms:
         enabled: true
+
+  
 
   kafka:
     topics:

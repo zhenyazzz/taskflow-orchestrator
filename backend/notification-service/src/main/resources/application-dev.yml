@@ -5,7 +5,7 @@ spring:
       port: 6379
       timeout: 5000ms
     mongodb:
-      uri: mongodb://localhost:27017/notificationdb
+      uri: mongodb://localhost:27017/notificationdb?authSource=admin
       database: notificationdb
       auto-index-creation: true
       repositories:
@@ -32,6 +32,10 @@ eureka:
 
 app:
   user-service:
-    url: http://localhost:8080
+    url: http://localhost:8082
+  grpc:
+    user-service:
+      host: localhost
+      port: 9090
 
 

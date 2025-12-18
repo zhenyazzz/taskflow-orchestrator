@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter implements WebFilter {
 
     private final JwtUtil jwtUtil;
+
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/signUp",
             "/api/auth/signIn",
@@ -40,21 +41,21 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
         String method = request.getMethod().name();
-        System.out.println("Path: " + method + " " + path);
 
-        // ДЕБАГ: проверяем что путь определяется как публичный
-        boolean isPublic = isPublicEndpoint(path);
-        System.out.println("Is public path: " + isPublic + " for path: " + path);
-
-        if (isPublic) {
-            System.out.println("Filter: Allowing public request to proceed");
+        String upgrade = request.getHeaders().getUpgrade();
+        if (upgrade != null && upgrade.equalsIgnoreCase("websocket")) {
             return chain.filter(exchange);
         }
 
         if ("OPTIONS".equalsIgnoreCase(method)) {
+            return chain.filter(exchange);
+        }
+
+        if (isPublicEndpoint(path)) {
             return chain.filter(exchange);
         }
 
@@ -79,10 +80,10 @@ public class JwtAuthenticationFilter implements WebFilter {
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(role -> new SimpleGrantedAuthority(role.name()))
-                    .collect(Collectors.toList());
+                    .toList();
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username, token, authorities);
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(username, token, authorities);
 
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
@@ -93,21 +94,12 @@ public class JwtAuthenticationFilter implements WebFilter {
     }
 
     private boolean isPublicEndpoint(String path) {
-        // Проверяем точное совпадение или начало пути
-        if (PUBLIC_PATHS.stream().anyMatch(publicPath -> path.equals(publicPath) || path.startsWith(publicPath))) {
-            return true;
-        }
-
-        // Отдельная проверка для actuator (любой путь начинающийся с /actuator/)
-        if (path.startsWith("/actuator/")) {
-            return true;
-        }
-
-        return false;
+        return PUBLIC_PATHS.stream()
+                .anyMatch(publicPath -> path.equals(publicPath) || path.startsWith(publicPath))
+                || path.startsWith("/actuator/");
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
-        System.err.println("JWT Auth failed: " + message);
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         exchange.getResponse().getHeaders().add("X-Auth-Error", message);
         return exchange.getResponse().setComplete();

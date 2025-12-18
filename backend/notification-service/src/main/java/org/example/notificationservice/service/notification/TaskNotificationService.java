@@ -13,10 +13,12 @@ import org.example.notificationservice.mapper.TaskNotificationMapper;
 import org.example.notificationservice.model.Notification;
 import org.example.notificationservice.model.NotificationType;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.example.notificationservice.mapper.NotificationMapper;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -29,7 +31,7 @@ public class TaskNotificationService {
     private final UserServiceClient userServiceClient;
     private final NotificationRepository notificationRepository;
     private final TaskNotificationMapper taskNotificationMapper;
-
+    private final NotificationMapper notificationMapper;
 
     @Transactional
     public void handleTaskCreated(TaskCreatedEvent event) {
@@ -40,14 +42,15 @@ public class TaskNotificationService {
         String message = String.format("New task '%s' created.", event.title());
 
         List<Notification> notifications = users.stream()
-                .map(user -> {
-                    return taskNotificationMapper.toNotification(user, event, message);
-                })
+                .map(user -> taskNotificationMapper.toNotification(user, event, message))
                 .toList();
-        notificationRepository.saveAll(notifications);
+
+        Map<String, Notification> notificationMap = notificationRepository.saveAll(notifications).stream()
+                .collect(Collectors.toMap(Notification::getUserId, n -> n));
 
         users.forEach(user -> {
-            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_CREATED.name(), event);
+            Notification notification = notificationMap.get(user.id());
+            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_CREATED.name(), notificationMapper.toDto(notification));
             emailDelivery.sendEmail(user.email(), "New Task Created", message);
         });
     }
@@ -61,14 +64,15 @@ public class TaskNotificationService {
         String message = String.format("You updated task '%s'.", event.title());
 
         List<Notification> notifications = users.stream()
-                .map(user -> {
-                    return taskNotificationMapper.toNotification(user, event, message);
-                })
+                .map(user -> taskNotificationMapper.toNotification(user, event, message))
                 .toList();
-        notificationRepository.saveAll(notifications);
+
+        Map<String, Notification> notificationMap = notificationRepository.saveAll(notifications).stream()
+                .collect(Collectors.toMap(Notification::getUserId, n -> n));
 
         users.forEach(user -> {
-            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_UPDATED.name(), event);
+            Notification notification = notificationMap.get(user.id());
+            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_UPDATED.name(), notificationMapper.toDto(notification));
             emailDelivery.sendEmail(user.email(), "Task Updated", message);
         });
     }
@@ -79,11 +83,11 @@ public class TaskNotificationService {
         UserResponse user = userServiceClient.getUserById(event.userId());
         String message = String.format("You subscribed to task '%s'.", event.title());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             taskNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_SUBSCRIBED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_SUBSCRIBED.name(), notificationMapper.toDto(notification));
         emailDelivery.sendEmail(user.email(), "Task Subscription Notification", message);
     }
 
@@ -93,11 +97,11 @@ public class TaskNotificationService {
         UserResponse user = userServiceClient.getUserById(event.userId());
         String message = String.format("You unsubscribed from task '%s'.", event.title());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             taskNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_UNSUBSCRIBED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_UNSUBSCRIBED.name(), notificationMapper.toDto(notification));
         emailDelivery.sendEmail(user.email(), "Task Unsubscription Notification", message);
     }
 
@@ -107,17 +111,18 @@ public class TaskNotificationService {
         Set<String> recipientIds = new HashSet<>(event.assigneeIds());
         recipientIds.add(event.creatorId());
         List<UserResponse> users = userServiceClient.getUsersByIds(recipientIds);
-        String message = String.format("You completed task '%s'.", event.title());
+        String message = String.format("Task '%s' has been completed.", event.title());
 
         List<Notification> notifications = users.stream()
-                .map(user -> {
-                    return taskNotificationMapper.toNotification(user, event, message);
-                })
+                .map(user -> taskNotificationMapper.toNotification(user, event, message))
                 .toList();
-        notificationRepository.saveAll(notifications);
+
+        Map<String, Notification> notificationMap = notificationRepository.saveAll(notifications).stream()
+                .collect(Collectors.toMap(Notification::getUserId, n -> n));
 
         users.forEach(user -> {
-            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_COMPLETED.name(), event);
+            Notification notification = notificationMap.get(user.id());
+            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_COMPLETED.name(), notificationMapper.toDto(notification));
             emailDelivery.sendEmail(user.email(), "Task Completed", message);
         });
     }
@@ -128,17 +133,18 @@ public class TaskNotificationService {
         Set<String> recipientIds = new HashSet<>(event.assigneeIds());
         recipientIds.add(event.creatorId());
         List<UserResponse> users = userServiceClient.getUsersByIds(recipientIds);
-        String message = String.format("You deleted task '%s'.", event.title());
+        String message = String.format("Task '%s' has been deleted.", event.title());
 
         List<Notification> notifications = users.stream()
-                .map(user -> {
-                    return taskNotificationMapper.toNotification(user, event, message);
-                })
+                .map(user -> taskNotificationMapper.toNotification(user, event, message))
                 .toList();
-        notificationRepository.saveAll(notifications);
+
+        Map<String, Notification> notificationMap = notificationRepository.saveAll(notifications).stream()
+                .collect(Collectors.toMap(Notification::getUserId, n -> n));
 
         users.forEach(user -> {
-            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_DELETED.name(), event);
+            Notification notification = notificationMap.get(user.id());
+            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_DELETED.name(), notificationMapper.toDto(notification));
             emailDelivery.sendEmail(user.email(), "Task Deleted", message);
         });
     }
@@ -147,13 +153,13 @@ public class TaskNotificationService {
     public void handleTaskStatusUpdated(TaskStatusUpdatedEvent event) {
         log.info("Handling TaskStatusUpdatedEvent: {}", event);
         UserResponse user = userServiceClient.getUserById(event.userId());
-        String message = String.format("You updated task '%s' status to '%s'.", event.title(), event.status());
+        String message = String.format("Task '%s' status updated to '%s'.", event.title(), event.status());
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
             taskNotificationMapper.toNotification(user, event, message)
         );
 
-        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_STATUS_UPDATED.name(), event);
+        webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_STATUS_UPDATED.name(), notificationMapper.toDto(notification));
         emailDelivery.sendEmail(user.email(), "Task Status Updated", message);
     }
 
@@ -162,17 +168,18 @@ public class TaskNotificationService {
         log.info("Handling TaskAssigneesUpdatedEvent: {}", event);
         Set<String> recipientIds = new HashSet<>(event.assigneeIds());
         List<UserResponse> users = userServiceClient.getUsersByIds(recipientIds);
-        String message = String.format("You updated task '%s' assignees to '%s'.", event.title(), event.assigneeIds());
+        String message = String.format("Task '%s' assignees updated.", event.title());
 
         List<Notification> notifications = users.stream()
-                .map(user -> {
-                    return taskNotificationMapper.toNotification(user, event, message);
-                })
+                .map(user -> taskNotificationMapper.toNotification(user, event, message))
                 .toList();
-        notificationRepository.saveAll(notifications);
+
+        Map<String, Notification> notificationMap = notificationRepository.saveAll(notifications).stream()
+                .collect(Collectors.toMap(Notification::getUserId, n -> n));
 
         users.forEach(user -> {
-            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_ASSIGNEE_UPDATED.name(), event);
+            Notification notification = notificationMap.get(user.id());
+            webSocketDelivery.sendWebSocketNotification(user.id(), NotificationType.TASK_ASSIGNEE_UPDATED.name(), notificationMapper.toDto(notification));
             emailDelivery.sendEmail(user.email(), "Task Assignees Updated", message);
         });
     }

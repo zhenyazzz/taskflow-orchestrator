@@ -17,18 +17,36 @@ public class CommentEventHandler {
     @KafkaListener(topics = "${app.kafka.topics.comment-created}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentCreated(CommentCreatedEvent event) {
         log.info("Received CommentCreatedEvent: {}", event);
-        commentNotificationService.handleCommentCreated(event);
+        try {
+            commentNotificationService.handleCommentCreated(event);
+            log.debug("Successfully processed CommentCreatedEvent for task: {}", event.taskId());
+        } catch (Exception e) {
+            log.error("Error processing CommentCreatedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.comment-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentUpdated(CommentUpdatedEvent event) {
         log.info("Received CommentUpdatedEvent: {}", event);
-        commentNotificationService.handleCommentUpdated(event);
+        try {
+            commentNotificationService.handleCommentUpdated(event);
+            log.debug("Successfully processed CommentUpdatedEvent for task: {}", event.taskId());
+        } catch (Exception e) {
+            log.error("Error processing CommentUpdatedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.comment-deleted}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeCommentDeleted(CommentDeletedEvent event) {
         log.info("Received CommentDeletedEvent: {}", event);
-        commentNotificationService.handleCommentDeleted(event);
+        try {
+            commentNotificationService.handleCommentDeleted(event);
+            log.debug("Successfully processed CommentDeletedEvent for task: {}", event.taskId());
+        } catch (Exception e) {
+            log.error("Error processing CommentDeletedEvent: {}", event, e);
+            throw e;
+        }
     }
 }

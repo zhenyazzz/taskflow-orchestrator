@@ -108,7 +108,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\").ok || quit(1)\' -u root -p password --authenticationDatabase admin"]
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\").ok || quit(1)' -u root -p password --authenticationDatabase admin"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -223,7 +223,7 @@ services:
     hostname: user-service
     ports:
       - "8082:8082"
-      - "9090:9090"  # gRPC port
+      - "9090:9090"  
     depends_on:
       eureka-service:
         condition: service_healthy
@@ -246,7 +246,7 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 60s
     networks:
       - app-network
@@ -284,36 +284,37 @@ services:
       retries: 5
       start_period: 60s
 
-  # task-service:
-  #   build:
-  #     context: .
-  #     dockerfile: task-service/Dockerfile
-  #   container_name: task-service
-  #   hostname: task-service
-  #   ports:
-  #     - "8083:8083"
-  #   depends_on:
-  #     eureka-service:
-  #       condition: service_healthy
-  #     config-service:
-  #       condition: service_healthy
-  #     mongo:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_started
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
-  #     - CONFIG_SERVER_URL=http://config-service:8888
-  #     - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-  #     - EUREKA_CLIENT_INITIAL-INSTANCE-INFO-REPLICATION-DELAY-SECONDS=30
-  #   healthcheck:
-  #     test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 60s
-  #   networks:
-  #     - app-network
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    hostname: notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+      
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8085/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - app-network
 
 volumes:
   postgres_data:

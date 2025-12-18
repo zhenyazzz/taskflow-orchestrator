@@ -13,10 +13,10 @@ import javax.annotation.PreDestroy;
 @Configuration
 public class GrpcClientConfig {
 
-    @Value("${grpc.user-service.host}")
+    @Value("${app.grpc.user-service.host}")
     private String host;
 
-    @Value("${grpc.user-service.port}")
+    @Value("${app.grpc.user-service.port}")
     private int port;
 
     private ManagedChannel channel;

@@ -29,10 +29,15 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS, "/api/me/tasks/**").permitAll()
                         .pathMatchers(
                             "/api/auth/**", 
+                            "/api/notifications/ws/**",
+                            "/api/notifications/ws",
+                            "/api/notifications/ws/info",
+                            "/notifications/**",
                             "/public/**", 
                             "/eureka/**", 
                             "/actuator/**",
@@ -45,25 +50,22 @@ public class SecurityConfig {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    
-    // Явно указываем твой фронтенд на Vite
-    configuration.setAllowedOriginPatterns(Arrays.asList(
-        "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"
-    ));
-    
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    configuration.setExposedHeaders(Arrays.asList(
-        HttpHeaders.AUTHORIZATION, 
-        "X-Auth-Error", 
-        "X-User-Id"
-    ));
-    configuration.setAllowCredentials(true); // Теперь работает!
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-}
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList(
+            HttpHeaders.AUTHORIZATION, 
+            "X-Auth-Error", 
+            "X-User-Id"
+        ));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

@@ -8,26 +8,18 @@ spring:
     import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8888}
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      httpclient:
+        websocket:
+          enabled: true
       server:
         webflux:
           discovery:
             locator:
               enabled: true
               lower-case-service-id: true
-          globalcors:
-            cors-configurations:
-              '[/**]':
-                allowedOrigins: "http://localhost:5174"
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-                allowedHeaders: "*"
-                allowCredentials: true
-                maxAge: 3600
-          routes:
+      routes:
             - id: auth-service
               uri: lb://auth-service
               predicates:
@@ -76,6 +68,14 @@ spring:
                 - Path=/api/analytics/**
               filters:
                 - StripPrefix=1
+            - id: notification-service
+              uri: lb:ws://notification-service
+              predicates:
+                - Path=/api/notifications/ws/**
+            - id: notification-http
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**
 
 jwt:
   issuer: auth-service

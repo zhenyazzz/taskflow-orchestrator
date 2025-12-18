@@ -17,48 +17,96 @@ public class TaskEventHandler {
     @KafkaListener(topics = "${app.kafka.topics.task-created}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskCreated(TaskCreatedEvent event) {
         log.info("Received TaskCreatedEvent: {}", event);
-        taskNotificationService.handleTaskCreated(event);
+        try {
+            taskNotificationService.handleTaskCreated(event);
+            log.debug("Successfully processed TaskCreatedEvent for task: {}", event.id());
+        } catch (Exception e) {
+            log.error("Error processing TaskCreatedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskUpdated(TaskUpdatedEvent event) {
         log.info("Received TaskUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskUpdated(event);
+        try {
+            taskNotificationService.handleTaskUpdated(event);
+            log.debug("Successfully processed TaskUpdatedEvent for task: {}", event.id());
+        } catch (Exception e) {
+            log.error("Error processing TaskUpdatedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-subscribed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskSubscribed(TaskSubscribedEvent event) {
         log.info("Received TaskSubscribedEvent: {}", event);
-        taskNotificationService.handleTaskSubscribed(event);
+        try {
+            taskNotificationService.handleTaskSubscribed(event);
+            log.debug("Successfully processed TaskSubscribedEvent for task: {} and user: {}", event.id(), event.userId());
+        } catch (Exception e) {
+            log.error("Error processing TaskSubscribedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-unsubscribed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskUnsubscribed(TaskUnsubscribedEvent event) {
         log.info("Received TaskUnsubscribedEvent: {}", event);
-        taskNotificationService.handleTaskUnsubscribed(event);
+        try {
+            taskNotificationService.handleTaskUnsubscribed(event);
+            log.debug("Successfully processed TaskUnsubscribedEvent for task: {} and user: {}", event.id(), event.userId());
+        } catch (Exception e) {
+            log.error("Error processing TaskUnsubscribedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-completed}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskCompleted(TaskCompletedEvent event) {
         log.info("Received TaskCompletedEvent: {}", event);
-        taskNotificationService.handleTaskCompleted(event);
+        try {
+            taskNotificationService.handleTaskCompleted(event);
+            log.debug("Successfully processed TaskCompletedEvent for task: {}", event.id());
+        } catch (Exception e) {
+            log.error("Error processing TaskCompletedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-deleted}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskDeleted(TaskDeletedEvent event) {
         log.info("Received TaskDeletedEvent: {}", event);
-        taskNotificationService.handleTaskDeleted(event);
+        try {
+            taskNotificationService.handleTaskDeleted(event);
+            log.debug("Successfully processed TaskDeletedEvent for task: {}", event.id());
+        } catch (Exception e) {
+            log.error("Error processing TaskDeletedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-status-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskStatusUpdated(TaskStatusUpdatedEvent event) {
         log.info("Received TaskStatusUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskStatusUpdated(event);
+        try {
+            taskNotificationService.handleTaskStatusUpdated(event);
+            log.debug("Successfully processed TaskStatusUpdatedEvent for task: {} and user: {}", event.id(), event.userId());
+        } catch (Exception e) {
+            log.error("Error processing TaskStatusUpdatedEvent: {}", event, e);
+            throw e;
+        }
     }
 
     @KafkaListener(topics = "${app.kafka.topics.task-assignees-updated}", groupId = "notification-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeTaskAssigneesUpdated(TaskAssigneesUpdatedEvent event) {
         log.info("Received TaskAssigneesUpdatedEvent: {}", event);
-        taskNotificationService.handleTaskAssigneesUpdated(event);
+        try {
+            taskNotificationService.handleTaskAssigneesUpdated(event);
+            log.debug("Successfully processed TaskAssigneesUpdatedEvent for task: {} and user: {}", event.id(), event.assigneeIds());
+        } catch (Exception e) {
+            log.error("Error processing TaskAssigneesUpdatedEvent: {}", event, e);
+            throw e;
+        }
     }
 }
