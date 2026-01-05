@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 import org.example.gatewayservice.util.JwtUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter implements WebFilter {

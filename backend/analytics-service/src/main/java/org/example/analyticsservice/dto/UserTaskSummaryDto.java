@@ -3,9 +3,6 @@ package org.example.analyticsservice.dto;
 import java.time.LocalDate;
 import java.util.Map;
 
-/**
- * DTO с персональной статистикой пользователя по задачам.
- */
 public record UserTaskSummaryDto(
         String userId,
         LocalDate startDate,
@@ -21,5 +18,3 @@ public record UserTaskSummaryDto(
         Map<String, Long> tasksByStatus,
         Map<String, Long> tasksByDepartment
 ) {}
-
-

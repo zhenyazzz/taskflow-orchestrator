@@ -10,9 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 
-/**
- * Глобальный счетчик задач
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -31,5 +28,3 @@ public class TaskCounter {
     @Builder.Default
     private Instant lastUpdated = Instant.now();
 }
-
-

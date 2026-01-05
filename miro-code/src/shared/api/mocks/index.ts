@@ -3,6 +3,5 @@ export async function enableMocking() {
     return;
   }
 
-  // Моки отключены - просто возвращаемся
   return;
 }

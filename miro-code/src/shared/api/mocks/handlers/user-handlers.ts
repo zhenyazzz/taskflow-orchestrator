@@ -58,7 +58,7 @@ mockUsers.forEach((user) => {
 });
 
 export const userHandlers = [
-    // Получение текущего пользователя
+
     http.get("/api/users/me", async ({ request }) => {
         await delay();
 
@@ -70,12 +70,10 @@ export const userHandlers = [
             );
         }
 
-        // Для тестов возвращаем первого пользователя (admin_user)
         const user = mockUsers[0];
         return HttpResponse.json(user, { status: 200 });
     }),
 
-    // Получение списка пользователей с фильтрацией, сортировкой и пагинацией
     http.get("/api/users", async ({ request }) => {
         await delay();
 
@@ -85,7 +83,6 @@ export const userHandlers = [
         const status = url.searchParams.get("status");
         const cursor = url.searchParams.get("cursor");
 
-        // Проверка авторизации
         const authHeader = request.headers.get("Authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return HttpResponse.json(
@@ -94,7 +91,6 @@ export const userHandlers = [
             );
         }
 
-        // Фильтрация и поиск
         let filteredUsers = mockUsers.filter((user) => {
             const matchesSearch =
                 user.username.toLowerCase().includes(search.toLowerCase()) ||
@@ -103,7 +99,6 @@ export const userHandlers = [
             return matchesSearch && matchesStatus;
         });
 
-        // Сортировка
         filteredUsers = filteredUsers.sort((a, b) => {
             const [field, direction] = sort.split("-");
             const isDesc = direction === "desc";
@@ -120,7 +115,6 @@ export const userHandlers = [
             return 0;
         });
 
-        // Пагинация
         const pageSize = 2; // Изменено с 5 на 2 для соответствия предыдущим версиям
         let startIndex = 0;
         if (cursor) {
@@ -145,7 +139,6 @@ export const userHandlers = [
         );
     }),
 
-    // Получение пользователя по ID
     http.get("/api/users/:id", async ({ params, request }) => {
         await delay();
 
@@ -168,7 +161,6 @@ export const userHandlers = [
         return HttpResponse.json(user, { status: 200 });
     }),
 
-    // Создание пользователя
     http.post("/api/users", async ({ request }) => {
         await delay();
 
@@ -214,7 +206,6 @@ export const userHandlers = [
         return HttpResponse.json(newUser, { status: 201 });
     }),
 
-    // Обновление пользователя
     http.patch("/api/users/:id", async ({ params, request }) => {
         await delay();
 
@@ -259,7 +250,6 @@ export const userHandlers = [
         return HttpResponse.json(updatedUser, { status: 200 });
     }),
 
-    // Удаление пользователя
     http.delete("/api/users/:id", async ({ params, request }) => {
         await delay();
 

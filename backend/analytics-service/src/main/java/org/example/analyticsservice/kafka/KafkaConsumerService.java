@@ -20,7 +20,6 @@ public class KafkaConsumerService {
     @Autowired
     private ObjectMapper objectMapper;
     
-    // Task Events
     @KafkaListener(topics = "${app.kafka.topics.task-created}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeTaskCreated(String message) {
         try {
@@ -74,7 +73,6 @@ public class KafkaConsumerService {
         }
     }
 
-    // User Events
     @KafkaListener(topics = "${app.kafka.topics.user-registered}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeUserRegistered(String message) {
         try {
@@ -101,7 +99,6 @@ public class KafkaConsumerService {
         }
     }
 
-    // Auth Events
     @KafkaListener(topics = "${app.kafka.topics.user-login-success}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeUserLoginSuccess(String message) {
         try {
@@ -128,7 +125,6 @@ public class KafkaConsumerService {
         }
     }
 
-    // Дополнительные события задач
     @KafkaListener(topics = "${app.kafka.topics.task-status-updated}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeTaskStatusUpdated(String message) {
         try {

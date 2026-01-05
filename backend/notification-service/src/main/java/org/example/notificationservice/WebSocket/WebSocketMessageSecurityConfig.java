@@ -12,14 +12,11 @@ public class WebSocketMessageSecurityConfig extends AbstractSecurityWebSocketMes
     @Override
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
         messages
-            // Разрешаем CONNECT всем (для установки соединения)
             .simpTypeMatchers(SimpMessageType.CONNECT).permitAll()
             
-            // Защищаем подписку на уведомления - пользователь может подписаться только на свои уведомления
             .simpSubscribeDestMatchers("/topic/notifications.*").authenticated()
             .simpSubscribeDestMatchers("/user/queue/notifications").authenticated()
             
-            // Блокируем отправку сообщений через WebSocket (только получение уведомлений)
             .simpDestMatchers("/app/**").denyAll()
             .anyMessage().denyAll();
     }

@@ -1,4 +1,3 @@
-// features/users/ui/user/edit-user-form.tsx
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/shared/ui/kit/button";
@@ -15,8 +14,6 @@ import { ROUTES } from "@/shared/model/routes";
 interface EditUserFormProps {
   user: ApiSchemas["UserResponse"];
   onCancel: () => void;
-  // onSuccess: () => void; // Removed, as we navigate directly
-  // Removed isPending, error, updateUser from props
 }
 
 export function EditUserForm({ user, onCancel }: EditUserFormProps) {

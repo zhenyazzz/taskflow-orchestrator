@@ -80,7 +80,6 @@ public class DataInitializer {
         }
 
         DEFAULT_USERS.forEach(seed -> {
-            // Используем вставку с кастомным ID, чтобы избежать merge/optimistic locking
             userRepository.insertWithCustomId(
                     seed.id(),
                     seed.username(),
@@ -102,4 +101,3 @@ public class DataInitializer {
     ) {
     }
 }
-

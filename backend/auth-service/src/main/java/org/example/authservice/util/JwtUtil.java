@@ -137,7 +137,6 @@ public class JwtUtil {
 
         String userIdStr = claims.get("userId", String.class);
         if (userIdStr == null) {
-            // Для refresh токена userId может быть в subject
             userIdStr = claims.getSubject();
         }
         return UUID.fromString(userIdStr);
@@ -147,7 +146,6 @@ public class JwtUtil {
         Claims claims = jwtParser
                 .parseSignedClaims(token)
                 .getPayload();
-        // В refresh токене userId хранится в subject
         return UUID.fromString(claims.getSubject());
     }
 

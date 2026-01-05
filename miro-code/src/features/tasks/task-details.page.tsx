@@ -344,7 +344,6 @@ function TaskDetailsPage() {
                     />
                   </div>
 
-                  {/* Comments Section */}
                   <div className="border-t pt-6 mt-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">

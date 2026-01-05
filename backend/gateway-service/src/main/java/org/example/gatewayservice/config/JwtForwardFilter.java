@@ -16,11 +16,9 @@ public class JwtForwardFilter implements GlobalFilter, Ordered {
         return exchange.getPrincipal()
                 .cast(org.springframework.security.core.Authentication.class)
                 .map(authentication -> {
-                    // Получаем токен из authentication (мы его сохранили в credentials)
                     String token = (String) authentication.getCredentials();
                     
                     if (token != null) {
-                        // Создаем новый request с Authorization header
                         return exchange.mutate()
                                 .request(builder -> builder
                                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -35,7 +33,6 @@ public class JwtForwardFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Выполняется после аутентификации но до маршрутизации
         return Ordered.LOWEST_PRECEDENCE - 1;
     }
 }

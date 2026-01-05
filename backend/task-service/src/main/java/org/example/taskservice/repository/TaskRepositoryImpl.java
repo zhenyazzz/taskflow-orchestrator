@@ -61,7 +61,6 @@ public class TaskRepositoryImpl implements TaskRepositoryCustom {
     @Override
     public Page<Task> findTasksByAssigneeWithFilters(String assigneeId, TaskStatus status, String creatorId, Department department, Pageable pageable) {
         List<Criteria> filters = new ArrayList<>();
-        // Always filter by assigneeId
         filters.add(Criteria.where("assigneeIds").in(assigneeId));
         if (status != null) filters.add(Criteria.where("status").is(status));
         if (creatorId != null && !creatorId.isBlank()) filters.add(Criteria.where("creatorId").is(creatorId));

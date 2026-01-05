@@ -25,7 +25,6 @@ export type NotificationDto = {
   read: boolean;
   createdAt: string;
 };
-
 const WS_URL = "ws://localhost:8085/notifications/ws";
 
 const NOTIFICATION_THEMES: Record<string, { label: string; variant: "success" | "error" | "info" | "warning" | "default"; icon: React.ReactNode }> = {

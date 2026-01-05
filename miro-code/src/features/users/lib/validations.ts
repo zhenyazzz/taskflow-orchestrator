@@ -1,4 +1,3 @@
-// features/users/lib/validations.ts
 import { z } from "zod";
 
 export const editUserSchema = z.object({

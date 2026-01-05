@@ -60,7 +60,6 @@ export function ManageUserRolesDialog({
     const mutationPromises: Promise<any>[] = [];
 
     rolesToAssign.forEach((role) => {
-      // Assuming 'USER' -> 'ROLE_USER' and 'ADMIN' -> 'ROLE_ADMIN' mapping
       const apiRole = `ROLE_${role}` as ApiSchemas["AssignRoleRequest"]["role"];
       mutationPromises.push(
         assignRoleMutateAsync({ body: { id: userId, username, role: apiRole } })

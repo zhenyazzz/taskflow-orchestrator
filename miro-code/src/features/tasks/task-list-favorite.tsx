@@ -45,7 +45,6 @@ function TaskListFavorite() {
         creatorId: tasksFilters.creatorId,
     });
 
-    // Хук удаления
     const { deleteTask, isPending: isDeleting } = useDeleteTask();
     const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 

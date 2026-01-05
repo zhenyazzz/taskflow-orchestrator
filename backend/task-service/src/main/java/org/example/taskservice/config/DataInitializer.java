@@ -20,10 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Заполняет MongoDB тестовыми задачами при старте, если коллекция пуста.
- * Создателем задач выступает админ, исполнители — созданные ранее пользователи.
- */
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor

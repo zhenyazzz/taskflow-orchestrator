@@ -12,10 +12,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 
-/**
- * Статистика задач по пользователю
- * Включает процент выполнения, структурный анализ задач
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,7 +28,6 @@ public class UserTaskStatistics {
     @Field("date")
     private LocalDate date;
 
-    // Общая статистика
     @Field("total_tasks")
     @Builder.Default
     private Long totalTasks = 0L;
@@ -53,30 +48,23 @@ public class UserTaskStatistics {
     @Builder.Default
     private Long deletedTasks = 0L;
 
-    // Процент выполнения
     @Field("completion_percentage")
     @Builder.Default
     private Double completionPercentage = 0.0;
 
-    // Структурный анализ - распределение задач по категориям описаний (для пирога)
     @Field("tasks_by_category")
-    private Map<String, Long> tasksByCategory; // Категория -> количество задач
+    private Map<String, Long> tasksByCategory;
 
-    // Распределение по приоритетам
     @Field("tasks_by_priority")
-    private Map<String, Long> tasksByPriority; // Приоритет -> количество задач
+    private Map<String, Long> tasksByPriority;
 
-    // Распределение по статусам
     @Field("tasks_by_status")
-    private Map<String, Long> tasksByStatus; // Статус -> количество задач
+    private Map<String, Long> tasksByStatus;
 
-    // Распределение по департаментам
     @Field("tasks_by_department")
-    private Map<String, Long> tasksByDepartment; // Департамент -> количество задач
+    private Map<String, Long> tasksByDepartment;
 
     @Field("last_updated")
     @Builder.Default
     private Instant lastUpdated = Instant.now();
 }
-
-

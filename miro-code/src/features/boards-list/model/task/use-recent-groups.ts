@@ -40,7 +40,6 @@ export function useRecentGroups(boards: ApiSchemas["Board"][]): BoardsGroup[] {
     return acc;
   }, []);
 
-  // Сортируем группы в нужном порядке
   const groupOrder = ["Сегодня", "Вчера", "Прошлый месяц", "Другое"];
   return groupOrder
     .map((title) => groups.find((g) => g.title === title))

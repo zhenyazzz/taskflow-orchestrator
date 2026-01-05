@@ -1,4 +1,3 @@
-// features/users/ui/user/user-profile-card.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/kit/card";
 import { Badge } from "@/shared/ui/kit/badge";
 import { Button } from "@/shared/ui/kit/button";
@@ -31,7 +30,7 @@ export function UserProfileCard({ user, onEdit }: UserProfileCardProps) {
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Аватар и основная информация */}
+        {}
         <div className="flex items-start gap-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
             {user.firstName?.[0]}{user.lastName?.[0]}
@@ -44,7 +43,7 @@ export function UserProfileCard({ user, onEdit }: UserProfileCardProps) {
           </div>
         </div>
 
-        {/* Контактная информация */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -89,7 +88,7 @@ export function UserProfileCard({ user, onEdit }: UserProfileCardProps) {
           </div>
         </div>
 
-        {/* Системная информация */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
           <div className="space-y-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">

@@ -3,7 +3,6 @@ import { http } from "../http";
 import { components } from "../../schema/generated";
 import { verifyTokenOrThrow } from "../session";
 
-// Функция для генерации случайной даты в пределах последних 30 дней
 function randomDate() {
   const start = new Date();
   start.setDate(start.getDate() - 30);
@@ -13,7 +12,6 @@ function randomDate() {
   ).toISOString();
 }
 
-// Функция для генерации случайной даты в будущем (дедлайны)
 function randomFutureDate() {
   const start = new Date();
   start.setDate(start.getDate() + 1); // завтра
@@ -24,7 +22,6 @@ function randomFutureDate() {
   ).toISOString();
 }
 
-// Функция для генерации случайного названия задачи
 function generateTaskTitle() {
   const prefixes = [
     "Разработать", "Внедрить", "Оптимизировать", "Исследовать", "Создать", 
@@ -52,7 +49,6 @@ function generateTaskTitle() {
   return `${randomPrefix} ${randomObject}${randomContext}`;
 }
 
-// Функция для генерации описания задачи
 function generateTaskDescription() {
   const descriptions = [
     "Необходимо провести полный анализ требований и разработать техническое решение с учетом существующей архитектуры системы.",
@@ -65,14 +61,12 @@ function generateTaskDescription() {
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-// Mock пользователи для назначения задач
 const mockUserIds = [
   "550e8400-e29b-41d4-a716-446655440001", // admin
   "550e8400-e29b-41d4-a716-446655440002", // employee  
   "550e8400-e29b-41d4-a716-446655440003", // manager
 ];
 
-// Генерация случайных задач
 function generateRandomTasks(count: number): components["schemas"]["TaskResponse"][] {
   const result: components["schemas"]["TaskResponse"][] = [];
   const statuses: NonNullable<components["schemas"]["TaskResponse"]["status"]>[] = ["AVAILABLE", "IN_PROGRESS", "COMPLETED", "BLOCKED"];
@@ -107,11 +101,10 @@ function generateRandomTasks(count: number): components["schemas"]["TaskResponse
   return result;
 }
 
-// Создаем 1000 случайных задач
 const tasks: components["schemas"]["TaskResponse"][] = generateRandomTasks(1000);
 
 export const tasksHandlers = [
-  // Получить все задачи
+
   http.get("/v1/tasks", async (ctx) => {
     await verifyTokenOrThrow(ctx.request);
 
@@ -127,7 +120,6 @@ export const tasksHandlers = [
 
     let filteredTasks = [...tasks];
 
-    // Фильтрация по поиску
     if (search) {
       filteredTasks = filteredTasks.filter((task) =>
         task.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -135,29 +127,24 @@ export const tasksHandlers = [
       );
     }
 
-    // Фильтрация по статусу
     if (status) {
       filteredTasks = filteredTasks.filter((task) => task.status === status);
     }
 
-    // Фильтрация по отделу
     if (department) {
       filteredTasks = filteredTasks.filter((task) => task.department === department);
     }
 
-    // Фильтрация по исполнителю
     if (assigneeId) {
       filteredTasks = filteredTasks.filter((task) => 
         task.assigneeIds && task.assigneeIds.includes(assigneeId)
       );
     }
 
-    // Фильтрация по создателю
     if (creatorId) {
       filteredTasks = filteredTasks.filter((task) => task.creatorId === creatorId);
     }
 
-    // Сортировка
     filteredTasks.sort((a, b) => {
       if (sort === "title") {
         return (a.title || "").localeCompare(b.title || "");
@@ -165,7 +152,7 @@ export const tasksHandlers = [
         const priorityOrder: Record<NonNullable<components["schemas"]["TaskResponse"]["priority"]>, number> = { LOW: 1, MEDIUM: 2, HIGH: 3 };
         return (priorityOrder[b.priority!] || 0) - (priorityOrder[a.priority!] || 0);
       } else {
-        // Для дат (createdAt, dueDate)
+
         const aDate = a[sort as keyof components["schemas"]["TaskResponse"]] as string | undefined;
         const bDate = b[sort as keyof components["schemas"]["TaskResponse"]] as string | undefined;
         return new Date(bDate || 0).getTime() - new Date(aDate || 0).getTime();
@@ -189,7 +176,6 @@ export const tasksHandlers = [
     });
   }),
 
-  // Получить мои задачи
   http.get("/v1/me/tasks", async (ctx) => {
     const session = await verifyTokenOrThrow(ctx.request);
     
@@ -202,12 +188,10 @@ export const tasksHandlers = [
       task.assigneeIds && task.assigneeIds.includes(session.userId)
     );
 
-    // Фильтрация по статусу
     if (status) {
       filteredTasks = filteredTasks.filter((task) => task.status === status);
     }
 
-    // Сортировка по дате создания (новые сначала)
     filteredTasks.sort((a, b) => 
       new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     );
@@ -229,7 +213,6 @@ export const tasksHandlers = [
     });
   }),
 
-  // Получить доступные задачи
   http.get("/v1/me/available-tasks", async (ctx) => {
     await verifyTokenOrThrow(ctx.request);
     
@@ -240,12 +223,10 @@ export const tasksHandlers = [
 
     let filteredTasks = tasks.filter((task) => task.status === "AVAILABLE");
 
-    // Фильтрация по отделу
     if (department) {
       filteredTasks = filteredTasks.filter((task) => task.department === department);
     }
 
-    // Сортировка по приоритету и дате создания
     filteredTasks.sort((a, b) => {
       const priorityOrder: Record<NonNullable<components["schemas"]["TaskResponse"]["priority"]>, number> = { LOW: 1, MEDIUM: 2, HIGH: 3 };
       const priorityDiff = (priorityOrder[b.priority!] || 0) - (priorityOrder[a.priority!] || 0);
@@ -270,7 +251,6 @@ export const tasksHandlers = [
     });
   }),
 
-  // Получить задачу по ID
   http.get("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
     const { id } = params;
@@ -287,7 +267,6 @@ export const tasksHandlers = [
     return HttpResponse.json(task);
   }),
 
-  // Создать новую задачу
   http.post("/v1/tasks", async (ctx) => {
     const session = await verifyTokenOrThrow(ctx.request);
     const body = await ctx.request.json() as components["schemas"]["CreateTaskRequest"];
@@ -315,7 +294,6 @@ export const tasksHandlers = [
     return HttpResponse.json(task, { status: 201 });
   }),
 
-  // Обновить задачу
   http.put("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
     const { id } = params;
@@ -329,8 +307,7 @@ export const tasksHandlers = [
     }
 
     const body = await request.json() as components["schemas"]["UpdateTaskRequest"];
-    
-    // Обновляем поля
+
     if (body.title !== undefined) task.title = body.title;
     if (body.description !== undefined) task.description = body.description;
     if (body.status !== undefined) {
@@ -348,7 +325,6 @@ export const tasksHandlers = [
     return HttpResponse.json(task);
   }),
 
-  // Удалить задачу
   http.delete("/v1/tasks/{id}", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
     const { id } = params;
@@ -366,7 +342,6 @@ export const tasksHandlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // Обновить исполнителей задачи (PATCH)
   http.patch("/v1/tasks/{id}/assignees", async ({ params, request }) => {
     await verifyTokenOrThrow(request);
     const { id } = params;
@@ -391,7 +366,6 @@ export const tasksHandlers = [
     return HttpResponse.json(task);
   }),
 
-  // Подписаться на задачу (самоназначение) (PATCH)
   http.patch("/v1/me/tasks/{id}/subscribe", async ({ params, request }) => {
     const session = await verifyTokenOrThrow(request);
     const { id } = params;

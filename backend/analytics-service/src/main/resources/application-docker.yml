@@ -9,7 +9,6 @@ spring:
       auto-index-creation: true
       database: taskdb
   
-  # Kafka - подключение к контейнеру Kafka
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
     consumer:
@@ -21,7 +20,6 @@ spring:
 server:
   port: 8084
 
-# Kafka Topics Configuration
 app:
   kafka:
     topics:
@@ -51,7 +49,6 @@ app:
       token-refreshed: "auth.token.refreshed"
       password-changed: "auth.password.changed"
 
-# Eureka - подключение к контейнеру Eureka
 eureka:
   client:
     service-url:
@@ -63,7 +60,6 @@ eureka:
     hostname: analytics-service
     instance-id: ${spring.application.name}:${server.port}
 
-# Logging - минимальное для продакшена
 logging:
   level:
     org.example.analyticsservice: INFO
@@ -74,7 +70,6 @@ logging:
   pattern:
     console: "%d{ISO8601} [%thread] %-5level [%logger{36}] - %msg%n"
 
-# Actuator - ограниченная информация для продакшена
 management:
   endpoint:
     health:

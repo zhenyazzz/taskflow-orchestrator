@@ -2,7 +2,6 @@ spring:
   application:
     name: analytics-service
   
-  # Config server (опционально)
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:}
   
@@ -23,7 +22,6 @@ spring:
 server:
   port: 8084
 
-# Kafka Topics Configuration (общие для всех профилей)
 app:
   kafka:
     topics:
@@ -52,7 +50,6 @@ app:
       token-refreshed: "auth.token.refreshed"
       password-changed: "auth.password.changed"
 
-# Actuator - базовые настройки
 management:
   endpoints:
     web:
@@ -62,7 +59,6 @@ management:
     health:
       show-details: always
 
-# Logging - базовые настройки
 logging:
   level:
     org.example.analyticsservice: INFO

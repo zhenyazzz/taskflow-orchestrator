@@ -3,10 +3,6 @@ import { http } from "../http";
 import { ApiSchemas } from "../../schema";
 import { verifyTokenOrThrow } from "../session";
 
-// Временные handlers для совместимости - мапим boards запросы на tasks данные
-// Это позволяет фронту работать без изменений, пока не трансформируем компоненты
-
-// Генерируем моковые "доски" из задач
 function generateMockBoards(count: number = 50): ApiSchemas["Board"][] {
   const result: ApiSchemas["Board"][] = [];
   const boardNames = [
@@ -55,14 +51,12 @@ export const boardsHandlers = [
 
     let filteredBoards = [...boards];
 
-    // Фильтрация по поиску
     if (search) {
       filteredBoards = filteredBoards.filter((board) =>
         board.name.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
-    // Фильтрация по избранному
     if (isFavorite !== null) {
       const isFav = isFavorite === "true";
       filteredBoards = filteredBoards.filter(
@@ -70,13 +64,12 @@ export const boardsHandlers = [
       );
     }
 
-    // Сортировка
     if (sort) {
       filteredBoards.sort((a, b) => {
         if (sort === "name") {
           return a.name.localeCompare(b.name);
         } else {
-          // Для дат (createdAt, updatedAt, lastOpenedAt)
+
           return (
             new Date(
               b[sort as keyof ApiSchemas["Board"]].toString(),
@@ -114,7 +107,6 @@ export const boardsHandlers = [
       );
     }
 
-    // Обновляем lastOpenedAt при просмотре доски
     board.lastOpenedAt = new Date().toISOString();
     await delay(200);
     return HttpResponse.json(board);

@@ -2,7 +2,6 @@ spring:
   application:
     name: analytics-service
   
-  # Отключаем config-server для локальной разработки (если он не запущен)
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:}
   
@@ -23,7 +22,6 @@ spring:
 server:
   port: 8084
 
-# Kafka Topics Configuration
 app:
   kafka:
     topics:
@@ -52,7 +50,6 @@ app:
       token-refreshed: "auth.token.refreshed"
       password-changed: "auth.password.changed"
 
-# Actuator - детальные настройки для разработки
 management:
   endpoints:
     web:
@@ -62,7 +59,6 @@ management:
     health:
       show-details: always
 
-# Logging - детальное для разработки
 logging:
   level:
     org.example.analyticsservice: DEBUG
@@ -72,7 +68,6 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
-# Eureka - опционально для локальной разработки
 eureka:
   client:
     service-url:
@@ -82,4 +77,3 @@ eureka:
   instance:
     hostname: localhost
     prefer-ip-address: true
-

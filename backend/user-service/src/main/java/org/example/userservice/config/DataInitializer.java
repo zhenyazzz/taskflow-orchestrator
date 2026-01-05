@@ -15,10 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Первичное заполнение БД профилями при старте сервиса.
- * Запускается только если таблица пользователей пуста.
- */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -89,7 +85,6 @@ public class DataInitializer {
         }
 
         DEFAULT_USERS.forEach(seed -> {
-            // Вставляем с заданным UUID через нативный insert, чтобы избежать merge/optimistic locking
             userRepository.insertWithCustomId(
                     seed.id(),
                     seed.username(),
@@ -114,4 +109,3 @@ public class DataInitializer {
     ) {
     }
 }
-

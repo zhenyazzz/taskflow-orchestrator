@@ -31,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // Пропускаем Swagger и публичные endpoints без проверки токена
         if (isPublicEndpoint(request)) {
             filterChain.doFilter(request, response);
             return;
@@ -68,7 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 
-        // Swagger endpoints
         if (path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-resources") ||
@@ -77,12 +75,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // Actuator health endpoint
         if (path.equals("/actuator/health")) {
             return true;
         }
 
-        // Public API endpoints (если есть)
         if ("GET".equals(method) && path.startsWith("/api/users")) {
             return true;
         }

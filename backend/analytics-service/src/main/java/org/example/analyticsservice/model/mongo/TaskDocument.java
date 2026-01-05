@@ -14,10 +14,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.Instant;
 import java.util.Set;
 
-/**
- * Документ для хранения детальной информации о задаче
- * Используется для анализа и статистики
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -35,7 +31,7 @@ public class TaskDocument {
     private String title;
 
     @Field("description_category")
-    private String descriptionCategory; // Категория для пирога (на основе title/priority/department)
+    private String descriptionCategory;
 
     @Field("priority")
     private TaskPriority priority;
@@ -73,4 +69,3 @@ public class TaskDocument {
     @Field("last_updated")
     private Instant lastUpdated;
 }
-

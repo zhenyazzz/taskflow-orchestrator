@@ -68,7 +68,6 @@ export function CreateUserForm({ formData, setFormData, onClose }: CreateUserFor
           </Select>
         </div>
 
-        {/* ✅ ДОБАВЬ ОТОБРАЖЕНИЕ ОШИБОК */}
         {errorMessage && (
             <p className="text-destructive text-sm mt-4">{errorMessage}</p>
         )}
@@ -77,7 +76,6 @@ export function CreateUserForm({ formData, setFormData, onClose }: CreateUserFor
           <Button type="button" variant="outline" onClick={onClose}>
             Назад
           </Button>
-          {/* ✅ ИСПОЛЬЗУЙ isPending ИЗ ТВОЕГО ХУКА */}
           <Button type="submit" disabled={isPending}>
             {isPending ? 'Создание...' : 'Создать'}
           </Button>

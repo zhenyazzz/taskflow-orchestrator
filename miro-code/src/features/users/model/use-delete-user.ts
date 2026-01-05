@@ -15,7 +15,6 @@ export function useDeleteUser(onSuccess?: () => void, onError?: (error: Error) =
     });
 
     const deleteUser = (userId: string) => {
-        // ✅ ПРАВИЛЬНО - используем params вместо path
         deleteMutation.mutate({
             params: {
                 path: { id: userId }

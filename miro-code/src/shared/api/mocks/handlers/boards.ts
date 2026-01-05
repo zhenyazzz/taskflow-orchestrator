@@ -3,7 +3,6 @@ import { http } from "../http";
 import { ApiSchemas } from "../../schema";
 import { verifyTokenOrThrow } from "../session";
 
-// Функция для генерации случайной даты в пределах последних 30 дней
 function randomDate() {
   const start = new Date();
   start.setDate(start.getDate() - 30);
@@ -15,7 +14,6 @@ function randomDate() {
   ).toISOString();
 }
 
-// Функция для генерации случайного названия доски
 function generateBoardName() {
   const adjectives = [
     "Стратегический",
@@ -76,7 +74,6 @@ function generateBoardName() {
   return `${randomAdjective} ${randomNoun} ${randomTheme}`;
 }
 
-// Генерация 1000 случайных досок
 function generateRandomBoards(count: number): ApiSchemas["Board"][] {
   const result: ApiSchemas["Board"][] = [];
 
@@ -108,7 +105,6 @@ function generateRandomBoards(count: number): ApiSchemas["Board"][] {
   return result;
 }
 
-// Создаем 1000 случайных досок
 const boards: ApiSchemas["Board"][] = generateRandomBoards(1000);
 
 export const boardsHandlers = [
@@ -124,14 +120,12 @@ export const boardsHandlers = [
 
     let filteredBoards = [...boards];
 
-    // Фильтрация по поиску
     if (search) {
       filteredBoards = filteredBoards.filter((board) =>
         board.name.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
-    // Фильтрация по избранному
     if (isFavorite !== null) {
       const isFav = isFavorite === "true";
       filteredBoards = filteredBoards.filter(
@@ -139,13 +133,12 @@ export const boardsHandlers = [
       );
     }
 
-    // Сортировка
     if (sort) {
       filteredBoards.sort((a, b) => {
         if (sort === "name") {
           return a.name.localeCompare(b.name);
         } else {
-          // Для дат (createdAt, updatedAt, lastOpenedAt)
+
           return (
             new Date(
               b[sort as keyof ApiSchemas["Board"]].toString(),
@@ -181,7 +174,6 @@ export const boardsHandlers = [
       );
     }
 
-    // Обновляем lastOpenedAt при просмотре доски
     board.lastOpenedAt = new Date().toISOString();
     return HttpResponse.json(board);
   }),

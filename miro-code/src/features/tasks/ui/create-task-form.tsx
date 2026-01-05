@@ -50,7 +50,6 @@ export function CreateTaskForm({ formData, setFormData, onClose }: CreateTaskFor
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     
-    // Обновляем assigneeIds из выбранных пользователей
     const taskData = {
       ...formData,
       assigneeIds: Array.from(selectedUserIds),

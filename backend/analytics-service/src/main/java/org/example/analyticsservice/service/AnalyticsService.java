@@ -35,8 +35,6 @@ public class AnalyticsService {
     private final TaskCounterRepository taskCounterRepository;
     private final UserTaskStatisticsRepository userTaskStatisticsRepository;
 
-    // ---------- Публичные методы для REST контроллеров ----------
-
     public TaskSummaryDto getTaskSummary(LocalDate startDate, LocalDate endDate) {
         List<TaskStatistics> statsInRange = taskStatisticsRepository.findByDateBetween(startDate, endDate);
         statsInRange.sort(Comparator.comparing(TaskStatistics::getDate));
@@ -187,7 +185,6 @@ public class AnalyticsService {
         log.info("Processing task created event for task: {}", event.id());
         
         try {
-            // Сохраняем или обновляем документ задачи
             TaskDocument taskDoc = taskDocumentRepository.findByTaskId(event.id())
                     .orElse(TaskDocument.builder()
                             .taskId(event.id())
@@ -208,17 +205,11 @@ public class AnalyticsService {
             
             taskDocumentRepository.save(taskDoc);
             
-            // Обновляем общую статистику
             updateTaskStatisticsOnCreate(event);
-            
-            // Обновляем статистику по пользователям
             updateUserTaskStatisticsOnCreate(event);
             
-            // Обновляем счетчик задач
             taskCounterRepository.ensureExists();
             taskCounterRepository.increment(1L, Instant.now());
-            
-            log.debug("Сохранена метрика создания задачи: {}", event.id());
         } catch (Exception e) {
             log.error("Error processing task created event: {}", e.getMessage(), e);
         }
@@ -241,9 +232,7 @@ public class AnalyticsService {
                 
                 taskDocumentRepository.save(taskDoc);
                 
-                // Обновляем статистику
                 updateTaskStatisticsOnUpdate();
-                log.debug("Сохранена метрика обновления задачи: {}", event.id());
             }
         } catch (Exception e) {
             log.error("Error processing task updated event: {}", e.getMessage(), e);
@@ -264,11 +253,8 @@ public class AnalyticsService {
                 
                 taskDocumentRepository.save(taskDoc);
                 
-                // Обновляем статистику
                 updateTaskStatisticsOnComplete(event);
                 updateUserTaskStatisticsOnComplete(event);
-                
-                log.debug("Сохранена метрика завершения задачи: {}", event.id());
             }
         } catch (Exception e) {
             log.error("Error processing task completed event: {}", e.getMessage(), e);
@@ -287,11 +273,8 @@ public class AnalyticsService {
                 
                 taskDocumentRepository.save(taskDoc);
                 
-                // Обновляем статистику
                 updateTaskStatisticsOnDelete(event);
                 updateUserTaskStatisticsOnDelete(event);
-                
-                log.debug("Сохранена метрика удаления задачи: {}", event.id());
             }
         } catch (Exception e) {
             log.error("Error processing task deleted event: {}", e.getMessage(), e);
@@ -316,11 +299,8 @@ public class AnalyticsService {
                 
                 taskDocumentRepository.save(taskDoc);
                 
-                // Обновляем статистику по статусам
                 updateTaskStatisticsOnStatusUpdate(event);
                 updateUserTaskStatisticsOnStatusUpdate(event);
-                
-                log.debug("Сохранена метрика обновления статуса задачи: {}", event.id());
             }
         } catch (Exception e) {
             log.error("Error processing task status updated event: {}", e.getMessage(), e);
@@ -339,14 +319,12 @@ public class AnalyticsService {
                 taskDoc.setLastUpdated(Instant.now());
                 
                 taskDocumentRepository.save(taskDoc);
-                log.debug("Сохранена метрика обновления исполнителей задачи: {}", event.id());
             }
         } catch (Exception e) {
             log.error("Error processing task assignees updated event: {}", e.getMessage(), e);
         }
     }
 
-    // Методы для обновления общей статистики
     private void updateTaskStatisticsOnCreate(TaskCreatedEvent event) {
         LocalDate today = LocalDate.now();
         TaskStatistics stats = taskStatisticsRepository.findByDate(today)
@@ -388,7 +366,6 @@ public class AnalyticsService {
             TaskDocument task = taskOpt.get();
             TaskStatus oldStatus = task.getStatus();
             
-            // Уменьшаем счетчик старого статуса
             if (oldStatus == TaskStatus.IN_PROGRESS) {
                 taskStatisticsRepository.incrementInProgressTasks(today, -1L, Instant.now());
             } else if (oldStatus == TaskStatus.AVAILABLE) {
@@ -417,16 +394,13 @@ public class AnalyticsService {
             TaskDocument task = taskOpt.get();
             TaskStatus oldStatus = task.getStatus();
             
-            // Уменьшаем счетчик старого статуса
             if (oldStatus == TaskStatus.COMPLETED) {
-                // Не уменьшаем completed, так как задача уже была завершена
             } else if (oldStatus == TaskStatus.IN_PROGRESS) {
                 taskStatisticsRepository.incrementInProgressTasks(today, -1L, Instant.now());
             } else if (oldStatus == TaskStatus.AVAILABLE) {
                 taskStatisticsRepository.incrementPendingTasks(today, -1L, Instant.now());
             }
             
-            // Увеличиваем счетчик нового статуса
             if (status == TaskStatus.COMPLETED) {
                 taskStatisticsRepository.incrementCompletedTasks(today, 1L, Instant.now());
                 taskStatisticsRepository.incrementCompletedTasksToday(today, 1L, Instant.now());
@@ -444,14 +418,12 @@ public class AnalyticsService {
         TaskStatistics stats = taskStatisticsRepository.findByDate(date).orElse(null);
         if (stats == null) return;
         
-        // Пересчитываем проценты и распределения
         long total = stats.getTotalTasks();
         long completed = stats.getCompletedTasks();
         
         double completionPercentage = total > 0 ? (completed * 100.0 / total) : 0.0;
         taskStatisticsRepository.updateCompletionPercentage(date, completionPercentage, Instant.now());
         
-        // Обновляем распределения по категориям, приоритетам, статусам
         updateTaskStatisticsDistributions(date);
     }
 
@@ -493,11 +465,9 @@ public class AnalyticsService {
         }
     }
 
-    // Методы для обновления статистики по пользователям
     private void updateUserTaskStatisticsOnCreate(TaskCreatedEvent event) {
         LocalDate today = LocalDate.now();
         
-        // Обновляем статистику для создателя
         if (event.creatorId() != null) {
             updateUserTaskStatistics(event.creatorId(), today, stats -> {
                 stats.setTotalTasks(stats.getTotalTasks() + 1);
@@ -505,7 +475,6 @@ public class AnalyticsService {
             });
         }
         
-        // Обновляем статистику для исполнителей
         if (event.assigneeIds() != null) {
             for (String assigneeId : event.assigneeIds()) {
                 updateUserTaskStatistics(assigneeId, today, stats -> {
@@ -529,7 +498,6 @@ public class AnalyticsService {
                     updateUserTaskStatistics(assigneeId, today, stats -> {
                         stats.setCompletedTasks(stats.getCompletedTasks() + 1);
                         
-                        // Уменьшаем счетчик старого статуса
                         if (oldStatus == TaskStatus.IN_PROGRESS) {
                             stats.setInProgressTasks(Math.max(0, stats.getInProgressTasks() - 1));
                         } else if (oldStatus == TaskStatus.AVAILABLE) {
@@ -577,7 +545,6 @@ public class AnalyticsService {
             if (task.getAssigneeIds() != null) {
                 for (String assigneeId : task.getAssigneeIds()) {
                     updateUserTaskStatistics(assigneeId, today, stats -> {
-                        // Уменьшаем счетчик старого статуса
                         if (oldStatus == TaskStatus.COMPLETED) {
                             stats.setCompletedTasks(Math.max(0, stats.getCompletedTasks() - 1));
                         } else if (oldStatus == TaskStatus.IN_PROGRESS) {
@@ -586,7 +553,6 @@ public class AnalyticsService {
                             stats.setPendingTasks(Math.max(0, stats.getPendingTasks() - 1));
                         }
                         
-                        // Увеличиваем счетчик нового статуса
                         if (event.status() == TaskStatus.COMPLETED) {
                             stats.setCompletedTasks(stats.getCompletedTasks() + 1);
                         } else if (event.status() == TaskStatus.IN_PROGRESS) {
@@ -616,13 +582,11 @@ public class AnalyticsService {
         
         updater.accept(stats);
         
-        // Пересчитываем процент выполнения
         if (stats.getTotalTasks() > 0) {
             double percentage = (stats.getCompletedTasks() * 100.0) / stats.getTotalTasks();
             stats.setCompletionPercentage(percentage);
         }
         
-        // Обновляем распределения
         updateUserTaskStatisticsDistributions(userId, stats);
         
         stats.setLastUpdated(Instant.now());
@@ -662,13 +626,11 @@ public class AnalyticsService {
         stats.setTasksByDepartment(byDepartment);
     }
 
-    // Вспомогательный метод для извлечения категории из описания (для пирога)
     private String extractCategory(String title, TaskPriority priority, org.example.events.enums.Department department) {
         if (title == null || title.isEmpty()) {
             return "Без категории";
         }
         
-        // Простая категоризация на основе ключевых слов в title
         String lowerTitle = title.toLowerCase();
         
         if (lowerTitle.contains("bug") || lowerTitle.contains("ошибка") || lowerTitle.contains("исправ")) {
@@ -688,7 +650,6 @@ public class AnalyticsService {
         }
     }
 
-    // Методы для работы с пользователями (оставляем как есть)
     public void handleUserRegistered(UserCreatedEvent event) {
         log.info("Processing user registered event for user: {}", event.id());
 
@@ -708,13 +669,10 @@ public class AnalyticsService {
         UserCounter counter = userCounterRepository.findByGlobalId();
         Long totalUsers = counter != null ? counter.getTotalUsers() : 0L;
         userStatisticsRepository.setTotalUsers(date, Instant.now(), totalUsers);
-
-        log.debug("Сохранена метрика регистрации пользователя: {}", event.id());
     }
 
     public void handleUserUpdated(UserProfileUpdatedEvent event) {
         log.info("Processing user updated event for user: {}", event.id());
-        log.debug("Сохранена метрика обновления пользователя: {}", event.id());
     }
 
     public void handleUserLoginSuccess(UserLoginEvent event) {
@@ -730,8 +688,6 @@ public class AnalyticsService {
 
         userStatisticsRepository.incrementSuccessfulLogins(date, Instant.now(), 1L);
         incrementLoginCountInDailyActiveUser(date, event.username());
-
-        log.debug("Сохранена метрика успешного входа: {}", event.id());
     }
 
     public void handleUserLoginFailed(LoginFailEvent eventJson) {
@@ -746,7 +702,6 @@ public class AnalyticsService {
         }
 
         userStatisticsRepository.incrementFailedLogins(date, Instant.now(), 1L);
-        log.debug("Сохранена метрика неуспешного входа: {}", eventJson.id());
     }
 
     private void incrementLoginCountInDailyActiveUser(LocalDate date, String username) {
@@ -763,8 +718,6 @@ public class AnalyticsService {
 
         dailyActiveUserRepository.incrementLoginCount(date, username, 1L);
     }
-
-    // ---------- Вспомогательные методы для аналитики ----------
 
     private TaskStatistics resolveLatestTaskStats(List<TaskStatistics> statsInRange, LocalDate endDate) {
         if (!statsInRange.isEmpty()) {

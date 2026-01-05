@@ -79,7 +79,6 @@ public class AuthServiceImpl implements AuthService {
                         )
         );
 
-        // Создаем refresh токен
         var tokenPair = refreshTokenService.createRefreshToken(savedUser, deviceInfo);
         JwtResponse jwtResponse = userMapper.toJwtResponse(savedUser, jwtUtil);
         
@@ -104,7 +103,6 @@ public class AuthServiceImpl implements AuthService {
                     userMapper.toUserLoginEvent(user,userAgent)
             );
         
-            // Создаем refresh токен
             var tokenPair = refreshTokenService.createRefreshToken(user, userAgent);
             JwtResponse jwtResponse = userMapper.toJwtResponse(user, jwtUtil);
             
@@ -214,16 +212,12 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidTokenException("Refresh токен отсутствует");
         }
 
-        // Проверяем refresh токен в БД и валидируем JWT
         org.example.authservice.model.RefreshToken tokenEntity = refreshTokenService.verifyRefreshToken(refreshToken);
         
-        // Инвалидируем старый токен (ротация)
         refreshTokenService.revokeRefreshToken(refreshToken);
         
-        // Получаем пользователя
         User user = tokenEntity.getUser();
         
-        // Создаем новую пару токенов
         String deviceInfo = request.getHeader("User-Agent");
         var tokenPair = refreshTokenService.createRefreshToken(user, deviceInfo != null ? deviceInfo : "Unknown");
         JwtResponse jwtResponse = userMapper.toJwtResponse(user, jwtUtil);

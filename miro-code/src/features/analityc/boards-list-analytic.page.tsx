@@ -33,7 +33,6 @@ import {
   Cell,
 } from "recharts";
 import { Calendar, Loader2, RefreshCw } from "lucide-react";
-// Типы респонсов описаны в OpenAPI и доступны через rqClient, явные алиасы здесь не потребовались.
 
 type DateRange = {
   start: Date;
@@ -85,7 +84,6 @@ const PRESET_OPTIONS = [
   { label: "90 дней", value: 90 },
 ];
 
-// Локальные типы под фактический ответ бэкенда (DashboardDto)
 type TaskSummaryDto = {
   startDate?: string;
   endDate?: string;
@@ -231,7 +229,6 @@ function AnalyticsPage() {
     periodEnd?: string;
   }) | undefined;
 
-  // Поддерживаем оба формата: новый (taskSummary) и старый (taskAnalytics)
   const taskSummary = (dashboard as DashboardDto | undefined)?.taskSummary ?? (dashboard as any)?.taskAnalytics;
   const loginAnalytics = (dashboard as DashboardDto | undefined)?.loginAnalytics ?? (dashboard as any)?.loginAnalytics;
   const userAnalytics = (dashboard as any)?.userAnalytics;
@@ -285,7 +282,6 @@ function AnalyticsPage() {
     [taskSummary],
   );
 
-  // Если вдруг пришёл старый формат userAnalytics с распределениями — используем его как резервный источник для департаментов
   const usersByDepartmentFallback = useMemo(
     () => normalizeRecord(userAnalytics?.usersByDepartment),
     [userAnalytics],

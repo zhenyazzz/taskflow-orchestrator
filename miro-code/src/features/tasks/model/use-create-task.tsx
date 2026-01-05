@@ -23,11 +23,9 @@ export function useCreateTask(onSuccessCallback?: () => void) {
 
       const formData = new FormData();
       
-      // Добавляем task как JSON blob
       const taskBlob = new Blob([JSON.stringify(task)], { type: "application/json" });
       formData.append("task", taskBlob);
 
-      // Добавляем файлы, если они есть
       if (files && files.length > 0) {
         files.forEach((file) => {
           formData.append("files", file);

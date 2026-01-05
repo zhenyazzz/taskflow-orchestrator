@@ -73,7 +73,6 @@ management:
     kafka:
       enabled: true
 
-# gRPC Server Configuration
 grpc:
   server:
     port: 9090

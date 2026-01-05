@@ -33,7 +33,6 @@ public class MongoDBInitializer {
             log.info("Initializing MongoDB collections...");
             
             try {
-                // Создаем коллекции, если их нет
                 createCollectionIfNotExists("user_counts");
                 createCollectionIfNotExists("user_statistics");
                 createCollectionIfNotExists("daily_active_users");
@@ -42,10 +41,8 @@ public class MongoDBInitializer {
                 createCollectionIfNotExists("task_statistics");
                 createCollectionIfNotExists("user_task_statistics");
                 
-                // Создаем индексы
                 createIndexes();
                 
-                // Инициализируем начальные данные
                 initializeInitialData();
                 
                 log.info("MongoDB collections initialized successfully");
@@ -73,20 +70,17 @@ public class MongoDBInitializer {
     @SuppressWarnings("deprecation")
     private void createIndexes() {
         try {
-            // Индексы для user_statistics
             IndexOperations userStatsIndexOps = mongoTemplate.indexOps(UserStatistics.class);
             Index userStatsDateIndex = new Index().on("date", Sort.Direction.ASC).unique();
             userStatsIndexOps.ensureIndex(userStatsDateIndex);
             log.info("Created indexes for user_statistics collection");
             
-            // Индексы для daily_active_users
             IndexOperations dailyActiveUsersIndexOps = mongoTemplate.indexOps(DailyActiveUser.class);
             Index dailyActiveUsersIndex = new Index().on("date", Sort.Direction.ASC)
                     .on("username", Sort.Direction.ASC).unique();
             dailyActiveUsersIndexOps.ensureIndex(dailyActiveUsersIndex);
             log.info("Created indexes for daily_active_users collection");
             
-            // Индексы для tasks (TaskDocument)
             IndexOperations tasksIndexOps = mongoTemplate.indexOps(TaskDocument.class);
             Index taskIdIndex = new Index().on("task_id", Sort.Direction.ASC).unique();
             tasksIndexOps.ensureIndex(taskIdIndex);
@@ -100,13 +94,11 @@ public class MongoDBInitializer {
             tasksIndexOps.ensureIndex(isCompletedIndex);
             log.info("Created indexes for task_documents collection");
             
-            // Индексы для task_statistics
             IndexOperations taskStatsIndexOps = mongoTemplate.indexOps(TaskStatistics.class);
             Index taskStatsDateIndex = new Index().on("date", Sort.Direction.ASC).unique();
             taskStatsIndexOps.ensureIndex(taskStatsDateIndex);
             log.info("Created indexes for task_statistics collection");
             
-            // Индексы для user_task_statistics
             IndexOperations userTaskStatsIndexOps = mongoTemplate.indexOps(UserTaskStatistics.class);
             Index userTaskStatsCompositeIndex = new Index().on("user_id", Sort.Direction.ASC)
                     .on("date", Sort.Direction.ASC).unique();
@@ -115,7 +107,6 @@ public class MongoDBInitializer {
             userTaskStatsIndexOps.ensureIndex(userIdIndex);
             log.info("Created indexes for user_task_statistics collection");
             
-            // Индексы для user_counts и task_counts (уже есть _id)
             log.info("Indexes for user_counts and task_counts collections (using _id)");
         } catch (Exception e) {
             log.error("Error creating indexes: {}", e.getMessage(), e);
@@ -125,7 +116,6 @@ public class MongoDBInitializer {
 
     private void initializeInitialData() {
         try {
-            // Инициализируем UserCounter, если его нет
             if (userCounterRepository.count() == 0) {
                 UserCounter userCounter = UserCounter.builder()
                         .id("global")
@@ -136,11 +126,9 @@ public class MongoDBInitializer {
                 log.info("Initialized UserCounter with id: global");
             }
             
-            // Инициализируем TaskCounter, если его нет
             taskCounterRepository.ensureExists();
             log.info("Initialized TaskCounter with id: global");
             
-            // Инициализируем UserStatistics для сегодня, если его нет
             LocalDate today = LocalDate.now();
             if (userStatisticsRepository.findByDate(today).isEmpty()) {
                 UserStatistics todayStats = UserStatistics.builder()
@@ -156,7 +144,6 @@ public class MongoDBInitializer {
                 log.info("Initialized UserStatistics for date: {}", today);
             }
             
-            // Инициализируем TaskStatistics для сегодня, если его нет
             if (taskStatisticsRepository.findByDate(today).isEmpty()) {
                 TaskStatistics todayTaskStats = TaskStatistics.builder()
                         .date(today)
@@ -180,6 +167,3 @@ public class MongoDBInitializer {
         }
     }
 }
-
-
-

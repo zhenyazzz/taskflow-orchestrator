@@ -20,8 +20,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-  
-
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -62,10 +60,9 @@ management:
       enabled: true
 
 jwt:
-  refresh-token-expiration: 604800000  # 7 дней в миллисекундах
+  refresh-token-expiration: 604800000
   cookie-name: refreshToken
-  cookie-secure: true  # true для production (HTTPS), false для dev
+  cookie-secure: true
   cookie-http-only: true
   cookie-same-site: strict
-  cleanup-cron: "0 0 2 * * ?"  # Каждый день в 2:00 утра
-
+  cleanup-cron: "0 0 2 * * ?"

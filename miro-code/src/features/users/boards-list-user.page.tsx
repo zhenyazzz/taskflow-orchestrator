@@ -40,7 +40,6 @@ function UsersListPage() {
         status: usersFilters.status as "ACTIVE" | "INACTIVE" | "PENDING" | null,
     });
 
-    // Хук удаления
     const { deleteUser, isPending: isDeleting } = useDeleteUser();
     const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 

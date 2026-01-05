@@ -3,9 +3,6 @@ package org.example.analyticsservice.dto;
 import java.time.LocalDate;
 import java.util.Map;
 
-/**
- * DTO для сводной статистики по задачам за указанный период.
- */
 public record TaskSummaryDto(
         LocalDate startDate,
         LocalDate endDate,
@@ -23,5 +20,3 @@ public record TaskSummaryDto(
         Map<LocalDate, Long> dailyCreatedTasks,
         Map<LocalDate, Long> dailyCompletedTasks
 ) {}
-
-

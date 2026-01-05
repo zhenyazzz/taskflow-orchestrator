@@ -1,6 +1,5 @@
 import { rqClient } from "@/shared/api/instance";
 import { useQueryClient } from "@tanstack/react-query";
-//import { ApiSchemas } from "@/shared/api/schema";
 
 export function useUpdateProfile(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();

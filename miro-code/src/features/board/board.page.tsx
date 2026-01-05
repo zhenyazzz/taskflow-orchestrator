@@ -41,11 +41,6 @@ function BoardPage() {
 
   const handleDeleteBoard = () => {
     if (window.confirm("Вы уверены, что хотите удалить эту задачу?")) {
-      // deleteBoardMutation.mutate(boardId, {
-      //   onSuccess: () => {
-      //     navigate("/boards");
-      //   },
-      // });
     }
   };
 
@@ -116,11 +111,6 @@ function BoardPage() {
           )}
 
           {isEditing ? (
-            // <EditBoardForm
-            //   board={board}
-            //   onCancel={() => setIsEditing(false)}
-            //   onSuccess={handleEditSuccess}
-            // />
             <div>Редактирование задачи</div>
           ) : (
             <div>Детали задачи</div>

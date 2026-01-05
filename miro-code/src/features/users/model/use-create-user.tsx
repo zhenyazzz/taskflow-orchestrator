@@ -1,9 +1,5 @@
-// features/users/model/use-create-user.ts
-
 import { rqClient } from "@/shared/api/instance";
 import { useQueryClient } from "@tanstack/react-query";
-
-// features/users/model/use-create-user.ts
 
 export function useCreateUser(onSuccessCallback?: () => void) {
     const queryClient = useQueryClient();
@@ -24,7 +20,6 @@ export function useCreateUser(onSuccessCallback?: () => void) {
     const createUser = (data: any) => {
         console.log("📤 Sending data:", data);
 
-        // ✅ ПРАВИЛЬНЫЙ СПОСОБ - передаем body напрямую
         createUserMutation.mutate({ body: data });
     };
 
